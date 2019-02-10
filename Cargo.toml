@@ -1,0 +1,11 @@
+[package]
+name = "katalyst"
+version = "0.1.0"
+authors = ["Phil Proctor <philliptproctor@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+hyper = "0.12"
+futures = "0.1"
+regex = "1"
+yaml-rust = "0.4.2"
