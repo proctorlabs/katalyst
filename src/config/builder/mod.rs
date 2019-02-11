@@ -2,26 +2,15 @@ mod routes;
 
 use crate::config::{Gateway, Listener};
 pub use routes::RouteBuilder;
+use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GatewayBuilder<'a> {
     pub routes: RefCell<Vec<RouteBuilder<'a>>>,
-    pub listener: RefCell<Option<Listener>>,
 }
 
 impl<'a> GatewayBuilder<'a> {
-    pub fn new() -> Self {
-        GatewayBuilder {
-            routes: RefCell::new(vec![]),
-            listener: RefCell::new(None),
-        }
-    }
-
-    pub fn push_routes(&mut self, routes: &mut Vec<RouteBuilder<'a>>) {
-        self.routes.get_mut().append(routes);
-    }
-
     pub fn build(&mut self) -> Gateway {
         println!("{:?}", self);
         //build routes...

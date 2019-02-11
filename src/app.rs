@@ -29,7 +29,7 @@ impl Katalyst {
 
     // Load some config file, placeholder for now...
     pub fn load(&self, config_file: &str) {
-        let mut config = parsers::parse_yaml_file(config_file);
+        let mut config = parsers::parse_file(config_file);
         self.update_state(config.build());
     }
 

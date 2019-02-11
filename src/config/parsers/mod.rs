@@ -1,18 +1,22 @@
 use crate::config::builder::GatewayBuilder;
+use serde_yaml;
+use std::ffi::OsStr;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 
-mod yaml;
+pub fn parse_file(file_path: &str) -> GatewayBuilder {
+    let path = Path::new(file_path);
+    let contents = load_file(path);
 
-pub fn parse_yaml_file(yaml_file: &str) -> GatewayBuilder {
-    let contents = load_file(yaml_file);
-    yaml::process_yaml(contents)
+    match path.extension().and_then(OsStr::to_str) {
+        Some("yml") | Some("yaml") => serde_yaml::from_str(&contents).unwrap(),
+        Some("json") | Some("js") => serde_json::from_str(&contents).unwrap(),
+        _ => panic!("Unrecognized config file format!"),
+    }
 }
 
-fn load_file<'a>(file_path: &'a str) -> String {
-    let path = Path::new(file_path);
-
+fn load_file<'a>(path: &Path) -> String {
     println!(
         "Loading file from: {}",
         path.canonicalize().unwrap().display()
