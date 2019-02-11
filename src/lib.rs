@@ -1,6 +1,6 @@
 mod app;
 mod config;
-mod handler;
+mod service;
 use app::Katalyst;
 
 pub fn katalyst(config_file: &str) {

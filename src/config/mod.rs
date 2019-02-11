@@ -12,8 +12,11 @@ pub struct Gateway {
 #[derive(Clone, Debug)]
 pub struct Route {
     pub pattern: Regex,
-    pub children: Option<Box<[Route]>>,
+    pub children: Option<Vec<Route>>,
+    pub message: Option<String>,
 }
 
 #[derive(Clone, Debug)]
-pub struct Listener {}
+pub struct Listener {
+    pub interface: String,
+}

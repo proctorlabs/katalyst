@@ -1,13 +1,17 @@
+mod listener;
 mod routes;
 
-use crate::config::{Gateway, Listener};
-pub use routes::RouteBuilder;
+use crate::config::Gateway;
+use listener::*;
+use routes::*;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Default)]
+#[serde(default)]
 pub struct GatewayBuilder<'a> {
-    pub routes: RefCell<Vec<RouteBuilder<'a>>>,
+    routes: RefCell<Vec<RouteBuilder<'a>>>,
+    listener: RefCell<ListenerBuilder>,
 }
 
 impl<'a> GatewayBuilder<'a> {
@@ -19,10 +23,11 @@ impl<'a> GatewayBuilder<'a> {
             all_routes.push(route.clone().build());
         }
 
+        let listener = self.listener.get_mut().build();
         //final result
         Gateway {
             routes: all_routes,
-            listener: Listener {},
+            listener: listener,
         }
     }
 }

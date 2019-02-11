@@ -2,6 +2,7 @@ use futures::future;
 use hyper::rt::Future;
 use hyper::service::service_fn;
 use hyper::{Body, Request, Response, Server, StatusCode};
+use std::net::SocketAddr;
 use std::time::Instant;
 
 use crate::config::Gateway;
@@ -9,7 +10,7 @@ use crate::config::Gateway;
 type BoxedFuture = Box<Future<Item = Response<Body>, Error = hyper::Error> + Send>;
 
 pub fn run_service(_config: Gateway) {
-    let addr = ([127, 0, 0, 1], 3000).into();
+    let addr: SocketAddr = _config.listener.interface.parse().unwrap();
     let server = Server::bind(&addr)
         .serve(move || {
             let config = _config.clone();

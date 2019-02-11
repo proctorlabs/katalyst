@@ -1,6 +1,6 @@
 use crate::config::parsers;
 use crate::config::Gateway;
-use crate::handler;
+use crate::service;
 use std::sync::RwLock;
 
 pub struct Katalyst {
@@ -34,6 +34,6 @@ impl Katalyst {
     }
 
     pub fn run(&self) {
-        handler::run_service(self.get_state());
+        service::run_service(self.get_state());
     }
 }
