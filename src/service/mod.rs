@@ -1,12 +1,12 @@
 use futures::future;
 use hyper::rt::Future;
 use hyper::service::service_fn;
-use hyper::{Body, Request, Response, Server, StatusCode};
+use hyper::{Body, Request, Response, Server};
 use std::net::SocketAddr;
 use std::time::Instant;
 
 use crate::config::Gateway;
-use crate::pipeline::Pipeline;
+use crate::pipeline::PipelineRunner;
 
 type BoxedFuture = Box<Future<Item = Response<Body>, Error = hyper::Error> + Send>;
 
@@ -15,16 +15,15 @@ pub fn run_service(_config: Gateway) {
     let server = Server::bind(&addr)
         .serve(move || {
             let config = _config.clone();
+            let pipeline = PipelineRunner::new();
             service_fn(move |req: Request<Body>| -> BoxedFuture {
                 let start = Instant::now();
-                let mut pipeline = crate::pipeline::PipelineState::new(req, config.clone());
-                let matcher = crate::matcher::Matcher {};
-                matcher.process(&mut pipeline);
+                let result = pipeline.run(req, &config);
                 println!(
                     "Processed in {}",
                     Instant::now().duration_since(start).subsec_micros()
                 );
-                Box::new(future::ok(pipeline.rsp))
+                Box::new(future::ok(result.rsp))
             })
         })
         .map_err(|e| eprintln!("server error: {}", e));

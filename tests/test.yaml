@@ -1,5 +1,6 @@
 routes:
   - pattern: "/test1"
+    message: "Some meesssssss"
   - pattern: "^/test2$"
   - pattern: "^/boo.*$"
 listener:

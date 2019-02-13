@@ -1,3 +1,4 @@
+use crate::config::Gateway;
 use crate::pipeline::*;
 use hyper::{Body, StatusCode};
 
@@ -8,17 +9,22 @@ impl Pipeline for Matcher {
         "matcher"
     }
 
-    fn process(&self, state: &mut PipelineState) -> bool {
-        loop {
-            for route in state.config.routes.iter() {
-                if route.pattern.is_match(state.req.uri().path()) {
-                    *state.rsp.body_mut() = Body::from("Matched!");
-                    break;
+    fn process(&self, state: &mut PipelineState, config: &Gateway) -> bool {
+        for route in config.routes.iter() {
+            println!(
+                "Message: {}",
+                match &route.message {
+                    Some(s) => s.to_owned(),
+                    None => String::from("No message"),
                 }
+            );
+            if route.pattern.is_match(state.req.uri().path()) {
+                state.matched_route = Some(route.clone());
+                *state.rsp.body_mut() = Body::from("Matched!");
+                return true;
             }
-            *state.rsp.status_mut() = StatusCode::NOT_FOUND;
-            break;
         }
-        true
+        *state.rsp.status_mut() = StatusCode::NOT_FOUND;
+        false
     }
 }
