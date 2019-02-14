@@ -3,7 +3,6 @@ use hyper::rt::Future;
 use hyper::service::service_fn;
 use hyper::{Body, Request, Response, Server};
 use std::net::SocketAddr;
-use std::time::Instant;
 
 use crate::config::Gateway;
 use crate::pipeline::PipelineRunner;
@@ -17,12 +16,7 @@ pub fn run_service(_config: Gateway) {
             let config = _config.clone();
             let pipeline = PipelineRunner::new();
             service_fn(move |req: Request<Body>| -> BoxedFuture {
-                let start = Instant::now();
                 let result = pipeline.run(req, &config);
-                println!(
-                    "Processed in {}",
-                    Instant::now().duration_since(start).subsec_micros()
-                );
                 Box::new(future::ok(result.rsp))
             })
         })

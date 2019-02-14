@@ -16,7 +16,6 @@ pub struct GatewayBuilder<'a> {
 
 impl<'a> GatewayBuilder<'a> {
     pub fn build(&mut self) -> Gateway {
-        println!("{:?}", self);
         //build routes...
         let mut all_routes = vec![];
         for route in self.routes.borrow().iter() {

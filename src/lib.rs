@@ -1,6 +1,5 @@
 mod app;
 mod config;
-mod matcher;
 mod pipeline;
 mod service;
 
