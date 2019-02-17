@@ -4,18 +4,12 @@ use crate::service;
 use std::sync::RwLock;
 
 /// This is the API Gateway container
+#[derive(Default)]
 pub struct Katalyst {
     state: RwLock<Option<Gateway>>,
 }
 
 impl Katalyst {
-    /// Create a new Katalyst instance
-    pub fn new() -> Self {
-        Katalyst {
-            state: RwLock::new(None),
-        }
-    }
-
     /// Update the running configuration of the API Gateway.
     pub fn update_state(&self, new_state: Gateway) {
         let mut state = self.state.write().unwrap();

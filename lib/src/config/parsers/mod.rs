@@ -16,7 +16,7 @@ pub fn parse_file(file_path: &str) -> GatewayBuilder {
     }
 }
 
-fn load_file<'a>(path: &Path) -> String {
+fn load_file(path: &Path) -> String {
     info!(
         "Loading file from: {}",
         path.canonicalize().unwrap().display()
