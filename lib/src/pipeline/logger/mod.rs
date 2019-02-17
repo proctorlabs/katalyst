@@ -13,15 +13,15 @@ impl Pipeline for Logger {
         state
             .timestamps
             .insert("started".to_string(), Instant::now());
-        println!("Request received for URL {}", state.upstream_request.uri());
+        debug!("Request received for URL {}", state.upstream_request.uri());
         state
     }
 
     fn post(&self, state: &PipelineState) {
-        let started = state.timestamps.get("started").unwrap();
-        println!(
+        let started = state.timestamps["started"];
+        debug!(
             "Request processed in {}",
-            Instant::now().duration_since(*started).subsec_micros()
+            Instant::now().duration_since(started).subsec_micros()
         );
     }
 

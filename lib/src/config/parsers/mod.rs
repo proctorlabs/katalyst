@@ -17,7 +17,7 @@ pub fn parse_file(file_path: &str) -> GatewayBuilder {
 }
 
 fn load_file<'a>(path: &Path) -> String {
-    println!(
+    info!(
         "Loading file from: {}",
         path.canonicalize().unwrap().display()
     );
@@ -25,5 +25,5 @@ fn load_file<'a>(path: &Path) -> String {
     let mut file = File::open(path).unwrap();
     let mut contents = String::new();
     file.read_to_string(&mut contents).unwrap();
-    return contents;
+    contents
 }

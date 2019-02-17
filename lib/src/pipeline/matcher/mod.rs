@@ -12,13 +12,6 @@ impl Pipeline for Matcher {
     fn process(&self, mut state: PipelineState, config: &Gateway) -> PipelineState {
         for route in config.routes.iter() {
             if route.pattern.is_match(state.upstream_request.uri().path()) {
-                println!(
-                    "Message: {}",
-                    match &route.message {
-                        Some(s) => s.to_owned(),
-                        None => String::from("No message"),
-                    }
-                );
                 state.matched_route = Some(route.clone());
                 *state.upstream_response.body_mut() = Body::from("Matched!");
                 return state;

@@ -3,6 +3,9 @@ name = "katalyst-app"
 version = "0.1.0"
 authors = ["Phil Proctor <philliptproctor@gmail.com>"]
 edition = "2018"
+publish = false
 
 [dependencies]
 katalyst = { path = "../lib/" }
+simple_logger = "1.0.1"
+log = "0.4.6"

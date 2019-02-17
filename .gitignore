@@ -1,8 +1,4 @@
-/app/target
-/app/**/*.rs.bk
-/app/Cargo.lock
-/lib/target
-/lib/**/*.rs.bk
-/lib/Cargo.lock
+target
+Cargo.lock
 
 .vscode

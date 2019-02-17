@@ -22,6 +22,6 @@ pub fn run_service(_config: Gateway) {
         })
         .map_err(|e| eprintln!("server error: {}", e));
 
-    println!("Listening on http://{}", addr);
+    info!("Listening on http://{}", addr);
     hyper::rt::run(server);
 }

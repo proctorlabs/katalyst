@@ -73,24 +73,24 @@ impl<'a> PipelineRunner {
         for i in 0..self.pipelines.len() {
             end = i;
             let pipeline = &self.pipelines[i];
-            println!("Running pipeline {}", pipeline.name());
+            debug!("Running pipeline {}", pipeline.name());
             state = pipeline.process(state, config);
             if state.failure {
-                println!("Error in pipeline {}!", pipeline.name());
+                warn!("Error in pipeline {}!", pipeline.name());
                 error = true;
                 break;
             }
         }
         while end < self.pipelines.len() {
             let pipeline = &self.pipelines[end];
-            println!("Post actions for pipeline {}", pipeline.name());
-            if error == true {
+            debug!("Post actions for pipeline {}", pipeline.name());
+            if error {
                 pipeline.error(&state);
             } else {
                 pipeline.post(&state);
             }
             if end > 0 {
-                end = end - 1;
+                end -= 1;
             } else {
                 end = self.pipelines.len();
             }
