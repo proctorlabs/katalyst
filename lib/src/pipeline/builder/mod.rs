@@ -1,6 +1,7 @@
 use super::*;
 use crate::config::Gateway;
-use hyper::{Request, Uri};
+use http::header::HeaderValue;
+use hyper::Request;
 
 pub struct Builder {}
 
@@ -17,18 +18,12 @@ impl Pipeline for Builder {
             let mut path = route.downstream.base_url.to_owned();
             path.push_str(&route.downstream.path);
 
-            let url: Uri = path.parse().unwrap();
-            let mut req = Request::builder();
-
-            let up = state.upstream_request;
-            let client_req = req
-                .uri(url)
-                .version(up.version())
-                .method(up.method())
-                .header("Proxied", "Test")
-                .body(up.into_body())
-                .unwrap();
-            //*client_req.headers_mut() = *state.upstream_request.headers();
+            let (mut parts, body) = state.upstream_request.into_parts();
+            parts.uri = path.parse().unwrap();
+            parts
+                .headers
+                .append("NewHeader", HeaderValue::from_str("Added").unwrap());
+            let client_req = Request::from_parts(parts, body);
 
             state.upstream_request = Request::default();
             state.downstream_request = Some(client_req);
