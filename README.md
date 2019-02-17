@@ -1,5 +1,5 @@
-# Katalyst
+# NOT READY FOR USE! This is currently experimental
 
-# NOT READY FOR USE! This is currently an experiment
+# Katalyst
 
 Katalyst is a rust based high-performance API Gateway built on hyper.
