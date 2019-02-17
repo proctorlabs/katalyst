@@ -1,0 +1,8 @@
+[package]
+name = "katalyst-app"
+version = "0.1.0"
+authors = ["Phil Proctor <philliptproctor@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+katalyst = { path = "../lib/" }
