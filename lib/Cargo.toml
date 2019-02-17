@@ -1,8 +1,11 @@
 [package]
 name = "katalyst"
+description = "Katalyst is an experimental API Gateway library"
 version = "0.1.0"
 authors = ["Phil Proctor <philliptproctor@gmail.com>"]
 edition = "2018"
+keywords = ["api gateway"]
+categories = ["network-programming", "web-programming::http-server", "web-programming"]
 
 [dependencies]
 hyper = "0.12"
@@ -13,3 +16,6 @@ serde_json = "1.0"
 serde_yaml = "0.8"
 log = "0.4"
 hyper-tls = "0.3.1"
+
+[badges]
+maintenance = { status = "experimental" }
