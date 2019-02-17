@@ -5,7 +5,7 @@ repository = "https://github.com/proctorlabs/katalyst"
 version = "0.1.0"
 authors = ["Phil Proctor <philliptproctor@gmail.com>"]
 edition = "2018"
-keywords = ["api gateway"]
+keywords = ["api", "gateway"]
 categories = ["network-programming", "web-programming::http-server", "web-programming"]
 license = "MIT"
 
