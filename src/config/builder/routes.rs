@@ -1,4 +1,5 @@
 use crate::config::Route;
+use super::downstream::DownstreamBuilder;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
@@ -10,6 +11,7 @@ pub struct RouteBuilder<'a> {
     pattern: RefCell<Option<String>>,
     children: RefCell<Option<Vec<RouteBuilder<'a>>>>,
     message: RefCell<Option<String>>,
+    downstream: RefCell<DownstreamBuilder>,
 }
 
 impl<'a> RouteBuilder<'a> {
@@ -27,11 +29,13 @@ impl<'a> RouteBuilder<'a> {
             }
             None => None,
         };
+        let downstream = self.downstream.get_mut().build();
 
         Route {
             pattern: Regex::new(&pattern).unwrap(),
             children: routes,
             message: self.message.borrow().to_owned(),
+            downstream: downstream,
         }
     }
 }

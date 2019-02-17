@@ -17,7 +17,7 @@ pub fn run_service(_config: Gateway) {
             let pipeline = PipelineRunner::new();
             service_fn(move |req: Request<Body>| -> BoxedFuture {
                 let result = pipeline.run(req, &config);
-                Box::new(future::ok(result.rsp))
+                Box::new(future::ok(result.upstream_response))
             })
         })
         .map_err(|e| eprintln!("server error: {}", e));

@@ -9,9 +9,9 @@ impl Pipeline for Matcher {
         "matcher"
     }
 
-    fn process(&self, state: &mut PipelineState, config: &Gateway) -> bool {
+    fn process(&self, mut state: PipelineState, config: &Gateway) -> PipelineState {
         for route in config.routes.iter() {
-            if route.pattern.is_match(state.req.uri().path()) {
+            if route.pattern.is_match(state.upstream_request.uri().path()) {
                 println!(
                     "Message: {}",
                     match &route.message {
@@ -20,11 +20,11 @@ impl Pipeline for Matcher {
                     }
                 );
                 state.matched_route = Some(route.clone());
-                *state.rsp.body_mut() = Body::from("Matched!");
-                return true;
+                *state.upstream_response.body_mut() = Body::from("Matched!");
+                return state;
             }
         }
-        *state.rsp.status_mut() = StatusCode::NOT_FOUND;
-        false
+        *state.upstream_response.status_mut() = StatusCode::NOT_FOUND;
+        state
     }
 }

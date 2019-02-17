@@ -4,18 +4,17 @@ use std::time::Instant;
 
 pub struct Logger {}
 
-#[allow(unused_variables, unused_mut)]
 impl Pipeline for Logger {
     fn name(&self) -> &'static str {
         "logger"
     }
 
-    fn process(&self, state: &mut PipelineState, config: &Gateway) -> bool {
+    fn process(&self, mut state: PipelineState, _config: &Gateway) -> PipelineState {
         state
             .timestamps
             .insert("started".to_string(), Instant::now());
-        println!("Request received for URL {}", state.req.uri());
-        true
+        println!("Request received for URL {}", state.upstream_request.uri());
+        state
     }
 
     fn post(&self, state: &PipelineState) {

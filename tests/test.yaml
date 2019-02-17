@@ -1,7 +1,8 @@
 routes:
-  - pattern: "/test1"
+  - pattern: ".*"
     message: "Some meesssssss"
-  - pattern: "^/test2$"
-  - pattern: "^/boo.*$"
+    downstream:
+      base_url: "http://postman-echo.com"
+      path: "/get?foo1=bar1"
 listener:
   interface: "127.0.0.1:3001"

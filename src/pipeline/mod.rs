@@ -1,42 +1,51 @@
+mod builder;
 mod logger;
 mod matcher;
+mod sender;
 
 use crate::config::*;
+use builder::Builder;
 use hyper::{Body, Request, Response};
 use logger::Logger;
 use matcher::Matcher;
+use sender::Sender;
 use std::collections::HashMap;
 use std::time::Instant;
 
 pub struct PipelineState {
-    pub req: Request<Body>,
-    pub rsp: Response<Body>,
+    pub upstream_request: Request<Body>,
+    pub upstream_response: Response<Body>,
+    pub downstream_request: Option<Request<Body>>,
+    pub downstream_response: Option<Response<Body>>,
     pub timestamps: HashMap<String, Instant>,
     pub matched_route: Option<Route>,
+    pub failure: bool,
 }
 
 impl PipelineState {
     fn new(request: Request<Body>) -> Self {
         PipelineState {
-            req: request,
-            rsp: Response::new(Body::empty()),
+            upstream_request: request,
+            upstream_response: Response::new(Body::empty()),
+            downstream_request: None,
+            downstream_response: None,
             matched_route: None,
             timestamps: HashMap::new(),
+            failure: false,
         }
     }
 }
 
-#[allow(unused_variables, unused_mut)]
 pub trait Pipeline {
     fn name(&self) -> &'static str;
 
-    fn process(&self, state: &mut PipelineState, config: &Gateway) -> bool {
-        true
+    fn process(&self, state: PipelineState, _config: &Gateway) -> PipelineState {
+        state
     }
 
-    fn post(&self, state: &PipelineState) {}
+    fn post(&self, _state: &PipelineState) {}
 
-    fn error(&self, state: &PipelineState) {}
+    fn error(&self, _state: &PipelineState) {}
 }
 
 pub struct PipelineRunner {
@@ -46,7 +55,12 @@ pub struct PipelineRunner {
 impl<'a> PipelineRunner {
     pub fn new() -> Self {
         //let mut state = PipelineState::new(request, config);
-        let pipelines: Vec<Box<Pipeline + Send>> = vec![Box::new(Logger {}), Box::new(Matcher {})];
+        let pipelines: Vec<Box<Pipeline + Send>> = vec![
+            Box::new(Logger {}),
+            Box::new(Matcher {}),
+            Box::new(Builder {}),
+            Box::new(Sender {}),
+        ];
         PipelineRunner {
             pipelines: pipelines.into_boxed_slice(),
         }
@@ -60,7 +74,8 @@ impl<'a> PipelineRunner {
             end = i;
             let pipeline = &self.pipelines[i];
             println!("Running pipeline {}", pipeline.name());
-            if !(pipeline.process(&mut state, config)) {
+            state = pipeline.process(state, config);
+            if state.failure {
                 println!("Error in pipeline {}!", pipeline.name());
                 error = true;
                 break;
