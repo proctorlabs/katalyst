@@ -2,7 +2,7 @@
 name = "katalyst"
 description = "Katalyst is an experimental API Gateway library"
 repository = "https://github.com/proctorlabs/katalyst"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Phil Proctor <philliptproctor@gmail.com>"]
 edition = "2018"
 keywords = ["http", "api", "gateway"]
