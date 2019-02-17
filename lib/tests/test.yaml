@@ -1,8 +1,0 @@
-routes:
-  - pattern: ".*"
-    message: "Some meesssssss"
-    downstream:
-      base_url: "http://postman-echo.com"
-      path: "/get?foo1=bar1"
-listener:
-  interface: "127.0.0.1:3001"

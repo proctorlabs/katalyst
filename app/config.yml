@@ -5,4 +5,4 @@ routes:
       base_url: "http://postman-echo.com"
       path: "/get?foo1=bar1"
 listener:
-  interface: "127.0.0.1:8000"
+  interface: "0.0.0.0:8000"

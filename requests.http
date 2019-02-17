@@ -1,0 +1,16 @@
+### These requests are used for manual testing purposes
+
+GET http://localhost:8000/ HTTP/1.1
+
+###
+GET http://localhost:8000/test/2 HTTP/1.1
+
+###
+
+POST http://localhost:8000/post HTTP/1.1
+content-type: application/json
+
+{
+    "name": "sample",
+    "time": "Wed, 21 Oct 2015 18:27:50 GMT"
+}
