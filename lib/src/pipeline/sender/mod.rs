@@ -1,6 +1,5 @@
 use super::*;
 use crate::config::Gateway;
-use futures::future::*;
 use hyper::Client;
 
 pub struct Sender {}
@@ -15,12 +14,11 @@ impl Pipeline for Sender {
             let request = state
                 .downstream_request
                 .expect("Sender requires a prepared request");
-            //hyper::client::Client<hyper::client::connect::http::HttpConnector<hyper::client::connect::dns::TokioThreadpoolGaiResolver>>
             let builder = Client::builder();
             let client =
                 builder.build(hyper::client::HttpConnector::new_with_tokio_threadpool_resolver());
-            let res = client.request(request).wait().unwrap();
-            state.upstream_response = res;
+            let res = client.request(request);
+            state.upstream_response = Box::new(res);
             state.downstream_request = None;
         }
         state

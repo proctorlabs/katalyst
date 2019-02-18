@@ -19,10 +19,9 @@ impl Pipeline for Logger {
 
     fn post(&self, state: &PipelineState) {
         let started = state.timestamps["started"];
-        debug!(
-            "Request processed in {}",
-            Instant::now().duration_since(started).subsec_micros()
-        );
+        let duration = Instant::now().duration_since(started);
+        let total_ms = u64::from(duration.subsec_millis()) + (duration.as_secs() * 1000);
+        debug!("Request processed in {:?}ms", total_ms);
     }
 
     fn error(&self, state: &PipelineState) {

@@ -1,6 +1,6 @@
 use super::*;
 use crate::config::Gateway;
-use hyper::{Body, StatusCode};
+use hyper::StatusCode;
 
 pub struct Matcher {}
 
@@ -13,11 +13,11 @@ impl Pipeline for Matcher {
         for route in config.routes.iter() {
             if route.pattern.is_match(state.upstream_request.uri().path()) {
                 state.matched_route = Some(route.clone());
-                *state.upstream_response.body_mut() = Body::from("Matched!");
                 return state;
             }
         }
-        *state.upstream_response.status_mut() = StatusCode::NOT_FOUND;
+        state.set_status(StatusCode::NOT_FOUND);
+        state.failure = true;
         state
     }
 }

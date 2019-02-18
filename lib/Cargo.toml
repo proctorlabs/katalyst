@@ -18,8 +18,8 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.8"
 log = "0.4"
-hyper-tls = "0.3.1"
-http = "0.1.15"
+hyper-tls = "0.3"
+http = "0.1"
 
 [badges]
 maintenance = { status = "experimental" }
