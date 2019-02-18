@@ -1,4 +1,4 @@
-use hyper::Method;
+use http::Method;
 use std::collections::HashSet;
 
 pub mod builder;

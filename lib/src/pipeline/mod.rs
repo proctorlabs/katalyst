@@ -21,7 +21,7 @@ pub struct PipelineState {
     pub downstream_response: Option<Response<Body>>,
     pub timestamps: HashMap<String, Instant>,
     pub matched_route: Option<Route>,
-    pub failure: bool,
+    pub finished: bool,
 }
 
 impl PipelineState {
@@ -33,13 +33,14 @@ impl PipelineState {
             downstream_response: None,
             matched_route: None,
             timestamps: HashMap::new(),
-            failure: false,
+            finished: false,
         }
     }
 
-    fn set_status(&mut self, status: StatusCode) {
+    fn return_status(&mut self, status: StatusCode) {
         let mut response = Response::new(Body::empty());
         *response.status_mut() = status;
+        self.finished = true;
         self.upstream_response = Box::new(future::ok(response));
     }
 }
@@ -83,7 +84,7 @@ impl PipelineRunner {
             let pipeline = &self.pipelines[i];
             debug!("Running pipeline {}", pipeline.name());
             state = pipeline.process(state, config);
-            if state.failure {
+            if state.finished {
                 warn!("Error in pipeline {}!", pipeline.name());
                 error = true;
                 break;

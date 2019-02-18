@@ -1,6 +1,6 @@
 use super::downstream::DownstreamBuilder;
 use crate::config::Route;
-use hyper::Method;
+use http::Method;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
@@ -43,7 +43,9 @@ impl<'a> RouteBuilder<'a> {
                 match mb {
                     Some(s) => {
                         for method_string in s {
-                            let method = Method::from_bytes(method_string.as_bytes()).unwrap();
+                            let method =
+                                Method::from_bytes(method_string.to_uppercase().as_bytes())
+                                    .unwrap();
                             vec_methods.insert(method);
                         }
                         methods = Some(vec_methods);
