@@ -3,11 +3,11 @@
 GET http://localhost:8000/ HTTP/1.1
 
 ###
-GET http://localhost:8000/test/2 HTTP/1.1
+GET http://localhost:8000/test HTTP/1.1
 
 ###
 
-POST http://localhost:8000/post HTTP/1.1
+POST http://localhost:8000/test/post HTTP/1.1
 content-type: application/json
 
 {

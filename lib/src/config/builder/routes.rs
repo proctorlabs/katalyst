@@ -1,8 +1,10 @@
-use crate::config::Route;
 use super::downstream::DownstreamBuilder;
+use crate::config::Route;
+use hyper::Method;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
+use std::collections::HashSet;
 use std::string::String;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
@@ -10,8 +12,8 @@ use std::string::String;
 pub struct RouteBuilder<'a> {
     pattern: RefCell<Option<String>>,
     children: RefCell<Option<Vec<RouteBuilder<'a>>>>,
-    message: RefCell<Option<String>>,
     downstream: RefCell<DownstreamBuilder>,
+    methods: RefCell<Option<Vec<String>>>,
 }
 
 impl<'a> RouteBuilder<'a> {
@@ -31,11 +33,31 @@ impl<'a> RouteBuilder<'a> {
         };
         let downstream = self.downstream.get_mut().build();
 
+        //Build method hashset
+        let mut methods: Option<HashSet<Method>> = None;
+        {
+            let mut methods_clone = (&self.methods).clone();
+            let mb = methods_clone.get_mut();
+            if mb.is_some() {
+                let mut vec_methods: HashSet<Method> = HashSet::new();
+                match mb {
+                    Some(s) => {
+                        for method_string in s {
+                            let method = Method::from_bytes(method_string.as_bytes()).unwrap();
+                            vec_methods.insert(method);
+                        }
+                        methods = Some(vec_methods);
+                    }
+                    None => {}
+                }
+            }
+        }
+
         Route {
             pattern: Regex::new(&pattern).unwrap(),
             children: routes,
-            message: self.message.borrow().to_owned(),
             downstream: downstream,
+            methods: methods,
         }
     }
 }

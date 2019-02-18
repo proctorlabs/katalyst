@@ -1,6 +1,13 @@
 routes:
-  - pattern: ".*"
-    message: "Some meesssssss"
+  - pattern: "^/test$"
+    methods:
+      - get
+    downstream:
+      base_url: "http://postman-echo.com"
+      path: "/get?foo1=bar1"
+  - pattern: "^/test/post$"
+    methods:
+      - post
     downstream:
       base_url: "http://postman-echo.com"
       path: "/get?foo1=bar1"

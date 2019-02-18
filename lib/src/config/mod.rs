@@ -1,3 +1,6 @@
+use hyper::Method;
+use std::collections::HashSet;
+
 pub mod builder;
 pub mod parsers;
 
@@ -13,8 +16,8 @@ pub struct Gateway {
 pub struct Route {
     pub pattern: Regex,
     pub children: Option<Vec<Route>>,
-    pub message: Option<String>,
     pub downstream: Downstream,
+    pub methods: Option<HashSet<Method>>,
 }
 
 #[derive(Clone, Debug)]
