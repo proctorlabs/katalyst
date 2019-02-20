@@ -1,5 +1,6 @@
 use super::downstream::DownstreamBuilder;
 use crate::config::Route;
+use crate::templates::Providers;
 use http::Method;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -17,7 +18,7 @@ pub struct RouteBuilder<'a> {
 }
 
 impl<'a> RouteBuilder<'a> {
-    pub fn build(&mut self) -> Route {
+    pub fn build(&mut self, providers: &Providers) -> Route {
         let pattern = self.pattern.borrow().to_owned().unwrap();
 
         let routebuilders: &mut Option<Vec<RouteBuilder>> = self.children.get_mut();
@@ -25,13 +26,13 @@ impl<'a> RouteBuilder<'a> {
             Some(b) => {
                 let mut result = vec![];
                 for rb in b {
-                    result.push(rb.build());
+                    result.push(rb.build(providers));
                 }
                 Some(result)
             }
             None => None,
         };
-        let downstream = self.downstream.get_mut().build();
+        let downstream = self.downstream.get_mut().build(providers);
 
         //Build method hashset
         let mut methods: Option<HashSet<Method>> = None;

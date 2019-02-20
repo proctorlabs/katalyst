@@ -1,12 +1,14 @@
 use crate::config::parsers;
 use crate::config::Gateway;
 use crate::service;
+use crate::templates::Providers;
 use std::sync::RwLock;
 
 /// This is the API Gateway container
 #[derive(Default)]
 pub struct Katalyst {
     state: RwLock<Option<Gateway>>,
+    providers: Providers,
 }
 
 impl Katalyst {
@@ -29,7 +31,7 @@ impl Katalyst {
     /// Load a configuration file
     pub fn load(&self, config_file: &str) {
         let mut config = parsers::parse_file(config_file);
-        self.update_state(config.build());
+        self.update_state(config.build(&self.providers));
     }
 
     /// Start the API Gateway

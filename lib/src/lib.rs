@@ -15,6 +15,7 @@ mod templates;
 pub use app::Katalyst;
 pub use templates::KatalystTemplatePlaceholder;
 pub use templates::KatalystTemplateProvider;
+pub use templates::Providers;
 
 /// This is the primary entrypoint for the API Gateway.
 /// config_file must be the path (relative or absolute) to a YAML or JSON configuration file.

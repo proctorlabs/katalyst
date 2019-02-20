@@ -1,7 +1,7 @@
 mod template_traits;
 
 use regex::Regex;
-
+use std::collections::HashMap;
 pub use template_traits::KatalystTemplatePlaceholder;
 pub use template_traits::KatalystTemplateProvider;
 
@@ -10,15 +10,77 @@ lazy_static! {
         Regex::new(r"\{\{\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*}}").unwrap();
 }
 
-fn find_matches(template: &str) -> Vec<(String, String)> {
-    let mut result: Vec<(String, String)> = vec![];
-    if TEMPLATE_PATTERN.is_match(template) {
-        for cap in TEMPLATE_PATTERN.captures_iter(template) {
-            let cap_group = ((&cap[1]).to_string(), (&cap[2]).to_string());
-            result.push(cap_group);
+pub struct Providers {
+    providers: HashMap<String, Box<KatalystTemplateProvider + Send>>,
+}
+
+impl Providers {
+    pub fn build_placeholder(
+        &self,
+        id: String,
+        _value: String,
+    ) -> Box<KatalystTemplatePlaceholder> {
+        self.providers[&id].build_placeholder(id)
+    }
+
+    pub fn register(&mut self, provider: Box<KatalystTemplateProvider + Send>) {
+        self.providers.insert(provider.identifier(), provider);
+    }
+
+    pub fn empty() -> Self {
+        Providers {
+            providers: HashMap::new(),
         }
     }
-    result
+
+    pub fn process_template(&self, template: &str) -> Vec<Box<KatalystTemplatePlaceholder>> {
+        let mut result_placeholders: Vec<Box<KatalystTemplatePlaceholder>> = vec![];
+        if TEMPLATE_PATTERN.is_match(template) {
+            let mut last_segment_index = 0;
+            for cap in Regex::new(r"\{\{\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*}}")
+                .unwrap()
+                .find_iter(template)
+            {
+                //for cap in TEMPLATE_PATTERN.captures_iter(template) {
+                if cap.start() > last_segment_index {
+                    let offset = cap.start() - last_segment_index;
+                    let segment: String = template
+                        .chars()
+                        .skip(last_segment_index)
+                        .take(offset)
+                        .collect();
+                    println!("{}", segment);
+                    result_placeholders.push(Box::new(segment));
+                }
+
+                //let cap_group = ((&cap[1]).to_string(), (&cap[2]).to_string());
+                result_placeholders.push(Box::new(cap.as_str().to_owned()));
+                println!("{}", cap.as_str());
+                last_segment_index = cap.end();
+            }
+            if last_segment_index < template.len() {
+                let offset = template.len() - last_segment_index;
+                let segment: String = template
+                    .chars()
+                    .skip(last_segment_index)
+                    .take(offset)
+                    .collect();
+                println!("{}", segment);
+                result_placeholders.push(Box::new(segment));
+            }
+        } else {
+            result_placeholders.push(Box::new(template.to_owned()));
+        }
+        result_placeholders
+    }
+}
+
+impl Default for Providers {
+    fn default() -> Self {
+        Providers {
+            providers: HashMap::new(),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -27,35 +89,40 @@ mod tests {
 
     #[test]
     fn positive_template_match() {
-        let result = find_matches("/testing/test/{{boo=>rai}}/boom");
-        assert_eq!(result.len(), 1);
-        assert_eq!(result[0], ("boo".to_string(), "rai".to_string()));
+        let provider = Providers::default();
+        let result = provider.process_template("/testing/test/{{boo=>rai}}/boom");
+        assert_eq!(result.len(), 3);
+        // assert_eq!(result[0], ("boo".to_string(), "rai".to_string()));
     }
 
     #[test]
     fn positive_template_match_with_whitespace() {
-        let result = find_matches("/testing/test/{{ boo   =>  rai     }}/boom");
-        assert_eq!(result.len(), 1);
-        assert_eq!(result[0], ("boo".to_string(), "rai".to_string()));
+        let provider = Providers::default();
+        let result = provider.process_template("/testing/test/{{ boo   =>  rai     }}/boom");
+        assert_eq!(result.len(), 3);
+        //assert_eq!(result[0], ("boo".to_string(), "rai".to_string()));
     }
 
     #[test]
     fn positive_template_match_with_nested_template() {
-        let result = find_matches("/testing/test/{{boo=>rai=>me}}/boom");
-        assert_eq!(result.len(), 1);
-        assert_eq!(result[0], ("boo".to_string(), "rai=>me".to_string()));
+        let provider = Providers::default();
+        let result = provider.process_template("/testing/test/{{boo=>rai=>me}}/boom");
+        assert_eq!(result.len(), 3);
+        //assert_eq!(result[0], ("boo".to_string(), "rai=>me".to_string()));
     }
 
     #[test]
     fn negative_template_match_regular_url() {
-        let result = find_matches("/testing/test/boom?query=value&something=else");
-        assert_eq!(result.len(), 0);
+        let provider = Providers::default();
+        let result = provider.process_template("/testing/test/boom?query=value&something=else");
+        assert_eq!(result.len(), 1);
     }
 
     #[test]
     fn negative_template_match_handlebars_but_bad_pattern() {
-        let result =
-            find_matches("/testing/{{test->shouldn'tmatch}}/boom?query=value&something=else");
-        assert_eq!(result.len(), 0);
+        let provider = Providers::default();
+        let result = provider
+            .process_template("/testing/{{test->shouldn'tmatch}}/boom?query=value&something=else");
+        assert_eq!(result.len(), 1);
     }
 }

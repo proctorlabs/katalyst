@@ -1,4 +1,5 @@
 use crate::config::Listener;
+use crate::templates::Providers;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 
@@ -9,7 +10,7 @@ pub struct ListenerBuilder {
 }
 
 impl<'a> ListenerBuilder {
-    pub fn build(&mut self) -> Listener {
+    pub fn build(&mut self, _providers: &Providers) -> Listener {
         Listener {
             interface: self.interface.borrow().to_owned().unwrap(),
         }

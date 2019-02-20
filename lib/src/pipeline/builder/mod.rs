@@ -1,5 +1,6 @@
 use super::*;
 use crate::config::Gateway;
+use crate::templates::KatalystTemplatePlaceholder;
 use http::header::HeaderValue;
 use hyper::Request;
 
@@ -10,25 +11,34 @@ impl Pipeline for Builder {
         "builder"
     }
 
-    fn process(&self, mut state: PipelineState, _config: &Gateway) -> PipelineState {
+    fn process(&self, mut state: PipelineState, config: &Gateway) -> PipelineState {
+        let mut path = String::new();
+        let mut parts: Vec<Box<KatalystTemplatePlaceholder>> = vec![];
         {
             let route = state
                 .matched_route
                 .expect("Builder requires route to be matched already");
-            let mut path = route.downstream.base_url.to_owned();
-            path.push_str(&route.downstream.path);
-
-            let (mut parts, body) = state.upstream_request.into_parts();
-            parts.uri = path.parse().unwrap();
-            parts
-                .headers
-                .append("NewHeader", HeaderValue::from_str("Added").unwrap());
-            let client_req = Request::from_parts(parts, body);
-
-            state.upstream_request = Request::default();
-            state.downstream_request = Some(client_req);
+            path.push_str(&route.downstream.base_url);
+            for part in route.downstream.path_parts.iter() {
+                parts.push(part.duplicate()); //TODO: Gotta be a better way to do this...
+            }
             state.matched_route = Some(route);
         }
+
+        for part in parts.iter() {
+            path.push_str(&part.get_value(&state, config));
+        }
+
+        let (mut parts, body) = state.upstream_request.into_parts();
+        parts.uri = path.parse().unwrap();
+        parts
+            .headers
+            .append("NewHeader", HeaderValue::from_str("Added").unwrap());
+        let client_req = Request::from_parts(parts, body);
+
+        state.upstream_request = Request::default();
+        state.downstream_request = Some(client_req);
+
         state
     }
 }

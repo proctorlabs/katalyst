@@ -1,4 +1,5 @@
 use crate::config::Downstream;
+use crate::templates::Providers;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::string::String;
@@ -11,10 +12,10 @@ pub struct DownstreamBuilder {
 }
 
 impl<'a> DownstreamBuilder {
-    pub fn build(&mut self) -> Downstream {
+    pub fn build(&mut self, providers: &Providers) -> Downstream {
         Downstream {
             base_url: self.base_url.borrow().to_owned(),
-            path: self.path.borrow().to_owned(),
+            path_parts: providers.process_template(&self.path.borrow().to_owned()),
         }
     }
 }

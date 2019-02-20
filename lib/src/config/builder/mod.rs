@@ -3,6 +3,7 @@ mod listener;
 mod routes;
 
 use crate::config::Gateway;
+use crate::templates::Providers;
 use listener::*;
 use routes::*;
 use serde::{Deserialize, Serialize};
@@ -16,14 +17,14 @@ pub struct GatewayBuilder<'a> {
 }
 
 impl<'a> GatewayBuilder<'a> {
-    pub fn build(&mut self) -> Gateway {
+    pub fn build(&mut self, providers: &Providers) -> Gateway {
         //build routes...
         let mut all_routes = vec![];
         for route in self.routes.borrow().iter() {
-            all_routes.push(route.clone().build());
+            all_routes.push(route.clone().build(providers));
         }
 
-        let listener = self.listener.get_mut().build();
+        let listener = self.listener.get_mut().build(providers);
         //final result
         Gateway {
             routes: all_routes,
