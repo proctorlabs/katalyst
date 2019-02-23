@@ -39,7 +39,7 @@ impl Clone for Downstream {
         }
         Downstream {
             base_url: self.base_url.to_string(),
-            path_parts: vec![],
+            path_parts: cloned_placeholders,
         }
     }
 }

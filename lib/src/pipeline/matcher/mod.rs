@@ -19,7 +19,7 @@ impl Pipeline for Matcher {
                 None => true,
             };
             if method_match && route.pattern.is_match(state.upstream_request.uri().path()) {
-                state.matched_route = Some(route.clone());
+                state.matched_route = Box::new(Some(route.clone()));
                 return state;
             }
         }

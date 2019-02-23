@@ -13,16 +13,13 @@ impl Pipeline for Builder {
 
     fn process(&self, mut state: PipelineState, config: &Gateway) -> PipelineState {
         let mut path = String::new();
-        let mut parts: Vec<Box<KatalystTemplatePlaceholder>> = vec![];
-        {
-            let route = state
-                .matched_route
-                .expect("Builder requires route to be matched already");
+        let mut parts: Vec<&Box<KatalystTemplatePlaceholder>> = vec![];
+
+        for route in state.matched_route.iter() {
             path.push_str(&route.downstream.base_url);
             for part in route.downstream.path_parts.iter() {
-                parts.push(part.duplicate()); //TODO: Gotta be a better way to do this...
+                parts.push(&part);
             }
-            state.matched_route = Some(route);
         }
 
         for part in parts.iter() {
@@ -30,6 +27,7 @@ impl Pipeline for Builder {
         }
 
         let (mut parts, body) = state.upstream_request.into_parts();
+        debug!("Routing request to {}", path);
         parts.uri = path.parse().unwrap();
         parts
             .headers

@@ -20,7 +20,7 @@ pub struct PipelineState {
     pub downstream_request: Option<Request<Body>>,
     pub downstream_response: Option<Response<Body>>,
     pub timestamps: HashMap<String, Instant>,
-    pub matched_route: Option<Route>,
+    pub matched_route: Box<Option<Route>>,
     pub finished: bool,
 }
 
@@ -31,7 +31,7 @@ impl PipelineState {
             upstream_response: Box::new(future::ok(Response::default())), //Response::new(Body::empty()),
             downstream_request: None,
             downstream_response: None,
-            matched_route: None,
+            matched_route: Box::new(None),
             timestamps: HashMap::new(),
             finished: false,
         }

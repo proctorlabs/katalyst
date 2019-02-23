@@ -1,6 +1,5 @@
 use crate::config::Gateway;
 use crate::pipeline::PipelineState;
-use std::fmt::Debug;
 
 /// This is the trait used by Katalyst for building the placeholders used in a downstream URL template
 pub trait KatalystTemplateProvider {
