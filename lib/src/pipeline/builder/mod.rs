@@ -1,6 +1,5 @@
 use super::*;
 use crate::config::Gateway;
-use crate::templates::KatalystTemplatePlaceholder;
 use http::header::HeaderValue;
 use hyper::Request;
 
@@ -11,20 +10,19 @@ impl Pipeline for Builder {
         "builder"
     }
 
-    fn process(&self, mut state: PipelineState, config: &Gateway,) -> PipelineResult {
-        if state.matched_route.is_none() {
-            return self.fail(PipelineError::Failed{});
-        }
-        let mut path = String::new();
-        let mut parts: Vec<&Box<KatalystTemplatePlaceholder>> = vec![];
+    fn process(&self, mut state: PipelineState, config: &Gateway) -> PipelineResult {
+        let state_ref = &state;
+        let downstream = match &(*state_ref.matched_route) {
+            Some(route) => &route.downstream,
+            None => {
+                return self.fail(PipelineError::Failed {});
+            }
+        };
 
-        for route in state.matched_route.iter() {
-            path.push_str(&route.downstream.base_url);
-            parts = route.downstream.path_parts.iter().collect();
-        }
+        let mut path = downstream.base_url.to_string();
 
-        for part in parts.iter() {
-            path.push_str(&part.get_value(&state, config));
+        for part in downstream.path_parts.iter() {
+            path.push_str(part.get_value(&state, config));
         }
 
         let (mut parts, body) = state.upstream_request.into_parts();

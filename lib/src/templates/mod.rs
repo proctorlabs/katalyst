@@ -1,9 +1,9 @@
-mod template_traits;
 mod providers;
+mod template_traits;
 
+pub use providers::*;
 use regex::Regex;
 use std::collections::HashMap;
-pub use providers::*;
 pub use template_traits::KatalystTemplatePlaceholder;
 pub use template_traits::KatalystTemplateProvider;
 
@@ -13,24 +13,23 @@ lazy_static! {
 }
 
 pub struct Providers {
-    providers: HashMap<String, Box<KatalystTemplateProvider + Send>>,
+    providers: HashMap<&'static str, Box<KatalystTemplateProvider + Send>>,
 }
 
 impl Providers {
     pub fn build_placeholder(&self, placeholder_text: String) -> Box<KatalystTemplatePlaceholder> {
-        for cap in TEMPLATE_PATTERN.captures(&placeholder_text)
-        {
-            let id = &cap[1];
-            let val = &cap[2];
-            let provider = self.providers.get(id);
-            if provider.is_some() {
-                for p in provider.iter() {
-                    return p.build_placeholder(val.to_string());
+        match TEMPLATE_PATTERN.captures(&placeholder_text) {
+            Some(cap) => {
+                let key = &cap[1];
+                let val = &cap[2];
+                let provider = self.providers.get(key);
+                match provider {
+                    Some(p) => p.build_placeholder(val.to_string()),
+                    None => Box::new(placeholder_text),
                 }
             }
+            None => Box::new(placeholder_text),
         }
-        Box::new(placeholder_text)
-
     }
 
     pub fn register(&mut self, provider: Box<KatalystTemplateProvider + Send>) {
@@ -47,8 +46,7 @@ impl Providers {
         let mut result_placeholders: Vec<Box<KatalystTemplatePlaceholder>> = vec![];
         if TEMPLATE_PATTERN.is_match(template) {
             let mut last_segment_index = 0;
-            for cap in TEMPLATE_PATTERN.find_iter(template)
-            {
+            for cap in TEMPLATE_PATTERN.find_iter(template) {
                 if cap.start() > last_segment_index {
                     let offset = cap.start() - last_segment_index;
                     let segment: String = template
@@ -82,8 +80,12 @@ impl Providers {
 
 impl Default for Providers {
     fn default() -> Self {
-        let mut result_map: HashMap<String, Box<KatalystTemplateProvider + Send>> = HashMap::new();
-        result_map.insert(EnvTemplateProvider{}.identifier(), Box::new(EnvTemplateProvider{}));
+        let mut result_map: HashMap<&'static str, Box<KatalystTemplateProvider + Send>> =
+            HashMap::new();
+        result_map.insert(
+            EnvTemplateProvider {}.identifier(),
+            Box::new(EnvTemplateProvider {}),
+        );
         Providers {
             providers: result_map,
         }

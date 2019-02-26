@@ -12,6 +12,8 @@ use logger::Logger;
 use matcher::Matcher;
 use sender::Sender;
 use std::collections::HashMap;
+use std::error;
+use std::fmt;
 use std::time::Instant;
 
 pub struct PipelineState {
@@ -52,6 +54,14 @@ pub enum PipelineError {
     Halted,
     Failed,
 }
+
+impl fmt::Display for PipelineError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self)
+    }
+}
+
+impl error::Error for PipelineError {}
 
 pub type HyperResult = Box<Future<Item = Response<Body>, Error = hyper::Error> + Send>;
 
@@ -110,6 +120,9 @@ impl PipelineRunner {
             let c = config.clone();
             result = Box::new(result.and_then(move |s| runner.process(s, &c)));
         }
-        Box::new(result.then(|s| ok::<Response<Body>, hyper::Error>(s.unwrap().upstream_response)))
+        Box::new(result.then(|s| match s {
+            Ok(res) => ok::<Response<Body>, hyper::Error>(res.upstream_response),
+            Err(_) => ok::<Response<Body>, hyper::Error>(Response::new(Body::empty())),
+        }))
     }
 }
