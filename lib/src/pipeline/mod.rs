@@ -31,7 +31,7 @@ impl PipelineState {
     fn new(request: Request<Body>) -> Self {
         PipelineState {
             upstream_request: request,
-            upstream_response: Response::default(), //Response::new(Body::empty()),
+            upstream_response: Response::default(),
             downstream_request: None,
             downstream_response: None,
             matched_route: Box::new(None),
@@ -81,7 +81,18 @@ pub trait Pipeline: Send + Sync {
     fn make(&self) -> Box<Pipeline + Send + Sync>;
 
     fn ok(&self, state: PipelineState) -> PipelineResult {
-        Box::new(ok::<PipelineState, PipelineError>(state))
+        Box::new(
+            ok::<PipelineState, PipelineError>(state).then(|s| match &s {
+                Ok(_) => {
+                    println!("post");
+                    s
+                }
+                Err(_) => {
+                    println!("error");
+                    s
+                }
+            }),
+        )
     }
 
     fn fail(&self, error: PipelineError) -> PipelineResult {
@@ -111,18 +122,16 @@ impl PipelineRunner {
             Box::new(lazy(|| {
                 ok::<PipelineState, PipelineError>(PipelineState::new(request))
             }));
-        let mut pipelines: Vec<Box<Pipeline + Send + Sync>> = vec![];
-        for pip in self.pipelines.iter() {
-            pipelines.push(pip.make());
-        }
+        let mut pipelines: Vec<Box<Pipeline + Send + Sync>> =
+            self.pipelines.iter().map(|p| p.make()).collect();
         while !pipelines.is_empty() {
             let runner = pipelines.remove(0);
-            let c = config.clone();
+            let c = config.clone(); //TODO: This is inefficient
             result = Box::new(result.and_then(move |s| runner.process(s, &c)));
         }
         Box::new(result.then(|s| match s {
             Ok(res) => ok::<Response<Body>, hyper::Error>(res.upstream_response),
-            Err(_) => ok::<Response<Body>, hyper::Error>(Response::new(Body::empty())),
+            Err(_) => ok::<Response<Body>, hyper::Error>(Response::default()),
         }))
     }
 }
