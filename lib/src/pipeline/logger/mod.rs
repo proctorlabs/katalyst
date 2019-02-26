@@ -9,12 +9,12 @@ impl Pipeline for Logger {
         "logger"
     }
 
-    fn process(&self, mut state: PipelineState, _config: &Gateway) -> PipelineState {
+    fn process(&self, mut state: PipelineState, _config: &Gateway,) -> PipelineResult {
         state
             .timestamps
             .insert("started".to_string(), Instant::now());
         debug!("Request received for URL {}", state.upstream_request.uri());
-        state
+        self.ok(state)
     }
 
     fn post(&self, state: &PipelineState) {
@@ -26,5 +26,9 @@ impl Pipeline for Logger {
 
     fn error(&self, state: &PipelineState) {
         self.post(state);
+    }
+
+    fn make(&self) -> Box<Pipeline + Send + Sync> {
+        Box::new(Logger {})
     }
 }

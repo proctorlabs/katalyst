@@ -4,9 +4,9 @@ mod matcher;
 mod sender;
 
 use crate::config::{Gateway, Route};
-use crate::service::BoxedFuture;
 use builder::Builder;
-use futures::future;
+use futures::future::*;
+use futures::Future;
 use hyper::{Body, Request, Response, StatusCode};
 use logger::Logger;
 use matcher::Matcher;
@@ -16,24 +16,26 @@ use std::time::Instant;
 
 pub struct PipelineState {
     pub upstream_request: Request<Body>,
-    pub upstream_response: BoxedFuture,
+    pub upstream_response: Response<Body>,
     pub downstream_request: Option<Request<Body>>,
     pub downstream_response: Option<Response<Body>>,
     pub timestamps: HashMap<String, Instant>,
     pub matched_route: Box<Option<Route>>,
     pub finished: bool,
+    pub hyper_error: Option<hyper::Error>,
 }
 
 impl PipelineState {
     fn new(request: Request<Body>) -> Self {
         PipelineState {
             upstream_request: request,
-            upstream_response: Box::new(future::ok(Response::default())), //Response::new(Body::empty()),
+            upstream_response: Response::default(), //Response::new(Body::empty()),
             downstream_request: None,
             downstream_response: None,
             matched_route: Box::new(None),
             timestamps: HashMap::new(),
             finished: false,
+            hyper_error: None,
         }
     }
 
@@ -41,69 +43,73 @@ impl PipelineState {
         let mut response = Response::new(Body::empty());
         *response.status_mut() = status;
         self.finished = true;
-        self.upstream_response = Box::new(future::ok(response));
+        self.upstream_response = response;
     }
 }
 
-pub trait Pipeline {
+#[derive(Debug)]
+pub enum PipelineError {
+    Halted,
+    Failed,
+}
+
+pub type HyperResult = Box<Future<Item = Response<Body>, Error = hyper::Error> + Send>;
+
+pub type PipelineResult = Box<Future<Item = PipelineState, Error = PipelineError> + Send>;
+
+pub trait Pipeline: Send + Sync {
     fn name(&self) -> &'static str;
 
-    fn process(&self, state: PipelineState, _config: &Gateway) -> PipelineState {
-        state
+    fn process(&self, state: PipelineState, _config: &Gateway) -> PipelineResult {
+        self.ok(state)
     }
 
     fn post(&self, _state: &PipelineState) {}
 
     fn error(&self, _state: &PipelineState) {}
+
+    fn make(&self) -> Box<Pipeline + Send + Sync>;
+
+    fn ok(&self, state: PipelineState) -> PipelineResult {
+        Box::new(ok::<PipelineState, PipelineError>(state))
+    }
+
+    fn fail(&self, error: PipelineError) -> PipelineResult {
+        Box::new(err::<PipelineState, PipelineError>(error))
+    }
 }
 
 pub struct PipelineRunner {
-    pipelines: Box<[Box<Pipeline + Send>]>,
+    pipelines: Vec<Box<Pipeline + Send + Sync>>,
 }
 
 impl PipelineRunner {
     pub fn new() -> Self {
-        //let mut state = PipelineState::new(request, config);
-        let pipelines: Vec<Box<Pipeline + Send>> = vec![
+        let pipelines: Vec<Box<Pipeline + Send + Sync>> = vec![
             Box::new(Logger {}),
             Box::new(Matcher {}),
             Box::new(Builder {}),
             Box::new(Sender {}),
         ];
         PipelineRunner {
-            pipelines: pipelines.into_boxed_slice(),
+            pipelines: pipelines,
         }
     }
 
-    pub fn run(&self, request: Request<Body>, config: &Gateway) -> PipelineState {
-        let mut state = PipelineState::new(request);
-        let mut last_run = 0;
-        let mut error = false;
-        for i in 0..self.pipelines.len() {
-            last_run = i;
-            let pipeline = &self.pipelines[i];
-            debug!("Running pipeline {}", pipeline.name());
-            state = pipeline.process(state, config);
-            if state.finished {
-                warn!("Error in pipeline {}!", pipeline.name());
-                error = true;
-                break;
-            }
+    pub fn run(&self, request: Request<Body>, config: &Gateway) -> HyperResult {
+        let mut result: Box<Future<Item = PipelineState, Error = PipelineError> + Send> =
+            Box::new(lazy(|| {
+                ok::<PipelineState, PipelineError>(PipelineState::new(request))
+            }));
+        let mut pipelines: Vec<Box<Pipeline + Send + Sync>> = vec![];
+        for pip in self.pipelines.iter() {
+            pipelines.push(pip.make());
         }
-        while last_run < self.pipelines.len() {
-            let pipeline = &self.pipelines[last_run];
-            debug!("Post actions for pipeline {}", pipeline.name());
-            if error {
-                pipeline.error(&state);
-            } else {
-                pipeline.post(&state);
-            }
-            if last_run > 0 {
-                last_run -= 1;
-            } else {
-                break;
-            }
+        while !pipelines.is_empty() {
+            let runner = pipelines.remove(0);
+            let c = config.clone();
+            result = Box::new(result.and_then(move |s| runner.process(s, &c)));
         }
-        state
+        Box::new(result.then(|s| ok::<Response<Body>, hyper::Error>(s.unwrap().upstream_response)))
     }
 }

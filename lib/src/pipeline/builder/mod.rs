@@ -11,15 +11,16 @@ impl Pipeline for Builder {
         "builder"
     }
 
-    fn process(&self, mut state: PipelineState, config: &Gateway) -> PipelineState {
+    fn process(&self, mut state: PipelineState, config: &Gateway,) -> PipelineResult {
+        if state.matched_route.is_none() {
+            return self.fail(PipelineError::Failed{});
+        }
         let mut path = String::new();
         let mut parts: Vec<&Box<KatalystTemplatePlaceholder>> = vec![];
 
         for route in state.matched_route.iter() {
             path.push_str(&route.downstream.base_url);
-            for part in route.downstream.path_parts.iter() {
-                parts.push(&part);
-            }
+            parts = route.downstream.path_parts.iter().collect();
         }
 
         for part in parts.iter() {
@@ -37,6 +38,10 @@ impl Pipeline for Builder {
         state.upstream_request = Request::default();
         state.downstream_request = Some(client_req);
 
-        state
+        self.ok(state)
+    }
+
+    fn make(&self) -> Box<Pipeline + Send + Sync> {
+        Box::new(Builder {})
     }
 }
