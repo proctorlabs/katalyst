@@ -22,7 +22,7 @@ impl Pipeline for Builder {
         let mut path = downstream.base_url.to_string();
 
         for part in downstream.path_parts.iter() {
-            path.push_str(part.get_value(&state, config));
+            path.push_str(&part.get_value(&state, config));
         }
 
         let (mut parts, body) = state.upstream_request.into_parts();

@@ -80,15 +80,10 @@ impl Providers {
 
 impl Default for Providers {
     fn default() -> Self {
-        let mut result_map: HashMap<&'static str, Box<KatalystTemplateProvider + Send>> =
-            HashMap::new();
-        result_map.insert(
-            EnvTemplateProvider {}.identifier(),
-            Box::new(EnvTemplateProvider {}),
-        );
-        Providers {
-            providers: result_map,
-        }
+        let mut providers = Providers::empty();
+        providers.register(Box::new(EnvTemplateProvider {}));
+        providers.register(Box::new(RegexTemplateProvider {}));
+        providers
     }
 }
 

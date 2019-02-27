@@ -1,10 +1,12 @@
-mod env;
+mod env_provider;
+mod regex_provider;
 
 use crate::config::Gateway;
 use crate::pipeline::PipelineState;
 use crate::templates::KatalystTemplatePlaceholder;
 
-pub use env::EnvTemplateProvider;
+pub use env_provider::EnvTemplateProvider;
+pub use regex_provider::RegexTemplateProvider;
 
 struct PrecomputedPlaceholder {
     result: String,
@@ -19,8 +21,8 @@ impl PrecomputedPlaceholder {
 }
 
 impl KatalystTemplatePlaceholder for PrecomputedPlaceholder {
-    fn get_value(&self, _state: &PipelineState, _config: &Gateway) -> &str {
-        &self.result
+    fn get_value(&self, _state: &PipelineState, _config: &Gateway) -> String {
+        self.result.to_string()
     }
 
     fn duplicate(&self) -> Box<KatalystTemplatePlaceholder> {

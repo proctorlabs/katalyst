@@ -10,7 +10,7 @@ impl Pipeline for Matcher {
         "matcher"
     }
 
-    fn process(&self, mut state: PipelineState, config: &Gateway,) -> PipelineResult {
+    fn process(&self, mut state: PipelineState, config: &Gateway) -> PipelineResult {
         for route in config.routes.iter() {
             let method_match = match &route.methods {
                 Some(methods) => {
@@ -19,13 +19,27 @@ impl Pipeline for Matcher {
                 }
                 None => true,
             };
-            if method_match && route.pattern.is_match(state.upstream_request.uri().path()) {
+            let path = state.upstream_request.uri().path();
+            if method_match && route.pattern.is_match(path) {
+                let mut cap_map = HashMap::new();
+                let caps = route.pattern.captures(path).unwrap();
+                for name_option in route.pattern.capture_names() {
+                    if name_option.is_some() {
+                        let name = name_option.unwrap();
+                        cap_map.insert(
+                            name.to_string(),
+                            caps.name(name).unwrap().as_str().to_string(),
+                        );
+                    }
+                }
                 state.matched_route = Box::new(Some(route.clone()));
+                state.captures = Some(cap_map);
+                debug!("Request has been matched to route!");
                 return Box::new(ok::<PipelineState, PipelineError>(state));
             }
         }
         state.return_status(StatusCode::NOT_FOUND);
-        self.fail(PipelineError::Halted{})
+        self.fail(PipelineError::Halted {})
     }
 
     fn make(&self) -> Box<Pipeline + Send + Sync> {

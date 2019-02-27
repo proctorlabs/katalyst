@@ -25,6 +25,7 @@ pub struct PipelineState {
     pub matched_route: Box<Option<Route>>,
     pub finished: bool,
     pub hyper_error: Option<hyper::Error>,
+    pub captures: Option<HashMap<String, String>>,
 }
 
 impl PipelineState {
@@ -38,6 +39,7 @@ impl PipelineState {
             timestamps: HashMap::new(),
             finished: false,
             hyper_error: None,
+            captures: None,
         }
     }
 

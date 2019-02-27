@@ -3,7 +3,7 @@
 GET http://localhost:8000/ HTTP/1.1
 
 ###
-GET http://localhost:8000/test HTTP/1.1
+GET http://localhost:8000/test/123 HTTP/1.1
 
 ###
 

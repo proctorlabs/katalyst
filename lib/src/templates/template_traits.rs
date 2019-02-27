@@ -13,15 +13,15 @@ pub trait KatalystTemplateProvider {
 /// This provides the actual value replacement used in the downstream URL template
 pub trait KatalystTemplatePlaceholder: Sync + Send {
     /// Returns the string value that should be used as a replacement for this Placeholder in the pipeline context
-    fn get_value(&self, state: &PipelineState, config: &Gateway) -> &str;
+    fn get_value(&self, state: &PipelineState, config: &Gateway) -> String;
 
     /// Creates a boxed duplicate of this placeholder
     fn duplicate(&self) -> Box<KatalystTemplatePlaceholder>;
 }
 
 impl KatalystTemplatePlaceholder for String {
-    fn get_value(&self, _state: &PipelineState, _config: &Gateway) -> &str {
-        self
+    fn get_value(&self, _state: &PipelineState, _config: &Gateway) -> String {
+        self.to_string()
     }
 
     fn duplicate(&self) -> Box<KatalystTemplatePlaceholder> {

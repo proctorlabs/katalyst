@@ -1,10 +1,10 @@
 routes:
-  - pattern: "^/test$"
+  - pattern: "^/test/(?P<cap>.*)$"
     methods:
       - get
     downstream:
       base_url: "http://postman-echo.com"
-      path: "/get?foo1={{env=>USER}}"
+      path: "/get?env_user={{env=>USER}}&regex_cap={{regex=>cap}}"
   - pattern: "^/test/post$"
     methods:
       - post
