@@ -22,5 +22,5 @@ pub use templates::Providers;
 pub fn start_katalyst(config_file: &str) {
     let app = Katalyst::default();
     app.load(config_file);
-    app.run();
+    app.run(); //
 }

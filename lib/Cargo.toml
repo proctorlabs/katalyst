@@ -22,5 +22,8 @@ hyper-tls = "0.3"
 http = "0.1"
 lazy_static = "1.2"
 
+[dev-dependencies]
+simple_logger = "1.0.1"
+
 [badges]
 maintenance = { status = "experimental" }

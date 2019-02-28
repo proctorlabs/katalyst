@@ -54,11 +54,9 @@ impl Providers {
                         .skip(last_segment_index)
                         .take(offset)
                         .collect();
-                    println!("{}", segment);
                     result_placeholders.push(Box::new(segment));
                 }
                 result_placeholders.push(self.build_placeholder(cap.as_str().to_owned()));
-                println!("{}", cap.as_str());
                 last_segment_index = cap.end();
             }
             if last_segment_index < template.len() {
@@ -68,7 +66,6 @@ impl Providers {
                     .skip(last_segment_index)
                     .take(offset)
                     .collect();
-                println!("{}", segment);
                 result_placeholders.push(Box::new(segment));
             }
         } else {
