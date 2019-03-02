@@ -9,13 +9,19 @@ use crate::pipeline::PipelineRunner;
 use std::sync::Arc;
 
 pub fn run_service(engine: Arc<KatalystEngine>) {
-    let addr: SocketAddr = engine.get_state().listener.interface.parse().unwrap();
+    let addr: SocketAddr = engine
+        .get_state()
+        .unwrap()
+        .listener
+        .interface
+        .parse()
+        .unwrap();
     let server = Server::bind(&addr)
         .serve(move || {
             let engine = engine.clone();
             let pipeline = PipelineRunner::new();
             service_fn(move |req: Request<Body>| -> HyperResult {
-                let config = engine.get_state();
+                let config = engine.get_state().unwrap();
                 pipeline.run(req, &config)
             })
         })

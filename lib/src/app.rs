@@ -12,49 +12,52 @@ pub struct KatalystEngine {
 }
 
 impl KatalystEngine {
-    pub fn new() -> Arc<KatalystEngine> {
-        Arc::new(KatalystEngine {
-            state: Arc::default(),
-            providers: Providers::default(),
-        })
-    }
-}
-
-impl Katalyst for Arc<KatalystEngine> {
-    fn update_state(&self, new_state: Gateway) {
+    /// Update the running configuration of the API Gateway.
+    pub fn update_state(&self, new_state: Gateway) {
         let mut state = self.state.write().unwrap();
         *state = Option::Some(new_state);
     }
 
-    fn get_state(&self) -> Gateway {
+    /// Get a copy of the currently running API Gateway configuration.
+    /// Will panic if the configuration has not yet been loaded.
+    pub fn get_state(&self) -> Result<Gateway, &'static str> {
         let state = self.state.read().unwrap();
-        match (*state).clone() {
-            Some(val) => val,
-            None => panic!("Attempted to access state but configuration has not been loaded yet!"),
+        match state.clone() {
+            Some(val) => Ok(val),
+            None => Err("Attempted to access state but configuration has not been loaded yet!"),
         }
-    }
-
-    fn load(&self, config_file: &str) {
-        let mut config = parsers::parse_file(config_file);
-        self.update_state(config.build(&self.providers));
-    }
-
-    fn run(&self) {
-        service::run_service(self.clone());
     }
 }
 
-pub trait Katalyst {
-    /// Update the running configuration of the API Gateway.
-    fn update_state(&self, new_state: Gateway);
+pub struct Katalyst {
+    engine: Arc<KatalystEngine>,
+}
 
-    /// Get a copy of the currently running API Gateway configuration.
-    /// Will panic if the configuration has not yet been loaded.
-    fn get_state(&self) -> Gateway;
+impl Katalyst {
+    pub fn engine(&self) -> Arc<KatalystEngine> {
+        self.engine.clone()
+    }
 
     /// Load a configuration file
-    fn load(&self, config_file: &str);
+    pub fn load(&self, config_file: &str) {
+        let mut config = parsers::parse_file(config_file);
+        self.engine
+            .update_state(config.build(&self.engine.providers));
+    }
 
     /// Start the API Gateway
-    fn run(&self);
+    pub fn run(&self) {
+        service::run_service(self.engine.clone());
+    }
+}
+
+impl Default for Katalyst {
+    fn default() -> Self {
+        Katalyst {
+            engine: Arc::new(KatalystEngine {
+                state: Arc::default(),
+                providers: Providers::default(),
+            }),
+        }
+    }
 }
