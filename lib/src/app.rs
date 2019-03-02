@@ -1,5 +1,6 @@
 use crate::config::parsers;
 use crate::config::Gateway;
+use crate::error::*;
 use crate::service;
 use crate::templates::Providers;
 use std::sync::Arc;
@@ -13,18 +14,18 @@ pub struct KatalystEngine {
 
 impl KatalystEngine {
     /// Update the running configuration of the API Gateway.
-    pub fn update_state(&self, new_state: Gateway) {
-        let mut state = self.state.write().unwrap();
+    pub fn update_state(&self, new_state: Gateway) -> Result<(), KatalystError> {
+        let mut state = self.state.write()?;
         *state = Option::Some(new_state);
+        Ok(())
     }
 
     /// Get a copy of the currently running API Gateway configuration.
-    /// Will panic if the configuration has not yet been loaded.
-    pub fn get_state(&self) -> Result<Gateway, &'static str> {
-        let state = self.state.read().unwrap();
+    pub fn get_state(&self) -> Result<Gateway, KatalystError> {
+        let state = self.state.read()?;
         match state.clone() {
-            Some(val) => Ok(val),
-            None => Err("Attempted to access state but configuration has not been loaded yet!"),
+            Some(s) => Ok(s),
+            None => Err(KatalystError::StateUnavailable),
         }
     }
 }
@@ -39,10 +40,11 @@ impl Katalyst {
     }
 
     /// Load a configuration file
-    pub fn load(&self, config_file: &str) {
+    pub fn load(&self, config_file: &str) -> Result<(), KatalystError> {
         let mut config = parsers::parse_file(config_file);
         self.engine
-            .update_state(config.build(&self.engine.providers));
+            .update_state(config.build(&self.engine.providers))?;
+        Ok(())
     }
 
     /// Start the API Gateway

@@ -7,12 +7,14 @@ extern crate lazy_static;
 //Load mods
 mod app;
 mod config;
+mod error;
 mod pipeline;
 mod service;
 mod templates;
 
 //Expose consumable APIs
 pub use app::Katalyst;
+pub use error::KatalystError;
 pub use templates::KatalystTemplatePlaceholder;
 pub use templates::KatalystTemplateProvider;
 pub use templates::Providers;
@@ -21,7 +23,7 @@ pub use templates::Providers;
 /// config_file must be the path (relative or absolute) to a YAML or JSON configuration file.
 pub fn start_katalyst(config_file: &str) -> Katalyst {
     let app = Katalyst::default();
-    app.load(config_file);
+    app.load(config_file).unwrap();
     app.run();
     app
 }
