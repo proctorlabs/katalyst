@@ -1,3 +1,5 @@
+mod forwarding_headers;
+
 use super::*;
 use crate::config::Gateway;
 use http::header::HeaderValue;
@@ -31,6 +33,7 @@ impl Pipeline for Builder {
         parts
             .headers
             .append("NewHeader", HeaderValue::from_str("Added").unwrap());
+        parts = forwarding_headers::add_forwarding_headers(parts);
         let client_req = Request::from_parts(parts, body);
 
         state.upstream_request = Request::default();

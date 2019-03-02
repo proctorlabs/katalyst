@@ -2,7 +2,7 @@ use crate::config::Gateway;
 use crate::pipeline::PipelineState;
 
 /// This is the trait used by Katalyst for building the placeholders used in a downstream URL template
-pub trait KatalystTemplateProvider {
+pub trait KatalystTemplateProvider: Send + Sync {
     /// The identifier in this template to locate that this provider should be used
     fn identifier(&self) -> &'static str;
     /// Construct a new KatalystTemplatePlaceholder to use in this config.
