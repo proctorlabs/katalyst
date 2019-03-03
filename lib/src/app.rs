@@ -50,8 +50,9 @@ impl Katalyst {
 
     /// Start the API Gateway
     #[inline]
-    pub fn run(&self) {
-        service::run_service(self.engine.clone());
+    pub fn run(&self) -> Result<(), KatalystError> {
+        service::run_service(self.engine.clone())?;
+        Ok(())
     }
 }
 
