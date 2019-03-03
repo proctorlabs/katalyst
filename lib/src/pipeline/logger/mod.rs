@@ -9,7 +9,7 @@ impl Pipeline for Logger {
         "logger"
     }
 
-    fn process(&self, mut state: PipelineState, _config: &Gateway,) -> PipelineResult {
+    fn process(&self, mut state: PipelineState, _config: &Gateway) -> PipelineResult {
         state
             .timestamps
             .insert("started".to_string(), Instant::now());
@@ -24,8 +24,8 @@ impl Pipeline for Logger {
         debug!("Request processed in {:?}ms", total_ms);
     }
 
-    fn error(&self, state: &PipelineState) {
-        self.post(state);
+    fn error(&self, _: &PipelineError) {
+        warn!("Pipeline processing failed!");
     }
 
     fn make(&self) -> Box<Pipeline + Send + Sync> {

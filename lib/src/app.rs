@@ -35,6 +35,7 @@ pub struct Katalyst {
 }
 
 impl Katalyst {
+    #[inline]
     pub fn engine(&self) -> Arc<KatalystEngine> {
         self.engine.clone()
     }
@@ -48,6 +49,7 @@ impl Katalyst {
     }
 
     /// Start the API Gateway
+    #[inline]
     pub fn run(&self) {
         service::run_service(self.engine.clone());
     }

@@ -14,6 +14,7 @@ use sender::Sender;
 use std::collections::HashMap;
 use std::error;
 use std::fmt;
+use std::sync::Arc;
 use std::time::Instant;
 
 pub struct PipelineState {
@@ -78,7 +79,7 @@ pub trait Pipeline: Send + Sync {
 
     fn post(&self, _state: &PipelineState) {}
 
-    fn error(&self, _state: &PipelineState) {}
+    fn error(&self, _state: &PipelineError) {}
 
     fn make(&self) -> Box<Pipeline + Send + Sync>;
 
@@ -103,33 +104,47 @@ pub trait Pipeline: Send + Sync {
 }
 
 pub struct PipelineRunner {
-    pipelines: Vec<Box<Pipeline + Send + Sync>>,
+    pipelines: Arc<[Arc<Pipeline + Send + Sync>]>,
 }
 
 impl PipelineRunner {
     pub fn new() -> Self {
-        let pipelines: Vec<Box<Pipeline + Send + Sync>> = vec![
-            Box::new(Logger {}),
-            Box::new(Matcher {}),
-            Box::new(Builder {}),
-            Box::new(Sender {}),
-        ];
+        let pipelines: Arc<[Arc<Pipeline + Send + Sync>]> = Arc::new([
+            Arc::new(Logger {}),
+            Arc::new(Matcher {}),
+            Arc::new(Builder {}),
+            Arc::new(Sender {}),
+        ]);
         PipelineRunner {
             pipelines: pipelines,
         }
     }
 
-    pub fn run(&self, request: Request<Body>, config: &Gateway) -> HyperResult {
+    pub fn run(&self, request: Request<Body>, inc_config: &Gateway) -> HyperResult {
+        let config = Arc::new(inc_config.clone());
         let mut result: Box<Future<Item = PipelineState, Error = PipelineError> + Send> =
             Box::new(lazy(|| {
                 ok::<PipelineState, PipelineError>(PipelineState::new(request))
             }));
-        let mut pipelines: Vec<Box<Pipeline + Send + Sync>> =
-            self.pipelines.iter().map(|p| p.make()).collect();
-        while !pipelines.is_empty() {
-            let runner = pipelines.remove(0);
-            let c = config.clone(); //TODO: This is inefficient
+        for pip in self.pipelines.iter() {
+            let c = config.clone();
+            let runner = pip.clone();
             result = Box::new(result.and_then(move |s| runner.process(s, &c)));
+        }
+        for pip in self.pipelines.iter().rev() {
+            let post = pip.clone();
+            let err = pip.clone();
+            result = Box::new(
+                result
+                    .map(move |s| {
+                        post.post(&s);
+                        s
+                    })
+                    .map_err(move |e| {
+                        err.error(&e);
+                        e
+                    }),
+            )
         }
         Box::new(result.then(|s| match s {
             Ok(res) => ok::<Response<Body>, hyper::Error>(res.upstream_response),

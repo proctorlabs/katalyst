@@ -19,7 +19,7 @@ require completion before being ready for production.
 - Appliance mode
     - Specify configuration file on argv
     - Specify configuration file with env
-- Post-error and post-success pipeline hooks working
+- ~~Post-error and post-success pipeline hooks working~~
 - Cleaner upstream path definitions
 - SSL/TLS Client
 
