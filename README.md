@@ -15,7 +15,7 @@ require completion before being ready for production.
     - Ability to modify downstream headers
 - Modular authentication
 - Modular authorization
-- Benchmarking suite through docker compose
+- ~~Benchmarking suite through docker compose~~
 - Appliance mode
     - Specify configuration file on argv
     - Specify configuration file with env

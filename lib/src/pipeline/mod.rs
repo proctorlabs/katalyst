@@ -7,7 +7,9 @@ use crate::config::{Gateway, Route};
 use builder::Builder;
 use futures::future::*;
 use futures::Future;
-use hyper::{Body, Request, Response, StatusCode};
+use hyper::client::connect::dns::TokioThreadpoolGaiResolver;
+use hyper::client::HttpConnector;
+use hyper::{Body, Client, Request, Response, StatusCode};
 use logger::Logger;
 use matcher::Matcher;
 use sender::Sender;
@@ -27,10 +29,14 @@ pub struct PipelineState {
     pub finished: bool,
     pub hyper_error: Option<hyper::Error>,
     pub captures: Option<HashMap<String, String>>,
+    pub client: Client<HttpConnector<TokioThreadpoolGaiResolver>, Body>,
 }
 
 impl PipelineState {
-    fn new(request: Request<Body>) -> Self {
+    fn new(
+        request: Request<Body>,
+        client: Client<HttpConnector<TokioThreadpoolGaiResolver>, Body>,
+    ) -> Self {
         PipelineState {
             upstream_request: request,
             upstream_response: Response::default(),
@@ -41,6 +47,7 @@ impl PipelineState {
             finished: false,
             hyper_error: None,
             captures: None,
+            client: client,
         }
     }
 
@@ -87,11 +94,11 @@ pub trait Pipeline: Send + Sync {
         Box::new(
             ok::<PipelineState, PipelineError>(state).then(|s| match &s {
                 Ok(_) => {
-                    println!("post");
+                    //println!("post");
                     s
                 }
                 Err(_) => {
-                    println!("error");
+                    //println!("error");
                     s
                 }
             }),
@@ -105,6 +112,7 @@ pub trait Pipeline: Send + Sync {
 
 pub struct PipelineRunner {
     pipelines: Arc<[Arc<Pipeline + Send + Sync>]>,
+    client: Client<HttpConnector<TokioThreadpoolGaiResolver>, Body>,
 }
 
 impl PipelineRunner {
@@ -115,16 +123,20 @@ impl PipelineRunner {
             Arc::new(Builder {}),
             Arc::new(Sender {}),
         ]);
+        let builder = Client::builder();
+        let client = builder.build(HttpConnector::new_with_tokio_threadpool_resolver());
         PipelineRunner {
             pipelines: pipelines,
+            client: client,
         }
     }
 
     pub fn run(&self, request: Request<Body>, inc_config: &Gateway) -> HyperResult {
         let config = Arc::new(inc_config.clone());
+        let client = self.client.clone();
         let mut result: Box<Future<Item = PipelineState, Error = PipelineError> + Send> =
-            Box::new(lazy(|| {
-                ok::<PipelineState, PipelineError>(PipelineState::new(request))
+            Box::new(lazy(move || {
+                ok::<PipelineState, PipelineError>(PipelineState::new(request, client))
             }));
         for pip in self.pipelines.iter() {
             let c = config.clone();

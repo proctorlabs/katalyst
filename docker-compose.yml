@@ -1,0 +1,24 @@
+version: "3"
+services:
+  nginx:
+    image: nginx
+    ports:
+      - 9999:80
+    volumes:
+      - "./util/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro"
+    logging:
+      driver: none
+  katalyst:
+    build: "."
+    links:
+      - "nginx:web"
+    volumes:
+      - "./util/benchmark/katalyst.yml:/katalyst.yml:ro"
+    logging:
+      driver: none
+  load-test:
+    image: nickgrealy/fasthttploader
+    command: http://katalyst:8000/test/333
+    links:
+      - "nginx:nginx"
+      - "katalyst:katalyst"

@@ -10,10 +10,9 @@ RUN mkdir lib/src && mkdir app/src && touch lib/src/lib.rs && touch app/src/main
 #Now we add the actual source and build the app/library itself
 ADD lib/src lib/src
 ADD app/src app/src
-ADD config.yml .
 RUN rm -rf target/release/deps/libkatalyst* && cargo build --release
 
 #Install into target container
 FROM debian:stable-slim
-COPY --from=builder ["target/release/katalyst-app", "config.yml", "./"]
+COPY --from=builder ["target/release/katalyst-app", "./"]
 ENTRYPOINT [ "./katalyst-app" ]
