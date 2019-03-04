@@ -9,7 +9,7 @@ services:
     logging:
       driver: none
   katalyst:
-    build: "."
+    build: "../../."
     links:
       - "nginx:web"
     volumes:
