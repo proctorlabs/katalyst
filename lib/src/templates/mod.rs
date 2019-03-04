@@ -7,23 +7,25 @@ use std::collections::HashMap;
 pub use template_traits::KatalystTemplatePlaceholder;
 pub use template_traits::KatalystTemplateProvider;
 
+const METHOD: &str = r"\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*";
+const TEMPLATE: &str = r"\{\{\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*}}";
+
 lazy_static! {
-    static ref TEMPLATE_PATTERN: Regex =
-        Regex::new(r"\{\{\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*}}").unwrap();
+    static ref TEMPLATE_MATCHER: Regex = Regex::new(TEMPLATE).unwrap();
+    static ref METHOD_MATCHER: Regex = Regex::new(METHOD).unwrap();
 }
 
 pub struct Providers {
-    providers: HashMap<&'static str, Box<KatalystTemplateProvider + Send>>,
+    providers: HashMap<&'static str, Box<KatalystTemplateProvider>>,
 }
 
 impl Providers {
-    pub fn build_placeholder(&self, placeholder_text: String) -> Box<KatalystTemplatePlaceholder> {
-        match TEMPLATE_PATTERN.captures(&placeholder_text) {
+    pub fn from_template(&self, placeholder_text: String) -> Box<KatalystTemplatePlaceholder> {
+        match TEMPLATE_MATCHER.captures(&placeholder_text) {
             Some(cap) => {
                 let key = &cap[1];
                 let val = &cap[2];
-                let provider = self.providers.get(key);
-                match provider {
+                match self.providers.get(key) {
                     Some(p) => p.build_placeholder(val.to_string()),
                     None => Box::new(placeholder_text),
                 }
@@ -32,7 +34,21 @@ impl Providers {
         }
     }
 
-    pub fn register(&mut self, provider: Box<KatalystTemplateProvider + Send>) {
+    pub fn from_method(&self, placeholder_text: String) -> Box<KatalystTemplatePlaceholder> {
+        match METHOD_MATCHER.captures(&placeholder_text) {
+            Some(cap) => {
+                let key = &cap[1];
+                let val = &cap[2];
+                match self.providers.get(key) {
+                    Some(p) => p.build_placeholder(val.to_string()),
+                    None => Box::new(placeholder_text),
+                }
+            }
+            None => Box::new(placeholder_text),
+        }
+    }
+
+    pub fn register(&mut self, provider: Box<KatalystTemplateProvider>) {
         self.providers.insert(provider.identifier(), provider);
     }
 
@@ -44,9 +60,9 @@ impl Providers {
 
     pub fn process_template(&self, template: &str) -> Vec<Box<KatalystTemplatePlaceholder>> {
         let mut result_placeholders: Vec<Box<KatalystTemplatePlaceholder>> = vec![];
-        if TEMPLATE_PATTERN.is_match(template) {
+        if TEMPLATE_MATCHER.is_match(template) {
             let mut last_segment_index = 0;
-            for cap in TEMPLATE_PATTERN.find_iter(template) {
+            for cap in TEMPLATE_MATCHER.find_iter(template) {
                 if cap.start() > last_segment_index {
                     let offset = cap.start() - last_segment_index;
                     let segment: String = template
@@ -56,7 +72,7 @@ impl Providers {
                         .collect();
                     result_placeholders.push(Box::new(segment));
                 }
-                result_placeholders.push(self.build_placeholder(cap.as_str().to_owned()));
+                result_placeholders.push(self.from_template(cap.as_str().to_owned()));
                 last_segment_index = cap.end();
             }
             if last_segment_index < template.len() {

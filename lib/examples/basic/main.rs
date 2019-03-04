@@ -19,5 +19,5 @@ fn main() {
     let path_buf = config_path().expect("Couldn't create path");
     let path = path_buf.to_string_lossy();
     info!("Loading file from {}", &path);
-    katalyst::start_katalyst(&path);
+    katalyst::start_katalyst(&path).unwrap();
 }

@@ -7,6 +7,7 @@ use std::sync::Arc;
 use std::sync::RwLock;
 
 /// This is the API Gateway container
+#[derive(Default)]
 pub struct KatalystEngine {
     state: Arc<RwLock<Option<Gateway>>>,
     providers: Providers,
@@ -30,6 +31,7 @@ impl KatalystEngine {
     }
 }
 
+#[derive(Default)]
 pub struct Katalyst {
     engine: Arc<KatalystEngine>,
 }
@@ -53,16 +55,5 @@ impl Katalyst {
     pub fn run(&self) -> Result<(), KatalystError> {
         service::run_service(self.engine.clone())?;
         Ok(())
-    }
-}
-
-impl Default for Katalyst {
-    fn default() -> Self {
-        Katalyst {
-            engine: Arc::new(KatalystEngine {
-                state: Arc::default(),
-                providers: Providers::default(),
-            }),
-        }
     }
 }

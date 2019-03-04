@@ -6,7 +6,7 @@ use std::cell::RefCell;
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct ListenerBuilder {
-    interface: RefCell<Option<String>>,
+    pub interface: RefCell<Option<String>>,
 }
 
 impl<'a> ListenerBuilder {
