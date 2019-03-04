@@ -13,6 +13,8 @@ require completion before being ready for production.
 - Additional downstream transforms
     - To downstream URL: Headers, Remote IP, JSON Path, pseudo-methods
     - Ability to modify downstream headers
+- ~~Proxy forwarding headers~~
+    - ~~Strip hop-to-hop headers~~
 - Modular authentication
 - Modular authorization
 - ~~Benchmarking suite through docker compose~~

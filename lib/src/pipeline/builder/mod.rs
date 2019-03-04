@@ -1,8 +1,8 @@
 mod forwarding_headers;
+mod hop_headers;
 
 use super::*;
 use crate::config::Gateway;
-use http::header::HeaderValue;
 use hyper::Request;
 
 pub struct Builder {}
@@ -30,10 +30,8 @@ impl Pipeline for Builder {
         let (mut parts, body) = state.upstream_request.into_parts();
         debug!("Routing request to {}", path);
         parts.uri = path.parse().unwrap();
-        parts
-            .headers
-            .append("NewHeader", HeaderValue::from_str("Added").unwrap());
-        parts = forwarding_headers::add_forwarding_headers(parts);
+        parts = forwarding_headers::add_forwarding_headers(parts, state.remote_addr);
+        parts = hop_headers::strip_hop_headers(parts);
         let client_req = Request::from_parts(parts, body);
 
         state.upstream_request = Request::default();

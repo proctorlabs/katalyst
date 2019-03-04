@@ -16,6 +16,7 @@ use sender::Sender;
 use std::collections::HashMap;
 use std::error;
 use std::fmt;
+use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Instant;
 
@@ -30,12 +31,14 @@ pub struct PipelineState {
     pub hyper_error: Option<hyper::Error>,
     pub captures: Option<HashMap<String, String>>,
     pub client: Client<HttpConnector<TokioThreadpoolGaiResolver>, Body>,
+    pub remote_addr: SocketAddr,
 }
 
 impl PipelineState {
     fn new(
         request: Request<Body>,
         client: Client<HttpConnector<TokioThreadpoolGaiResolver>, Body>,
+        remote: SocketAddr,
     ) -> Self {
         PipelineState {
             upstream_request: request,
@@ -48,6 +51,7 @@ impl PipelineState {
             hyper_error: None,
             captures: None,
             client: client,
+            remote_addr: remote,
         }
     }
 
@@ -131,12 +135,17 @@ impl PipelineRunner {
         }
     }
 
-    pub fn run(&self, request: Request<Body>, inc_config: &Gateway) -> HyperResult {
+    pub fn run(
+        &self,
+        remote_addr: SocketAddr,
+        request: Request<Body>,
+        inc_config: &Gateway,
+    ) -> HyperResult {
         let config = Arc::new(inc_config.clone());
         let client = self.client.clone();
         let mut result: Box<Future<Item = PipelineState, Error = PipelineError> + Send> =
             Box::new(lazy(move || {
-                ok::<PipelineState, PipelineError>(PipelineState::new(request, client))
+                ok::<PipelineState, PipelineError>(PipelineState::new(request, client, remote_addr))
             }));
         for pip in self.pipelines.iter() {
             let c = config.clone();
