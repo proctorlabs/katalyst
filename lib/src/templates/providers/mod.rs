@@ -1,4 +1,6 @@
 mod env_provider;
+mod header_provider;
+mod http_provider;
 mod regex_provider;
 
 use crate::config::Gateway;
@@ -6,7 +8,9 @@ use crate::pipeline::PipelineState;
 use crate::templates::KatalystTemplatePlaceholder;
 
 pub use env_provider::EnvTemplateProvider;
+pub use header_provider::HeaderTemplateProvider;
 pub use regex_provider::RegexTemplateProvider;
+pub use http_provider::HttpTemplateProvider;
 
 struct PrecomputedPlaceholder {
     result: String,

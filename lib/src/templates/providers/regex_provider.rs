@@ -19,18 +19,14 @@ struct RegexTemplatePlaceholder {
     val: String,
 }
 
-lazy_static! {
-    static ref SREF: String = String::default();
-}
-
 impl KatalystTemplatePlaceholder for RegexTemplatePlaceholder {
     fn get_value(&self, state: &PipelineState, _config: &Gateway) -> String {
         match &state.captures {
             Some(caps) => {
-                let res = caps.get(&self.val).unwrap_or(&SREF);
+                let res = caps.get(&self.val).unwrap_or(self.none());
                 String::from_str(res).unwrap().to_string()
             }
-            None => SREF.to_string(),
+            None => self.none().to_string(),
         }
     }
 

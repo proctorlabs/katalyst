@@ -96,6 +96,8 @@ impl Default for Providers {
         let mut providers = Providers::empty();
         providers.register(Box::new(EnvTemplateProvider {}));
         providers.register(Box::new(RegexTemplateProvider {}));
+        providers.register(Box::new(HeaderTemplateProvider {}));
+        providers.register(Box::new(HttpTemplateProvider {}));
         providers
     }
 }

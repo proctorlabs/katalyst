@@ -10,6 +10,10 @@ pub trait KatalystTemplateProvider: Send + Sync {
     fn build_placeholder(&self, value: String) -> Box<KatalystTemplatePlaceholder>;
 }
 
+lazy_static! {
+    static ref DEF_STRING: String = String::default();
+}
+
 /// This provides the actual value replacement used in the downstream URL template
 pub trait KatalystTemplatePlaceholder: Sync + Send {
     /// Returns the string value that should be used as a replacement for this Placeholder in the pipeline context
@@ -17,6 +21,11 @@ pub trait KatalystTemplatePlaceholder: Sync + Send {
 
     /// Creates a boxed duplicate of this placeholder
     fn duplicate(&self) -> Box<KatalystTemplatePlaceholder>;
+
+    /// Returned when no match is found for placeholder
+    fn none(&self) -> &String {
+        &DEF_STRING
+    }
 }
 
 impl KatalystTemplatePlaceholder for String {
