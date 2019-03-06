@@ -27,8 +27,6 @@ pub struct PipelineState {
     pub downstream_response: Option<Response<Body>>,
     pub timestamps: HashMap<String, Instant>,
     pub matched_route: Box<Option<Route>>,
-    pub finished: bool,
-    pub hyper_error: Option<hyper::Error>,
     pub captures: Option<HashMap<String, String>>,
     pub client: Client<HttpConnector<TokioThreadpoolGaiResolver>, Body>,
     pub remote_addr: SocketAddr,
@@ -47,8 +45,6 @@ impl PipelineState {
             downstream_response: None,
             matched_route: Box::new(None),
             timestamps: HashMap::new(),
-            finished: false,
-            hyper_error: None,
             captures: None,
             client: client,
             remote_addr: remote,
@@ -58,7 +54,6 @@ impl PipelineState {
     fn return_status(&mut self, status: StatusCode) {
         let mut response = Response::new(Body::empty());
         *response.status_mut() = status;
-        self.finished = true;
         self.upstream_response = response;
     }
 }

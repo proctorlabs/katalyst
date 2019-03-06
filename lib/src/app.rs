@@ -1,15 +1,26 @@
 use crate::config::parsers;
 use crate::config::Gateway;
 use crate::error::*;
+use crate::loc::Locator;
 use crate::templates::Providers;
 use std::sync::Arc;
 use std::sync::RwLock;
 
 /// This is the API Gateway container
-#[derive(Default)]
 pub struct KatalystEngine {
     state: Arc<RwLock<Option<Gateway>>>,
-    providers: Providers,
+    locator: Locator,
+}
+
+impl Default for KatalystEngine {
+    fn default() -> Self {
+        let mut result = KatalystEngine {
+            state: Arc::default(),
+            locator: Locator::default(),
+        };
+        result.locator.register(Providers::default());
+        result
+    }
 }
 
 impl KatalystEngine {
@@ -44,8 +55,8 @@ impl Katalyst {
     /// Load a configuration file
     pub fn load(&self, config_file: &str) -> Result<(), KatalystError> {
         let mut config = parsers::parse_file(config_file);
-        self.engine
-            .update_state(config.build(&self.engine.providers))?;
+        let providers = &self.engine.locator.locate::<Providers>().unwrap();
+        self.engine.update_state(config.build(&providers))?;
         Ok(())
     }
 

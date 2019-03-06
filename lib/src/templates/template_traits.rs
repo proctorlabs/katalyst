@@ -15,7 +15,7 @@ lazy_static! {
 }
 
 /// This provides the actual value replacement used in the downstream URL template
-pub trait KatalystTemplatePlaceholder: Sync + Send {
+pub trait KatalystTemplatePlaceholder: Send + Sync {
     /// Returns the string value that should be used as a replacement for this Placeholder in the pipeline context
     fn get_value(&self, state: &PipelineState, config: &Gateway) -> String;
 

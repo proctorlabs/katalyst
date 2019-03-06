@@ -15,6 +15,7 @@ impl KatalystTemplateProvider for RegexTemplateProvider {
     }
 }
 
+#[derive(Debug)]
 struct RegexTemplatePlaceholder {
     val: String,
 }

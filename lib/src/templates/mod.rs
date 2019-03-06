@@ -102,6 +102,8 @@ impl Default for Providers {
     }
 }
 
+impl crate::loc::Locatable for Providers {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
