@@ -27,8 +27,9 @@ impl KatalystTemplatePlaceholder for HeaderTemplatePlaceholder {
     }
 
     fn duplicate(&self) -> Box<KatalystTemplatePlaceholder> {
-        Box::new(HeaderTemplatePlaceholder {
+        HeaderTemplatePlaceholder {
             header: self.header.to_owned(),
-        })
+        }
+        .boxed()
     }
 }

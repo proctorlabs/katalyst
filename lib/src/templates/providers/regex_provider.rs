@@ -23,7 +23,7 @@ impl KatalystTemplatePlaceholder for RegexTemplatePlaceholder {
     fn get_value(&self, state: &PipelineState, _config: &Gateway) -> String {
         match &state.captures {
             Some(caps) => {
-                let res = caps.get(&self.val).unwrap_or(self.none());
+                let res = caps.get(&self.val).unwrap_or_else(|| self.none());
                 String::from_str(res).unwrap().to_string()
             }
             None => self.none().to_string(),
@@ -31,8 +31,9 @@ impl KatalystTemplatePlaceholder for RegexTemplatePlaceholder {
     }
 
     fn duplicate(&self) -> Box<KatalystTemplatePlaceholder> {
-        Box::new(RegexTemplatePlaceholder {
+        RegexTemplatePlaceholder {
             val: self.val.to_owned(),
-        })
+        }
+        .boxed()
     }
 }

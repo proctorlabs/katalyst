@@ -1,7 +1,6 @@
 use crate::config::parsers;
 use crate::config::Gateway;
 use crate::error::*;
-use crate::service;
 use crate::templates::Providers;
 use std::sync::Arc;
 use std::sync::RwLock;
@@ -53,7 +52,7 @@ impl Katalyst {
     /// Start the API Gateway
     #[inline]
     pub fn run(&self) -> Result<(), KatalystError> {
-        service::run_service(self.engine.clone())?;
+        self.run_service()?;
         Ok(())
     }
 }

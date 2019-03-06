@@ -20,7 +20,7 @@ pub struct Providers {
 }
 
 impl Providers {
-    pub fn from_template(&self, placeholder_text: String) -> Box<KatalystTemplatePlaceholder> {
+    pub fn get_from_template(&self, placeholder_text: String) -> Box<KatalystTemplatePlaceholder> {
         match TEMPLATE_MATCHER.captures(&placeholder_text) {
             Some(cap) => {
                 let key = &cap[1];
@@ -34,7 +34,7 @@ impl Providers {
         }
     }
 
-    pub fn from_method(&self, placeholder_text: String) -> Box<KatalystTemplatePlaceholder> {
+    pub fn get_from_method(&self, placeholder_text: String) -> Box<KatalystTemplatePlaceholder> {
         match METHOD_MATCHER.captures(&placeholder_text) {
             Some(cap) => {
                 let key = &cap[1];
@@ -72,7 +72,7 @@ impl Providers {
                         .collect();
                     result_placeholders.push(Box::new(segment));
                 }
-                result_placeholders.push(self.from_template(cap.as_str().to_owned()));
+                result_placeholders.push(self.get_from_template(cap.as_str().to_owned()));
                 last_segment_index = cap.end();
             }
             if last_segment_index < template.len() {

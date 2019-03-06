@@ -11,10 +11,10 @@ impl KatalystTemplateProvider for HttpTemplateProvider {
 
     fn build_placeholder(&self, value: String) -> Box<KatalystTemplatePlaceholder> {
         match value.as_str() {
-            "method" => HttpMethodTemplatePlaceholder {}.duplicate(),
-            "ip" => HttpIPTemplatePlaceholder {}.duplicate(),
-            "path" => HttpUriTemplatePlaceholder {}.duplicate(),
-            &_ => HttpMethodTemplatePlaceholder {}.duplicate(),
+            "method" => HttpMethodTemplatePlaceholder {}.boxed(),
+            "ip" => HttpIPTemplatePlaceholder {}.boxed(),
+            "path" => HttpUriTemplatePlaceholder {}.boxed(),
+            &_ => HttpMethodTemplatePlaceholder {}.boxed(),
         }
     }
 }
@@ -30,7 +30,7 @@ impl KatalystTemplatePlaceholder for HttpMethodTemplatePlaceholder {
     }
 
     fn duplicate(&self) -> Box<KatalystTemplatePlaceholder> {
-        Box::new(HttpMethodTemplatePlaceholder {})
+        HttpMethodTemplatePlaceholder {}.boxed()
     }
 }
 
@@ -40,7 +40,7 @@ impl KatalystTemplatePlaceholder for HttpIPTemplatePlaceholder {
     }
 
     fn duplicate(&self) -> Box<KatalystTemplatePlaceholder> {
-        Box::new(HttpIPTemplatePlaceholder {})
+        HttpIPTemplatePlaceholder {}.boxed()
     }
 }
 
@@ -50,7 +50,7 @@ impl KatalystTemplatePlaceholder for HttpUriTemplatePlaceholder {
     }
 
     fn duplicate(&self) -> Box<KatalystTemplatePlaceholder> {
-        Box::new(HttpUriTemplatePlaceholder {})
+        HttpUriTemplatePlaceholder {}.boxed()
     }
 }
 
@@ -65,6 +65,6 @@ impl KatalystTemplatePlaceholder for HttpQueryTemplatePlaceholder {
     }
 
     fn duplicate(&self) -> Box<KatalystTemplatePlaceholder> {
-        Box::new(HttpQueryTemplatePlaceholder {})
+        HttpQueryTemplatePlaceholder {}.boxed()
     }
 }

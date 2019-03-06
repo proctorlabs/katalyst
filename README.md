@@ -24,6 +24,7 @@ require completion before being ready for production.
 - ~~Post-error and post-success pipeline hooks working~~
 - Cleaner upstream path definitions
 - SSL/TLS Client
+- Load balancing
 
 ### Future Enhancements
 

@@ -9,8 +9,8 @@ use crate::templates::KatalystTemplatePlaceholder;
 
 pub use env_provider::EnvTemplateProvider;
 pub use header_provider::HeaderTemplateProvider;
-pub use regex_provider::RegexTemplateProvider;
 pub use http_provider::HttpTemplateProvider;
+pub use regex_provider::RegexTemplateProvider;
 
 struct PrecomputedPlaceholder {
     result: String,
@@ -30,8 +30,9 @@ impl KatalystTemplatePlaceholder for PrecomputedPlaceholder {
     }
 
     fn duplicate(&self) -> Box<KatalystTemplatePlaceholder> {
-        Box::new(PrecomputedPlaceholder {
+        PrecomputedPlaceholder {
             result: self.result.to_owned(),
-        })
+        }
+        .boxed()
     }
 }

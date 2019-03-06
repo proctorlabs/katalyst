@@ -26,6 +26,14 @@ pub trait KatalystTemplatePlaceholder: Sync + Send {
     fn none(&self) -> &String {
         &DEF_STRING
     }
+
+    fn boxed(self) -> Box<KatalystTemplatePlaceholder>
+    where
+        Self: std::marker::Sized,
+        Self: 'static,
+    {
+        Box::new(self)
+    }
 }
 
 impl KatalystTemplatePlaceholder for String {
