@@ -2,14 +2,20 @@ use crate::config::parsers;
 use crate::config::Gateway;
 use crate::error::*;
 use crate::loc::Locator;
+use crate::service::EngineService;
 use crate::templates::Providers;
+
+use futures::future::Future;
 use std::sync::Arc;
 use std::sync::RwLock;
+use std::{thread, time};
+use tokio::runtime::Runtime;
 
 /// This is the API Gateway container
 pub struct KatalystEngine {
     state: Arc<RwLock<Option<Gateway>>>,
     locator: Locator,
+    pub rt: RwLock<Runtime>,
 }
 
 impl Default for KatalystEngine {
@@ -17,6 +23,7 @@ impl Default for KatalystEngine {
         let mut result = KatalystEngine {
             state: Arc::default(),
             locator: Locator::default(),
+            rt: RwLock::new(Runtime::new().unwrap()),
         };
         result.locator.register(Providers::default());
         result
@@ -38,6 +45,28 @@ impl KatalystEngine {
             Some(s) => Ok(s),
             None => Err(KatalystError::StateUnavailable),
         }
+    }
+
+    pub fn spawn<F: Future<Item = (), Error = ()> + Send + 'static>(
+        &self,
+        fut: F,
+    ) -> Result<(), KatalystError> {
+        let mut rt = self.rt.write().unwrap();
+        rt.spawn(fut);
+        Ok(())
+    }
+
+    pub fn wait(&self) -> Result<(), KatalystError> {
+        let mut rt = self.rt.write().unwrap();
+        rt.block_on(futures::future::lazy(|| {
+            loop {
+                let block = time::Duration::from_secs(10);
+                thread::sleep(block);
+            }
+            futures::future::ok::<bool, KatalystError>(true)
+        }))
+        .unwrap();
+        Ok(())
     }
 }
 
@@ -62,8 +91,9 @@ impl Katalyst {
 
     /// Start the API Gateway
     #[inline]
-    pub fn run(&self) -> Result<(), KatalystError> {
-        self.run_service()?;
+    pub fn run(&mut self) -> Result<(), KatalystError> {
+        self.engine.run_service()?;
+        self.engine.wait()?;
         Ok(())
     }
 }

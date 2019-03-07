@@ -9,11 +9,16 @@ use crate::app::*;
 use crate::error::*;
 use crate::pipeline::HyperResult;
 use crate::pipeline::PipelineRunner;
+use std::sync::Arc;
 
-impl Katalyst {
-    pub fn run_service(&self) -> Result<(), KatalystError> {
-        let engine = self.engine().clone();
-        let addr: SocketAddr = engine.get_state()?.listener.interface.parse()?;
+pub trait EngineService {
+    fn run_service(&mut self) -> Result<(), KatalystError>;
+}
+
+impl EngineService for Arc<KatalystEngine> {
+    fn run_service(&mut self) -> Result<(), KatalystError> {
+        let engine = self.clone();
+        let addr: SocketAddr = self.get_state()?.listener.interface.parse()?;
         let server = Server::bind(&addr)
             .serve(make_service_fn(move |conn: &AddrStream| {
                 let engine = engine.clone();
@@ -27,7 +32,6 @@ impl Katalyst {
             .map_err(|e| eprintln!("server error: {}", e));
 
         info!("Listening on http://{}", addr);
-        hyper::rt::run(server);
-        Ok(())
+        self.spawn(server)
     }
 }
