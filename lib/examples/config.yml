@@ -3,7 +3,7 @@ routes:
     methods:
       - get
     downstream:
-      base_url: "http://postman-echo.com"
+      base_url: "https://postman-echo.com"
       path: "/get?env_user={{env=>USER}}&regex_cap={{regex=>cap}}&method={{http=>method}}&ip={{http=>ip}}&header={{header=>user-agent}}"
   - pattern: "^/test/post$"
     methods:

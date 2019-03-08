@@ -3,13 +3,12 @@ mod logger;
 mod matcher;
 mod sender;
 
+use crate::app::HttpsClient;
 use crate::config::{Gateway, Route};
 use builder::Builder;
 use futures::future::*;
 use futures::Future;
-use hyper::client::connect::dns::TokioThreadpoolGaiResolver;
-use hyper::client::HttpConnector;
-use hyper::{Body, Client, Request, Response, StatusCode};
+use hyper::{Body, Request, Response, StatusCode};
 use logger::Logger;
 use matcher::Matcher;
 use sender::Sender;
@@ -28,16 +27,12 @@ pub struct PipelineState {
     pub timestamps: HashMap<String, Instant>,
     pub matched_route: Box<Option<Route>>,
     pub captures: Option<HashMap<String, String>>,
-    pub client: Client<HttpConnector<TokioThreadpoolGaiResolver>, Body>,
+    pub client: Arc<HttpsClient>,
     pub remote_addr: SocketAddr,
 }
 
 impl PipelineState {
-    fn new(
-        request: Request<Body>,
-        client: Client<HttpConnector<TokioThreadpoolGaiResolver>, Body>,
-        remote: SocketAddr,
-    ) -> Self {
+    fn new(request: Request<Body>, client: Arc<HttpsClient>, remote: SocketAddr) -> Self {
         PipelineState {
             upstream_request: request,
             upstream_response: Response::default(),
@@ -89,6 +84,10 @@ pub trait Pipeline: Send + Sync {
 
     fn make(&self) -> Box<Pipeline + Send + Sync>;
 
+    fn result(&self, res: Result<PipelineState, PipelineError>) -> PipelineResult {
+        Box::new(result(res))
+    }
+
     fn ok(&self, state: PipelineState) -> PipelineResult {
         Box::new(
             ok::<PipelineState, PipelineError>(state).then(|s| match &s {
@@ -111,19 +110,17 @@ pub trait Pipeline: Send + Sync {
 
 pub struct PipelineRunner {
     pipelines: Arc<[Arc<Pipeline + Send + Sync>]>,
-    client: Client<HttpConnector<TokioThreadpoolGaiResolver>, Body>,
+    client: Arc<HttpsClient>,
 }
 
 impl PipelineRunner {
-    pub fn new() -> Self {
+    pub fn new(client: Arc<HttpsClient>) -> Self {
         let pipelines: Arc<[Arc<Pipeline + Send + Sync>]> = Arc::new([
             Arc::new(Logger {}),
             Arc::new(Matcher {}),
             Arc::new(Builder {}),
             Arc::new(Sender {}),
         ]);
-        let builder = Client::builder();
-        let client = builder.build(HttpConnector::new_with_tokio_threadpool_resolver());
         PipelineRunner {
             pipelines: pipelines,
             client: client,

@@ -1,14 +1,19 @@
 use crate::config::parsers;
 use crate::config::Gateway;
 use crate::error::*;
-use crate::loc::Locator;
+use crate::loc::{Locatable, Locator};
+use crate::pipeline::PipelineRunner;
 use crate::service::EngineService;
 use crate::templates::Providers;
 
 use futures::future::Future;
+use hyper::client::connect::dns::TokioThreadpoolGaiResolver;
+use hyper::client::HttpConnector;
+use hyper::{Body, Client};
+use hyper_rustls::HttpsConnector;
+use rustls::ClientConfig;
 use std::sync::Arc;
 use std::sync::RwLock;
-use std::{thread, time};
 use tokio::runtime::Runtime;
 
 /// This is the API Gateway container
@@ -18,15 +23,29 @@ pub struct KatalystEngine {
     pub rt: RwLock<Runtime>,
 }
 
+pub type HttpsClient = Client<HttpsConnector<HttpConnector<TokioThreadpoolGaiResolver>>, Body>;
+impl Locatable for HttpsClient {}
+impl Locatable for PipelineRunner {}
+
 impl Default for KatalystEngine {
     fn default() -> Self {
-        let mut result = KatalystEngine {
+        let builder = Client::builder();
+        let mut locator = Locator::default();
+        let mut http_connector = HttpConnector::new_with_tokio_threadpool_resolver();
+        http_connector.enforce_http(false);
+        let mut tls = ClientConfig::new();
+        tls.root_store
+            .add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
+
+        locator.register(Providers::default());
+        locator.register::<HttpsClient>(builder.build(HttpsConnector::from((http_connector, tls))));
+        locator.register(PipelineRunner::new(locator.locate().unwrap()));
+
+        KatalystEngine {
             state: Arc::default(),
-            locator: Locator::default(),
+            locator: locator,
             rt: RwLock::new(Runtime::new().unwrap()),
-        };
-        result.locator.register(Providers::default());
-        result
+        }
     }
 }
 
@@ -36,6 +55,10 @@ impl KatalystEngine {
         let mut state = self.state.write()?;
         *state = Option::Some(new_state);
         Ok(())
+    }
+
+    pub fn locate<T: Locatable>(&self) -> Option<Arc<T>> {
+        self.locator.locate::<T>()
     }
 
     /// Get a copy of the currently running API Gateway configuration.
@@ -58,14 +81,7 @@ impl KatalystEngine {
 
     pub fn wait(&self) -> Result<(), KatalystError> {
         let mut rt = self.rt.write().unwrap();
-        rt.block_on(futures::future::lazy(|| {
-            loop {
-                let block = time::Duration::from_secs(10);
-                thread::sleep(block);
-            }
-            futures::future::ok::<bool, KatalystError>(true)
-        }))
-        .unwrap();
+        rt.block_on(futures::empty::<(), KatalystError>())?;
         Ok(())
     }
 }
