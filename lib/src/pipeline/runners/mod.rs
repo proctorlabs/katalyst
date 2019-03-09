@@ -10,11 +10,6 @@ use matcher::Matcher;
 use sender::Sender;
 use std::sync::Arc;
 
-pub fn all() -> Arc<[Arc<Pipeline + Send + Sync>]> {
-    Arc::new([
-        Arc::new(Logger {}),
-        Arc::new(Matcher {}),
-        Arc::new(Builder {}),
-        Arc::new(Sender {}),
-    ])
+pub fn all() -> Arc<[Arc<Pipeline>]> {
+    Arc::new([Logger::arc(), Matcher::arc(), Builder::arc(), Sender::arc()])
 }

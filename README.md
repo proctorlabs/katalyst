@@ -21,7 +21,7 @@ require completion before being ready for production.
     - Specify configuration file with env
 - ~~Post-error and post-success pipeline hooks working~~
 - ~~SSL/TLS Client~~
-- Proper status code/error handling in pipeline
+- ~~Proper status code/error handling in pipeline~~
 
 ### Future Enhancements
 

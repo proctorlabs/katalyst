@@ -2,12 +2,11 @@ mod runners;
 
 use crate::app::HttpsClient;
 use crate::config::{Gateway, Route};
+use crate::error::KatalystError;
 use futures::future::*;
 use futures::Future;
-use hyper::{Body, Request, Response, StatusCode};
+use hyper::{Body, Request, Response};
 use std::collections::HashMap;
-use std::error;
-use std::fmt;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Instant;
@@ -45,71 +44,38 @@ impl PipelineState {
         state.upstream.request = Some(request);
         state
     }
-
-    fn return_status(&mut self, status: StatusCode) {
-        let mut response = Response::new(Body::empty());
-        *response.status_mut() = status;
-        self.upstream.response = Some(response);
-    }
 }
-
-#[derive(Debug)]
-pub enum PipelineError {
-    Halted,
-    Failed,
-}
-
-impl fmt::Display for PipelineError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self)
-    }
-}
-
-impl error::Error for PipelineError {}
 
 pub type HyperResult = Box<Future<Item = Response<Body>, Error = hyper::Error> + Send>;
 
-pub type PipelineResult = Box<Future<Item = PipelineState, Error = PipelineError> + Send>;
+pub type AsyncPipelineResult = Box<Future<Item = PipelineState, Error = KatalystError> + Send>;
+pub type PipelineResult = Result<PipelineState, KatalystError>;
 
 pub trait Pipeline: Send + Sync {
     fn name(&self) -> &'static str;
 
-    fn process(&self, state: PipelineState, _config: &Gateway) -> PipelineResult {
-        self.ok(state)
+    fn process(&self, state: PipelineState, config: &Gateway) -> AsyncPipelineResult {
+        Box::new(result(self.process_result(state, config)))
+    }
+
+    fn process_result(&self, _state: PipelineState, _config: &Gateway) -> PipelineResult {
+        Err(KatalystError::Unavailable)
     }
 
     fn post(&self, _state: &PipelineState) {}
 
-    fn error(&self, _state: &PipelineError) {}
+    fn error(&self, _state: &KatalystError) {}
 
-    fn make(&self) -> Box<Pipeline + Send + Sync>;
-
-    fn result(&self, res: Result<PipelineState, PipelineError>) -> PipelineResult {
-        Box::new(result(res))
-    }
-
-    fn ok(&self, state: PipelineState) -> PipelineResult {
-        Box::new(
-            ok::<PipelineState, PipelineError>(state).then(|s| match &s {
-                Ok(_) => {
-                    //println!("post");
-                    s
-                }
-                Err(_) => {
-                    //println!("error");
-                    s
-                }
-            }),
-        )
-    }
-
-    fn fail(&self, error: PipelineError) -> PipelineResult {
-        Box::new(err::<PipelineState, PipelineError>(error))
+    fn arc() -> Arc<Pipeline>
+    where
+        Self: 'static + Sized + Default,
+    {
+        Arc::new(Self::default())
     }
 }
 
 pub struct PipelineRunner {
-    pipelines: Arc<[Arc<Pipeline + Send + Sync>]>,
+    pipelines: Arc<[Arc<Pipeline>]>,
     client: Arc<HttpsClient>,
 }
 
@@ -129,10 +95,9 @@ impl PipelineRunner {
     ) -> HyperResult {
         let config = Arc::new(inc_config.clone());
         let client = self.client.clone();
-        let mut result: Box<Future<Item = PipelineState, Error = PipelineError> + Send> =
-            Box::new(lazy(move || {
-                ok::<PipelineState, PipelineError>(PipelineState::new(request, client, remote_addr))
-            }));
+        let mut result: AsyncPipelineResult = Box::new(lazy(move || {
+            ok::<PipelineState, KatalystError>(PipelineState::new(request, client, remote_addr))
+        }));
         for pip in self.pipelines.iter() {
             let c = config.clone();
             let runner = pip.clone();
@@ -155,7 +120,11 @@ impl PipelineRunner {
         }
         Box::new(result.then(|s| match s {
             Ok(res) => ok::<Response<Body>, hyper::Error>(res.upstream.response.unwrap()),
-            Err(_) => ok::<Response<Body>, hyper::Error>(Response::default()),
+            Err(e) => ok::<Response<Body>, hyper::Error>({
+                let mut resp = Response::default();
+                *resp.status_mut() = e.status_code();
+                resp
+            }),
         }))
     }
 }

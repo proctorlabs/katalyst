@@ -14,9 +14,11 @@ services:
       - "nginx:web"
     volumes:
       - "./katalyst.yml:/katalyst.yml:ro"
+    logging:
+      driver: none
   load-test:
     image: nickgrealy/fasthttploader
-    command: http://katalyst/
+    command: http://katalyst:8000/
     links:
       - "nginx:nginx"
       - "katalyst:katalyst"

@@ -5,6 +5,7 @@ use crate::config::Gateway;
 use crate::pipeline::*;
 use hyper::Request;
 
+#[derive(Default)]
 pub struct Builder {}
 
 impl Pipeline for Builder {
@@ -12,12 +13,12 @@ impl Pipeline for Builder {
         "builder"
     }
 
-    fn process(&self, mut state: PipelineState, config: &Gateway) -> PipelineResult {
+    fn process_result(&self, mut state: PipelineState, config: &Gateway) -> PipelineResult {
         let state_ref = &state;
         let downstream = match &state_ref.context.matched_route {
             Some(route) => &route.downstream,
             None => {
-                return self.fail(PipelineError::Failed {});
+                return Err(KatalystError::Unavailable);
             }
         };
 
@@ -37,10 +38,6 @@ impl Pipeline for Builder {
         state.upstream.request = None;
         state.downstream.request = Some(client_req);
 
-        self.ok(state)
-    }
-
-    fn make(&self) -> Box<Pipeline + Send + Sync> {
-        Box::new(Builder {})
+        Ok(state)
     }
 }

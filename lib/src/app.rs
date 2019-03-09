@@ -5,7 +5,6 @@ use crate::locator::{Locatable, Locator};
 use crate::pipeline::PipelineRunner;
 use crate::service::EngineService;
 use crate::templates::Providers;
-
 use futures::future::Future;
 use hyper::client::connect::dns::TokioThreadpoolGaiResolver;
 use hyper::client::HttpConnector;

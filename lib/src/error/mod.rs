@@ -1,8 +1,8 @@
-use crate::config::Gateway;
+mod conversions;
+mod status_codes;
+
 use std::error::Error;
 use std::fmt;
-use std::net::AddrParseError;
-use std::sync;
 
 #[derive(Debug)]
 pub enum KatalystError {
@@ -11,6 +11,7 @@ pub enum KatalystError {
     ConfigFailure,
     Unavailable,
     ConfigParseError,
+    NotFound,
 }
 
 impl Error for KatalystError {}
@@ -23,24 +24,7 @@ impl fmt::Display for KatalystError {
             KatalystError::StateUnavailable => write!(f, "State is currently unavailable"),
             KatalystError::Unavailable => write!(f, "Feature unavailable"),
             KatalystError::ConfigParseError => write!(f, "Failed to parse configuration"),
+            KatalystError::NotFound => write!(f, "Not found!"),
         }
-    }
-}
-
-impl From<sync::PoisonError<sync::RwLockWriteGuard<'_, Option<Gateway>>>> for KatalystError {
-    fn from(_: sync::PoisonError<sync::RwLockWriteGuard<Option<Gateway>>>) -> Self {
-        KatalystError::StateUpdateFailure
-    }
-}
-
-impl From<sync::PoisonError<sync::RwLockReadGuard<'_, Option<Gateway>>>> for KatalystError {
-    fn from(_: sync::PoisonError<sync::RwLockReadGuard<Option<Gateway>>>) -> Self {
-        KatalystError::StateUnavailable
-    }
-}
-
-impl From<AddrParseError> for KatalystError {
-    fn from(_: AddrParseError) -> Self {
-        KatalystError::ConfigParseError
     }
 }
