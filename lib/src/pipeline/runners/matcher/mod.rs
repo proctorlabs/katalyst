@@ -8,7 +8,7 @@ impl Pipeline for Matcher {
         "matcher"
     }
 
-    fn process_result(&self, mut state: PipelineState) -> PipelineResult {
+    fn prepare_request(&self, mut state: PipelineState) -> PipelineResult {
         let request = match &state.upstream.request {
             Some(r) => r,
             None => return Err(KatalystError::NotFound),

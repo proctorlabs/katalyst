@@ -11,7 +11,7 @@ impl Pipeline for Sender {
         "sender"
     }
 
-    fn process(&self, mut state: PipelineState) -> AsyncPipelineResult {
+    fn prepare_request_future(&self, mut state: PipelineState) -> AsyncPipelineResult {
         let dsr = match state.downstream.request {
             Some(s) => {
                 state.downstream.request = None;

@@ -11,7 +11,7 @@ impl Pipeline for Builder {
         "builder"
     }
 
-    fn process_result(&self, mut state: PipelineState) -> PipelineResult {
+    fn prepare_request(&self, mut state: PipelineState) -> PipelineResult {
         let state_ref = &state;
         let downstream = match &state_ref.context.matched_route {
             Some(route) => &route.downstream,

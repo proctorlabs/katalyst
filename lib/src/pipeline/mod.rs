@@ -54,17 +54,21 @@ pub type PipelineResult = Result<PipelineState, KatalystError>;
 pub trait Pipeline: Send + Sync {
     fn name(&self) -> &'static str;
 
-    fn process(&self, state: PipelineState) -> AsyncPipelineResult {
-        Box::new(result(self.process_result(state)))
+    fn prepare_request_future(&self, state: PipelineState) -> AsyncPipelineResult {
+        Box::new(result(self.prepare_request(state)))
     }
 
-    fn process_result(&self, _state: PipelineState) -> PipelineResult {
-        Err(KatalystError::Unavailable)
+    fn prepare_request(&self, state: PipelineState) -> PipelineResult {
+        Ok(state)
     }
 
-    fn post(&self, _state: &PipelineState) {}
+    fn process_response(&self, state: PipelineState) -> PipelineState {
+        state
+    }
 
-    fn error(&self, _state: &KatalystError) {}
+    fn process_error(&self, err: KatalystError) -> KatalystError {
+        err
+    }
 
     fn arc() -> Arc<Pipeline>
     where
@@ -97,7 +101,7 @@ impl PipelineRunner {
         for pip in self.pipelines.iter() {
             result = Box::new(result.and_then({
                 let r = pip.clone();
-                move |s| r.process(s)
+                move |s| r.prepare_request_future(s)
             }));
         }
         for pip in self.pipelines.iter().rev() {
@@ -105,17 +109,11 @@ impl PipelineRunner {
                 result
                     .map({
                         let r = pip.clone();
-                        move |s| {
-                            r.post(&s);
-                            s
-                        }
+                        move |s| r.process_response(s)
                     })
                     .map_err({
                         let r = pip.clone();
-                        move |e| {
-                            r.error(&e);
-                            e
-                        }
+                        move |e| r.process_error(e)
                     }),
             )
         }
