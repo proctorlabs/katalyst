@@ -12,4 +12,4 @@ routes:
       base_url: "http://web"
       path: "/test"
 listener:
-  interface: "0.0.0.0:80"
+  interface: "0.0.0.0:8080"
