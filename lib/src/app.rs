@@ -24,8 +24,6 @@ pub struct KatalystEngine {
 }
 
 pub type HttpsClient = Client<HttpsConnector<HttpConnector<TokioThreadpoolGaiResolver>>, Body>;
-impl Locatable for HttpsClient {}
-impl Locatable for PipelineRunner {}
 
 impl Default for KatalystEngine {
     fn default() -> Self {

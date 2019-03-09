@@ -2,6 +2,9 @@ use std::any::{Any, TypeId};
 use std::collections::HashMap;
 use std::sync::Arc;
 
+pub trait Locatable: Send + Sync + Any {}
+impl<T> Locatable for T where T: Send + Sync + Any {}
+
 #[derive(Debug)]
 struct ArcObject<T: Locatable> {
     obj: Arc<T>,
@@ -17,14 +20,10 @@ impl<T: Locatable> ArcObject<T> {
     }
 }
 
-impl<T: Locatable> Locatable for ArcObject<T> {}
-
 #[derive(Debug, Default)]
 pub struct Locator {
     services: HashMap<TypeId, Box<Any + Sync + Send>>,
 }
-
-pub trait Locatable: Send + Sync + Any {}
 
 impl Locator {
     pub fn locate<T: Locatable>(&self) -> Option<Arc<T>> {
@@ -48,8 +47,6 @@ mod tests {
     struct LocatableThing {
         contents: &'static str,
     }
-
-    impl Locatable for LocatableThing {}
 
     #[test]
     fn register_in_locator_can_retrieve() {
