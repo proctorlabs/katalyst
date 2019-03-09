@@ -1,5 +1,4 @@
 use crate::pipeline::*;
-use crate::state::KatalystState;
 use std::time::Instant;
 
 #[derive(Default)]
@@ -10,7 +9,7 @@ impl Pipeline for Logger {
         "logger"
     }
 
-    fn process_result(&self, mut state: PipelineState, _config: &KatalystState) -> PipelineResult {
+    fn process_result(&self, mut state: PipelineState) -> PipelineResult {
         state
             .context
             .timestamps

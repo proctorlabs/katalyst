@@ -1,5 +1,4 @@
 use crate::pipeline::*;
-use crate::state::KatalystState;
 
 #[derive(Default)]
 pub struct Matcher {}
@@ -9,11 +8,12 @@ impl Pipeline for Matcher {
         "matcher"
     }
 
-    fn process_result(&self, mut state: PipelineState, config: &KatalystState) -> PipelineResult {
+    fn process_result(&self, mut state: PipelineState) -> PipelineResult {
         let request = match &state.upstream.request {
             Some(r) => r,
             None => return Err(KatalystError::NotFound),
         };
+        let config = state.engine.get_state()?;
         for route in config.routes.iter() {
             let method_match = match &route.methods {
                 Some(methods) => {

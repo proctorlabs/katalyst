@@ -1,5 +1,5 @@
+use crate::app::HttpsClient;
 use crate::pipeline::*;
-use crate::state::KatalystState;
 use futures::future::*;
 use futures::Future;
 
@@ -11,7 +11,7 @@ impl Pipeline for Sender {
         "sender"
     }
 
-    fn process(&self, mut state: PipelineState, _config: &KatalystState) -> AsyncPipelineResult {
+    fn process(&self, mut state: PipelineState) -> AsyncPipelineResult {
         let dsr = match state.downstream.request {
             Some(s) => {
                 state.downstream.request = None;
@@ -23,7 +23,8 @@ impl Pipeline for Sender {
                 ));
             }
         };
-        let res = state.client.request(dsr);
+        let client: Arc<HttpsClient> = state.engine.locate().unwrap();
+        let res = client.request(dsr);
         Box::new(res.then(|response| match response {
             Ok(r) => {
                 state.upstream.response = Some(r);

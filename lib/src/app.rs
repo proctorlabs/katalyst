@@ -36,7 +36,7 @@ impl Default for KatalystEngine {
 
         locator.register(Providers::default());
         locator.register::<HttpsClient>(builder.build(HttpsConnector::from((http_connector, tls))));
-        locator.register(PipelineRunner::new(locator.locate().unwrap()));
+        locator.register(PipelineRunner::new());
 
         KatalystEngine {
             state: RwLock::default(),
