@@ -22,7 +22,7 @@ struct RegexTemplatePlaceholder {
 
 impl KatalystTemplatePlaceholder for RegexTemplatePlaceholder {
     fn get_value(&self, state: &PipelineState, _config: &Gateway) -> String {
-        match &state.captures {
+        match &state.context.captures {
             Some(caps) => {
                 let res = caps.get(&self.val).unwrap_or_else(|| self.none());
                 String::from_str(res).unwrap().to_string()

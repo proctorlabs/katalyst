@@ -1,5 +1,5 @@
-use super::*;
 use crate::config::Gateway;
+use crate::pipeline::*;
 use futures::future::*;
 use futures::Future;
 
@@ -11,11 +11,11 @@ impl Pipeline for Sender {
     }
 
     fn process(&self, mut state: PipelineState, _config: &Gateway) -> PipelineResult {
-        let dsr = state.downstream_request.unwrap();
+        let dsr = state.downstream.request.unwrap();
         let res = state.client.request(dsr);
-        state.downstream_request = None;
+        state.downstream.request = None;
         Box::new(res.then(|r| {
-            state.upstream_response = r.unwrap();
+            state.upstream.response = Some(r.unwrap());
             ok::<PipelineState, PipelineError>(state)
         }))
     }

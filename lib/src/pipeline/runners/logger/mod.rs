@@ -1,5 +1,5 @@
-use super::*;
 use crate::config::Gateway;
+use crate::pipeline::*;
 use std::time::Instant;
 
 pub struct Logger {}
@@ -11,14 +11,14 @@ impl Pipeline for Logger {
 
     fn process(&self, mut state: PipelineState, _config: &Gateway) -> PipelineResult {
         state
+            .context
             .timestamps
             .insert("started".to_string(), Instant::now());
-        debug!("Request received for URL {}", state.upstream_request.uri());
         self.ok(state)
     }
 
     fn post(&self, state: &PipelineState) {
-        let started = state.timestamps["started"];
+        let started = state.context.timestamps["started"];
         let duration = Instant::now().duration_since(started);
         let total_ms = u64::from(duration.subsec_millis()) + (duration.as_secs() * 1000);
         debug!("Request processed in {:?}ms", total_ms);

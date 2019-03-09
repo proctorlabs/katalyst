@@ -1,5 +1,5 @@
-use super::*;
 use crate::config::Gateway;
+use crate::pipeline::*;
 use futures::future::*;
 use hyper::StatusCode;
 
@@ -12,15 +12,19 @@ impl Pipeline for Matcher {
 
     fn process(&self, mut state: PipelineState, config: &Gateway) -> PipelineResult {
         self.result({
+            let request = match &state.upstream.request {
+                Some(r) => r,
+                None => panic!("Request expected and unavailable!"),
+            };
             for route in config.routes.iter() {
                 let method_match = match &route.methods {
                     Some(methods) => {
-                        let up_method = state.upstream_request.method();
+                        let up_method = request.method();
                         methods.contains(up_method)
                     }
                     None => true,
                 };
-                let path = state.upstream_request.uri().path();
+                let path = request.uri().path();
                 if method_match && route.pattern.is_match(path) {
                     let mut cap_map = HashMap::new();
                     let caps = route.pattern.captures(path).unwrap();
@@ -33,8 +37,8 @@ impl Pipeline for Matcher {
                             );
                         }
                     }
-                    state.matched_route = Box::new(Some(route.clone()));
-                    state.captures = Some(cap_map);
+                    state.context.matched_route = Some(route.clone());
+                    state.context.captures = Some(cap_map);
                     debug!("Request has been matched to route!");
                     return Box::new(ok::<PipelineState, PipelineError>(state));
                 }

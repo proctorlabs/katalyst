@@ -1,17 +1,10 @@
-mod builder;
-mod logger;
-mod matcher;
-mod sender;
+mod runners;
 
 use crate::app::HttpsClient;
 use crate::config::{Gateway, Route};
-use builder::Builder;
 use futures::future::*;
 use futures::Future;
 use hyper::{Body, Request, Response, StatusCode};
-use logger::Logger;
-use matcher::Matcher;
-use sender::Sender;
 use std::collections::HashMap;
 use std::error;
 use std::fmt;
@@ -19,37 +12,44 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Instant;
 
-pub struct PipelineState {
-    pub upstream_request: Request<Body>,
-    pub upstream_response: Response<Body>,
-    pub downstream_request: Option<Request<Body>>,
-    pub downstream_response: Option<Response<Body>>,
-    pub timestamps: HashMap<String, Instant>,
-    pub matched_route: Box<Option<Route>>,
+#[derive(Default)]
+pub struct RequestResponse {
+    pub request: Option<Request<Body>>,
+    pub response: Option<Response<Body>>,
+}
+
+#[derive(Default)]
+pub struct RequestContext {
+    pub matched_route: Option<Route>,
     pub captures: Option<HashMap<String, String>>,
+    pub timestamps: HashMap<String, Instant>,
+}
+
+pub struct PipelineState {
+    pub upstream: RequestResponse,
+    pub downstream: RequestResponse,
+    pub context: RequestContext,
     pub client: Arc<HttpsClient>,
     pub remote_addr: SocketAddr,
 }
 
 impl PipelineState {
     fn new(request: Request<Body>, client: Arc<HttpsClient>, remote: SocketAddr) -> Self {
-        PipelineState {
-            upstream_request: request,
-            upstream_response: Response::default(),
-            downstream_request: None,
-            downstream_response: None,
-            matched_route: Box::new(None),
-            timestamps: HashMap::new(),
-            captures: None,
+        let mut state = PipelineState {
+            upstream: RequestResponse::default(),
+            downstream: RequestResponse::default(),
+            context: RequestContext::default(),
             client: client,
             remote_addr: remote,
-        }
+        };
+        state.upstream.request = Some(request);
+        state
     }
 
     fn return_status(&mut self, status: StatusCode) {
         let mut response = Response::new(Body::empty());
         *response.status_mut() = status;
-        self.upstream_response = response;
+        self.upstream.response = Some(response);
     }
 }
 
@@ -115,14 +115,8 @@ pub struct PipelineRunner {
 
 impl PipelineRunner {
     pub fn new(client: Arc<HttpsClient>) -> Self {
-        let pipelines: Arc<[Arc<Pipeline + Send + Sync>]> = Arc::new([
-            Arc::new(Logger {}),
-            Arc::new(Matcher {}),
-            Arc::new(Builder {}),
-            Arc::new(Sender {}),
-        ]);
         PipelineRunner {
-            pipelines: pipelines,
+            pipelines: runners::all(),
             client: client,
         }
     }
@@ -160,7 +154,7 @@ impl PipelineRunner {
             )
         }
         Box::new(result.then(|s| match s {
-            Ok(res) => ok::<Response<Body>, hyper::Error>(res.upstream_response),
+            Ok(res) => ok::<Response<Body>, hyper::Error>(res.upstream.response.unwrap()),
             Err(_) => ok::<Response<Body>, hyper::Error>(Response::default()),
         }))
     }

@@ -1,24 +1,10 @@
+mod int;
+
+use int::ArcObject;
+pub use int::Locatable;
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
 use std::sync::Arc;
-
-pub trait Locatable: Send + Sync + Any {}
-impl<T> Locatable for T where T: Send + Sync + Any {}
-
-#[derive(Debug)]
-struct ArcObject<T: Locatable> {
-    obj: Arc<T>,
-}
-
-impl<T: Locatable> ArcObject<T> {
-    fn new(obj: T) -> Self {
-        ArcObject { obj: Arc::new(obj) }
-    }
-
-    fn clone(&self) -> Arc<T> {
-        self.obj.clone()
-    }
-}
 
 #[derive(Debug, Default)]
 pub struct Locator {

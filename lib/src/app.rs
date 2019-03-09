@@ -1,7 +1,7 @@
 use crate::config::parsers;
 use crate::config::Gateway;
 use crate::error::*;
-use crate::loc::{Locatable, Locator};
+use crate::locator::{Locatable, Locator};
 use crate::pipeline::PipelineRunner;
 use crate::service::EngineService;
 use crate::templates::Providers;

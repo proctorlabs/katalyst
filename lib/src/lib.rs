@@ -8,7 +8,7 @@ extern crate lazy_static;
 mod app;
 mod config;
 mod error;
-mod loc;
+mod locator;
 mod pipeline;
 mod service;
 mod templates;

@@ -26,7 +26,10 @@ struct HttpQueryTemplatePlaceholder {}
 
 impl KatalystTemplatePlaceholder for HttpMethodTemplatePlaceholder {
     fn get_value(&self, state: &PipelineState, _config: &Gateway) -> String {
-        state.upstream_request.method().as_str().to_owned()
+        match &state.upstream.request {
+            Some(s) => s.method().as_str().to_owned(),
+            None => String::default(),
+        }
     }
 
     fn duplicate(&self) -> Box<KatalystTemplatePlaceholder> {
@@ -46,7 +49,10 @@ impl KatalystTemplatePlaceholder for HttpIPTemplatePlaceholder {
 
 impl KatalystTemplatePlaceholder for HttpUriTemplatePlaceholder {
     fn get_value(&self, state: &PipelineState, _config: &Gateway) -> String {
-        state.upstream_request.uri().path().to_string()
+        match &state.upstream.request {
+            Some(s) => s.uri().path().to_string(),
+            None => String::default(),
+        }
     }
 
     fn duplicate(&self) -> Box<KatalystTemplatePlaceholder> {
@@ -56,12 +62,10 @@ impl KatalystTemplatePlaceholder for HttpUriTemplatePlaceholder {
 
 impl KatalystTemplatePlaceholder for HttpQueryTemplatePlaceholder {
     fn get_value(&self, state: &PipelineState, _config: &Gateway) -> String {
-        state
-            .upstream_request
-            .uri()
-            .query()
-            .unwrap_or_default()
-            .to_string()
+        match &state.upstream.request {
+            Some(s) => s.uri().query().unwrap_or_default().to_string(),
+            None => String::default(),
+        }
     }
 
     fn duplicate(&self) -> Box<KatalystTemplatePlaceholder> {
