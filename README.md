@@ -31,9 +31,17 @@ require completion before being ready for production.
 - Cleaner upstream path definitions
 - API for modifying routes after start
 - INotify for config file changes
-- Caching implementation, local or redis
+- Caching implementation (local, redis, etc.)
 - Customizable pipeline for request processing
 - External API hooks built into standard pipeline
 - Server SSL/TLS termination
 - Complex transforms: JSON Path, pseudo-methods
 - FFI for other languages
+- Request aggregation and chaining
+- Request tracking
+- QoS Options
+- Circuit breaking
+- Rate limiting
+- Service discovery
+- Health checks
+- Websockets
