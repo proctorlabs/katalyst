@@ -1,8 +1,8 @@
 mod runners;
 
 use crate::app::HttpsClient;
-use crate::config::{Gateway, Route};
 use crate::error::KatalystError;
+use crate::state::{KatalystState, Route};
 use futures::future::*;
 use futures::Future;
 use hyper::{Body, Request, Response};
@@ -19,7 +19,7 @@ pub struct RequestResponse {
 
 #[derive(Default)]
 pub struct RequestContext {
-    pub matched_route: Option<Route>,
+    pub matched_route: Option<Arc<Route>>,
     pub captures: Option<HashMap<String, String>>,
     pub timestamps: HashMap<String, Instant>,
 }
@@ -54,11 +54,11 @@ pub type PipelineResult = Result<PipelineState, KatalystError>;
 pub trait Pipeline: Send + Sync {
     fn name(&self) -> &'static str;
 
-    fn process(&self, state: PipelineState, config: &Gateway) -> AsyncPipelineResult {
+    fn process(&self, state: PipelineState, config: &KatalystState) -> AsyncPipelineResult {
         Box::new(result(self.process_result(state, config)))
     }
 
-    fn process_result(&self, _state: PipelineState, _config: &Gateway) -> PipelineResult {
+    fn process_result(&self, _state: PipelineState, _config: &KatalystState) -> PipelineResult {
         Err(KatalystError::Unavailable)
     }
 
@@ -91,9 +91,8 @@ impl PipelineRunner {
         &self,
         remote_addr: SocketAddr,
         request: Request<Body>,
-        inc_config: &Gateway,
+        config: Arc<KatalystState>,
     ) -> HyperResult {
-        let config = Arc::new(inc_config.clone());
         let client = self.client.clone();
         let mut result: AsyncPipelineResult = Box::new(lazy(move || {
             ok::<PipelineState, KatalystError>(PipelineState::new(request, client, remote_addr))

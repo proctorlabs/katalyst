@@ -26,7 +26,7 @@ impl EngineService for Arc<KatalystEngine> {
                 let remote_addr = conn.remote_addr();
                 service_fn(move |req: Request<Body>| -> HyperResult {
                     let config = engine.get_state().unwrap();
-                    pipeline.run(remote_addr, req, &config)
+                    pipeline.run(remote_addr, req, config)
                 })
             }))
             .map_err(|e| eprintln!("server error: {}", e));

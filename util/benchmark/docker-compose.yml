@@ -17,8 +17,8 @@ services:
     logging:
       driver: none
   load-test:
-    image: nickgrealy/fasthttploader
-    command: http://katalyst:8000/
+    build: .
+    command: -c 500 -n 300000 -k -G 16 -r http://nginx/
     links:
       - "nginx:nginx"
       - "katalyst:katalyst"

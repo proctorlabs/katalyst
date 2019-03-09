@@ -1,5 +1,5 @@
-use crate::config::Gateway;
 use crate::pipeline::PipelineState;
+use crate::state::KatalystState;
 use crate::templates::{KatalystTemplatePlaceholder, KatalystTemplateProvider};
 use std::str::FromStr;
 
@@ -21,7 +21,7 @@ struct RegexTemplatePlaceholder {
 }
 
 impl KatalystTemplatePlaceholder for RegexTemplatePlaceholder {
-    fn get_value(&self, state: &PipelineState, _config: &Gateway) -> String {
+    fn get_value(&self, state: &PipelineState, _config: &KatalystState) -> String {
         match &state.context.captures {
             Some(caps) => {
                 let res = caps.get(&self.val).unwrap_or_else(|| self.none());

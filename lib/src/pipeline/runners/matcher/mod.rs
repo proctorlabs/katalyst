@@ -1,5 +1,5 @@
-use crate::config::Gateway;
 use crate::pipeline::*;
+use crate::state::KatalystState;
 
 #[derive(Default)]
 pub struct Matcher {}
@@ -9,7 +9,7 @@ impl Pipeline for Matcher {
         "matcher"
     }
 
-    fn process_result(&self, mut state: PipelineState, config: &Gateway) -> PipelineResult {
+    fn process_result(&self, mut state: PipelineState, config: &KatalystState) -> PipelineResult {
         let request = match &state.upstream.request {
             Some(r) => r,
             None => return Err(KatalystError::NotFound),

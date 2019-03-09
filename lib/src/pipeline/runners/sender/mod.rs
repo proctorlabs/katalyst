@@ -1,5 +1,5 @@
-use crate::config::Gateway;
 use crate::pipeline::*;
+use crate::state::KatalystState;
 use futures::future::*;
 use futures::Future;
 
@@ -11,13 +11,28 @@ impl Pipeline for Sender {
         "sender"
     }
 
-    fn process(&self, mut state: PipelineState, _config: &Gateway) -> AsyncPipelineResult {
-        let dsr = state.downstream.request.unwrap();
+    fn process(&self, mut state: PipelineState, _config: &KatalystState) -> AsyncPipelineResult {
+        let dsr = match state.downstream.request {
+            Some(s) => {
+                state.downstream.request = None;
+                s
+            }
+            None => {
+                return Box::new(err::<PipelineState, KatalystError>(
+                    KatalystError::Unavailable,
+                ));
+            }
+        };
         let res = state.client.request(dsr);
-        state.downstream.request = None;
-        Box::new(res.then(|r| {
-            state.upstream.response = Some(r.unwrap());
-            ok::<PipelineState, KatalystError>(state)
+        Box::new(res.then(|response| match response {
+            Ok(r) => {
+                state.upstream.response = Some(r);
+                ok::<PipelineState, KatalystError>(state)
+            }
+            Err(e) => {
+                warn!("Could not send upstream request! Caused by: {:?}", e);
+                err::<PipelineState, KatalystError>(KatalystError::GatewayTimeout)
+            }
         }))
     }
 }

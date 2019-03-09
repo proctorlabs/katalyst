@@ -1,18 +1,17 @@
-use crate::config::Listener;
+use crate::state::Listener;
 use crate::templates::Providers;
 use serde::{Deserialize, Serialize};
-use std::cell::RefCell;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct ListenerBuilder {
-    pub interface: RefCell<Option<String>>,
+    pub interface: String,
 }
 
-impl<'a> ListenerBuilder {
-    pub fn build(&mut self, _providers: &Providers) -> Listener {
+impl ListenerBuilder {
+    pub fn build(&self, _providers: &Providers) -> Listener {
         Listener {
-            interface: self.interface.borrow().to_owned().unwrap(),
+            interface: self.interface.to_owned(),
         }
     }
 }

@@ -1,8 +1,8 @@
 mod forwarding_headers;
 mod hop_headers;
 
-use crate::config::Gateway;
 use crate::pipeline::*;
+use crate::state::KatalystState;
 use hyper::Request;
 
 #[derive(Default)]
@@ -13,7 +13,7 @@ impl Pipeline for Builder {
         "builder"
     }
 
-    fn process_result(&self, mut state: PipelineState, config: &Gateway) -> PipelineResult {
+    fn process_result(&self, mut state: PipelineState, config: &KatalystState) -> PipelineResult {
         let state_ref = &state;
         let downstream = match &state_ref.context.matched_route {
             Some(route) => &route.downstream,

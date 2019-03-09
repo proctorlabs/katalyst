@@ -1,16 +1,17 @@
 use super::KatalystError;
-use crate::config::Gateway;
+use crate::state::KatalystState;
 use std::net::AddrParseError;
 use std::sync;
+use std::sync::Arc;
 
-impl From<sync::PoisonError<sync::RwLockWriteGuard<'_, Option<Gateway>>>> for KatalystError {
-    fn from(_: sync::PoisonError<sync::RwLockWriteGuard<Option<Gateway>>>) -> Self {
+impl From<sync::PoisonError<sync::RwLockWriteGuard<'_, Arc<KatalystState>>>> for KatalystError {
+    fn from(_: sync::PoisonError<sync::RwLockWriteGuard<Arc<KatalystState>>>) -> Self {
         KatalystError::StateUpdateFailure
     }
 }
 
-impl From<sync::PoisonError<sync::RwLockReadGuard<'_, Option<Gateway>>>> for KatalystError {
-    fn from(_: sync::PoisonError<sync::RwLockReadGuard<Option<Gateway>>>) -> Self {
+impl From<sync::PoisonError<sync::RwLockReadGuard<'_, Arc<KatalystState>>>> for KatalystError {
+    fn from(_: sync::PoisonError<sync::RwLockReadGuard<Arc<KatalystState>>>) -> Self {
         KatalystError::StateUnavailable
     }
 }

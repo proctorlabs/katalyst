@@ -1,9 +1,9 @@
 use crate::config::parsers;
-use crate::config::Gateway;
 use crate::error::*;
 use crate::locator::{Locatable, Locator};
 use crate::pipeline::PipelineRunner;
 use crate::service::EngineService;
+use crate::state::KatalystState;
 use crate::templates::Providers;
 use futures::future::Future;
 use hyper::client::connect::dns::TokioThreadpoolGaiResolver;
@@ -17,7 +17,7 @@ use tokio::runtime::Runtime;
 
 /// This is the API Gateway container
 pub struct KatalystEngine {
-    state: Arc<RwLock<Option<Gateway>>>,
+    state: RwLock<Arc<KatalystState>>,
     locator: Locator,
     pub rt: RwLock<Runtime>,
 }
@@ -39,7 +39,7 @@ impl Default for KatalystEngine {
         locator.register(PipelineRunner::new(locator.locate().unwrap()));
 
         KatalystEngine {
-            state: Arc::default(),
+            state: RwLock::default(),
             locator: locator,
             rt: RwLock::new(Runtime::new().unwrap()),
         }
@@ -48,9 +48,9 @@ impl Default for KatalystEngine {
 
 impl KatalystEngine {
     /// Update the running configuration of the API Gateway.
-    pub fn update_state(&self, new_state: Gateway) -> Result<(), KatalystError> {
+    pub fn update_state(&self, new_state: KatalystState) -> Result<(), KatalystError> {
         let mut state = self.state.write()?;
-        *state = Option::Some(new_state);
+        *state = Arc::new(new_state);
         Ok(())
     }
 
@@ -59,12 +59,9 @@ impl KatalystEngine {
     }
 
     /// Get a copy of the currently running API Gateway configuration.
-    pub fn get_state(&self) -> Result<Gateway, KatalystError> {
+    pub fn get_state(&self) -> Result<Arc<KatalystState>, KatalystError> {
         let state = self.state.read()?;
-        match state.clone() {
-            Some(s) => Ok(s),
-            None => Err(KatalystError::StateUnavailable),
-        }
+        Ok(state.clone())
     }
 
     pub fn spawn<F: Future<Item = (), Error = ()> + Send + 'static>(
@@ -96,7 +93,7 @@ impl Katalyst {
 
     /// Load a configuration file
     pub fn load(&self, config_file: &str) -> Result<(), KatalystError> {
-        let mut config = parsers::parse_file(config_file);
+        let config = parsers::parse_file(config_file);
         let providers = &self.engine.locator.locate::<Providers>().unwrap();
         self.engine.update_state(config.build(&providers))?;
         Ok(())

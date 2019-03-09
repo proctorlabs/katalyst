@@ -2,31 +2,31 @@ mod downstream;
 mod listener;
 mod routes;
 
-use crate::config::Gateway;
+use crate::state::KatalystState;
 use crate::templates::Providers;
 use listener::*;
 use routes::*;
 use serde::{Deserialize, Serialize};
-use std::cell::RefCell;
+use std::sync::Arc;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
-pub struct GatewayBuilder<'a> {
-    routes: RefCell<Vec<RouteBuilder<'a>>>,
-    listener: RefCell<ListenerBuilder>,
+pub struct GatewayBuilder {
+    routes: Vec<RouteBuilder>,
+    listener: ListenerBuilder,
 }
 
-impl<'a> GatewayBuilder<'a> {
-    pub fn build(&mut self, providers: &Providers) -> Gateway {
+impl GatewayBuilder {
+    pub fn build(&self, providers: &Providers) -> KatalystState {
         //build routes...
         let mut all_routes = vec![];
-        for route in self.routes.borrow().iter() {
-            all_routes.push(route.clone().build(providers));
+        for route in self.routes.iter() {
+            all_routes.push(Arc::new(route.build(providers)));
         }
 
-        let listener = self.listener.get_mut().build(providers);
+        let listener = self.listener.build(providers);
         //final result
-        Gateway {
+        KatalystState {
             routes: all_routes,
             listener: listener,
         }

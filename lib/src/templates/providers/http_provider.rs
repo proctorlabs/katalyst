@@ -1,5 +1,5 @@
-use crate::config::Gateway;
 use crate::pipeline::PipelineState;
+use crate::state::KatalystState;
 use crate::templates::{KatalystTemplatePlaceholder, KatalystTemplateProvider};
 
 pub struct HttpTemplateProvider {}
@@ -19,13 +19,17 @@ impl KatalystTemplateProvider for HttpTemplateProvider {
     }
 }
 
+#[derive(Debug)]
 struct HttpMethodTemplatePlaceholder {}
+#[derive(Debug)]
 struct HttpIPTemplatePlaceholder {}
+#[derive(Debug)]
 struct HttpUriTemplatePlaceholder {}
+#[derive(Debug)]
 struct HttpQueryTemplatePlaceholder {}
 
 impl KatalystTemplatePlaceholder for HttpMethodTemplatePlaceholder {
-    fn get_value(&self, state: &PipelineState, _config: &Gateway) -> String {
+    fn get_value(&self, state: &PipelineState, _config: &KatalystState) -> String {
         match &state.upstream.request {
             Some(s) => s.method().as_str().to_owned(),
             None => String::default(),
@@ -38,7 +42,7 @@ impl KatalystTemplatePlaceholder for HttpMethodTemplatePlaceholder {
 }
 
 impl KatalystTemplatePlaceholder for HttpIPTemplatePlaceholder {
-    fn get_value(&self, state: &PipelineState, _config: &Gateway) -> String {
+    fn get_value(&self, state: &PipelineState, _config: &KatalystState) -> String {
         state.remote_addr.ip().to_string()
     }
 
@@ -48,7 +52,7 @@ impl KatalystTemplatePlaceholder for HttpIPTemplatePlaceholder {
 }
 
 impl KatalystTemplatePlaceholder for HttpUriTemplatePlaceholder {
-    fn get_value(&self, state: &PipelineState, _config: &Gateway) -> String {
+    fn get_value(&self, state: &PipelineState, _config: &KatalystState) -> String {
         match &state.upstream.request {
             Some(s) => s.uri().path().to_string(),
             None => String::default(),
@@ -61,7 +65,7 @@ impl KatalystTemplatePlaceholder for HttpUriTemplatePlaceholder {
 }
 
 impl KatalystTemplatePlaceholder for HttpQueryTemplatePlaceholder {
-    fn get_value(&self, state: &PipelineState, _config: &Gateway) -> String {
+    fn get_value(&self, state: &PipelineState, _config: &KatalystState) -> String {
         match &state.upstream.request {
             Some(s) => s.uri().query().unwrap_or_default().to_string(),
             None => String::default(),

@@ -1,5 +1,6 @@
-use crate::config::Gateway;
 use crate::pipeline::PipelineState;
+use crate::state::KatalystState;
+use std::fmt::Debug;
 
 /// This is the trait used by Katalyst for building the placeholders used in a downstream URL template
 pub trait KatalystTemplateProvider: Send + Sync {
@@ -15,9 +16,9 @@ lazy_static! {
 }
 
 /// This provides the actual value replacement used in the downstream URL template
-pub trait KatalystTemplatePlaceholder: Send + Sync {
+pub trait KatalystTemplatePlaceholder: Send + Sync + Debug {
     /// Returns the string value that should be used as a replacement for this Placeholder in the pipeline context
-    fn get_value(&self, state: &PipelineState, config: &Gateway) -> String;
+    fn get_value(&self, state: &PipelineState, config: &KatalystState) -> String;
 
     /// Creates a boxed duplicate of this placeholder
     fn duplicate(&self) -> Box<KatalystTemplatePlaceholder>;
@@ -37,7 +38,7 @@ pub trait KatalystTemplatePlaceholder: Send + Sync {
 }
 
 impl KatalystTemplatePlaceholder for String {
-    fn get_value(&self, _state: &PipelineState, _config: &Gateway) -> String {
+    fn get_value(&self, _state: &PipelineState, _config: &KatalystState) -> String {
         self.to_string()
     }
 

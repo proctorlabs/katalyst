@@ -3,8 +3,8 @@ mod header_provider;
 mod http_provider;
 mod regex_provider;
 
-use crate::config::Gateway;
 use crate::pipeline::PipelineState;
+use crate::state::KatalystState;
 use crate::templates::KatalystTemplatePlaceholder;
 
 pub use env_provider::EnvTemplateProvider;
@@ -12,6 +12,7 @@ pub use header_provider::HeaderTemplateProvider;
 pub use http_provider::HttpTemplateProvider;
 pub use regex_provider::RegexTemplateProvider;
 
+#[derive(Debug)]
 struct PrecomputedPlaceholder {
     result: String,
 }
@@ -25,7 +26,7 @@ impl PrecomputedPlaceholder {
 }
 
 impl KatalystTemplatePlaceholder for PrecomputedPlaceholder {
-    fn get_value(&self, _state: &PipelineState, _config: &Gateway) -> String {
+    fn get_value(&self, _state: &PipelineState, _config: &KatalystState) -> String {
         self.result.to_string()
     }
 

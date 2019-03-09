@@ -12,6 +12,7 @@ pub enum KatalystError {
     Unavailable,
     ConfigParseError,
     NotFound,
+    GatewayTimeout,
 }
 
 impl Error for KatalystError {}
@@ -24,7 +25,8 @@ impl fmt::Display for KatalystError {
             KatalystError::StateUnavailable => write!(f, "State is currently unavailable"),
             KatalystError::Unavailable => write!(f, "Feature unavailable"),
             KatalystError::ConfigParseError => write!(f, "Failed to parse configuration"),
-            KatalystError::NotFound => write!(f, "Not found!"),
+            KatalystError::NotFound => write!(f, "Not Found"),
+            KatalystError::GatewayTimeout => write!(f, "Gateway Timeout"),
         }
     }
 }

@@ -11,6 +11,7 @@ mod error;
 mod locator;
 mod pipeline;
 mod service;
+mod state;
 mod templates;
 
 //Expose consumable APIs
