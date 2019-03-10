@@ -4,7 +4,9 @@ routes:
       - get
     downstream:
       base_url: "https://postman-echo.com"
-      path: "/get?env_user={{env=>USER}}&regex_cap={{regex=>cap}}&method={{http=>method}}&ip={{http=>ip}}&header={{header=>user-agent}}"
+      path: "/get?env_user={{env=>USER}}&regex_cap={{regex=>cap}}&method={{http=>method}}&ip={{http=>ip}}&header={{header=>user-agent}}&claim={{claim=>KatalystAuthenticator}}"
+    authenticators:
+      - backend: always
   - pattern: "^/test/post$"
     methods:
       - post

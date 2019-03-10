@@ -9,7 +9,9 @@ impl KatalystAuthenticator for AlwaysAuthenticator {
     }
 
     fn authenticate(&self, _: &PipelineState) -> AuthenticationResult {
-        Ok(KatalystAuthenticationInfo::default())
+        let mut result = KatalystAuthenticationInfo::default();
+        result.add_claim("KatalystAuthenticator".to_string(), self.name().to_string());
+        Ok(result)
     }
 }
 

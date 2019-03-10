@@ -1,3 +1,4 @@
+mod claim_provider;
 mod env_provider;
 mod header_provider;
 mod http_provider;
@@ -7,6 +8,7 @@ use crate::pipeline::PipelineState;
 use crate::state::KatalystState;
 use crate::templates::KatalystTemplatePlaceholder;
 
+pub use claim_provider::ClaimTemplateProvider;
 pub use env_provider::EnvTemplateProvider;
 pub use header_provider::HeaderTemplateProvider;
 pub use http_provider::HttpTemplateProvider;

@@ -98,6 +98,7 @@ impl Default for Providers {
         providers.register(Box::new(RegexTemplateProvider {}));
         providers.register(Box::new(HeaderTemplateProvider {}));
         providers.register(Box::new(HttpTemplateProvider {}));
+        providers.register(Box::new(ClaimTemplateProvider {}));
         providers
     }
 }
