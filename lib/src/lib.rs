@@ -6,6 +6,8 @@ extern crate lazy_static;
 
 //Load mods
 mod app;
+mod authentication;
+mod common;
 mod config;
 mod error;
 mod locator;

@@ -1,6 +1,7 @@
-use super::downstream::DownstreamBuilder;
+use super::*;
+use crate::app::KatalystEngine;
+use crate::error::KatalystError;
 use crate::state::Route;
-use crate::templates::Providers;
 use http::Method;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -15,22 +16,23 @@ pub struct RouteBuilder {
     children: Option<Vec<RouteBuilder>>,
     downstream: DownstreamBuilder,
     methods: Option<Vec<String>>,
+    authenticators: Option<Vec<AuthenticatorBuilder>>,
 }
 
 impl RouteBuilder {
-    pub fn build(&self, providers: &Providers) -> Route {
+    pub fn build(&self, engine: Arc<KatalystEngine>) -> Result<Route, KatalystError> {
         let routebuilders: &Option<Vec<RouteBuilder>> = &self.children;
         let routes = match routebuilders {
             Some(b) => {
                 let mut result = vec![];
                 for rb in b {
-                    result.push(Arc::new(rb.build(providers)));
+                    result.push(Arc::new(rb.build(engine.clone())?));
                 }
                 Some(result)
             }
             None => None,
         };
-        let downstream = self.downstream.build(providers);
+        let downstream = self.downstream.build(engine.clone())?;
 
         //Build method hashset
         let methods = match &self.methods {
@@ -46,11 +48,23 @@ impl RouteBuilder {
             None => None,
         };
 
-        Route {
+        let authenticators = match &self.authenticators {
+            Some(auths) => {
+                let mut vec_auths: Vec<Authenticator> = vec![];
+                for a in auths {
+                    vec_auths.push(a.build(engine.clone())?);
+                }
+                Some(vec_auths)
+            }
+            None => None,
+        };
+
+        Ok(Route {
             pattern: Regex::new(&self.pattern).unwrap(),
             children: routes,
             downstream: downstream,
             methods: methods,
-        }
+            authenticators: authenticators,
+        })
     }
 }

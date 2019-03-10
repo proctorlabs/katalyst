@@ -1,6 +1,7 @@
 mod runners;
 
 use crate::app::KatalystEngine;
+use crate::authentication::KatalystAuthenticationInfo;
 use crate::error::KatalystError;
 use crate::state::Route;
 use futures::future::*;
@@ -22,6 +23,7 @@ pub struct RequestContext {
     pub matched_route: Option<Arc<Route>>,
     pub captures: Option<HashMap<String, String>>,
     pub timestamps: HashMap<String, Instant>,
+    pub authentication: Option<KatalystAuthenticationInfo>,
 }
 
 pub struct PipelineState {
@@ -68,13 +70,6 @@ pub trait Pipeline: Send + Sync {
 
     fn process_error(&self, err: KatalystError) -> KatalystError {
         err
-    }
-
-    fn arc() -> Arc<Pipeline>
-    where
-        Self: 'static + Sized + Default,
-    {
-        Arc::new(Self::default())
     }
 }
 

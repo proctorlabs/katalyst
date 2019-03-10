@@ -1,6 +1,8 @@
+use crate::app::KatalystEngine;
+use crate::error::KatalystError;
 use crate::state::Listener;
-use crate::templates::Providers;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
@@ -9,9 +11,9 @@ pub struct ListenerBuilder {
 }
 
 impl ListenerBuilder {
-    pub fn build(&self, _providers: &Providers) -> Listener {
-        Listener {
+    pub fn build(&self, _: Arc<KatalystEngine>) -> Result<Listener, KatalystError> {
+        Ok(Listener {
             interface: self.interface.to_owned(),
-        }
+        })
     }
 }

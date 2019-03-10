@@ -1,3 +1,4 @@
+use crate::authentication;
 use crate::config::parsers;
 use crate::error::*;
 use crate::locator::{Locatable, Locator};
@@ -37,6 +38,7 @@ impl Default for KatalystEngine {
         locator.register(Providers::default());
         locator.register::<HttpsClient>(builder.build(HttpsConnector::from((http_connector, tls))));
         locator.register(PipelineRunner::new());
+        locator.register(authentication::all());
 
         KatalystEngine {
             state: RwLock::default(),
@@ -94,8 +96,7 @@ impl Katalyst {
     /// Load a configuration file
     pub fn load(&self, config_file: &str) -> Result<(), KatalystError> {
         let config = parsers::parse_file(config_file);
-        let providers = &self.engine.locator.locate::<Providers>().unwrap();
-        self.engine.update_state(config.build(&providers))?;
+        self.engine.update_state(config.build(self.engine())?)?;
         Ok(())
     }
 

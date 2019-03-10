@@ -1,3 +1,4 @@
+use crate::authentication::KatalystAuthenticator;
 use crate::KatalystTemplatePlaceholder;
 use http::Method;
 use regex::Regex;
@@ -16,6 +17,12 @@ pub struct Route {
     pub children: Option<Vec<Arc<Route>>>,
     pub downstream: Downstream,
     pub methods: Option<HashSet<Method>>,
+    pub authenticators: Option<Vec<Authenticator>>,
+}
+
+#[derive(Debug)]
+pub struct Authenticator {
+    pub authenticator: Arc<KatalystAuthenticator>,
 }
 
 #[derive(Debug)]

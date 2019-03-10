@@ -1,11 +1,11 @@
-use crate::config::builder::GatewayBuilder;
+use crate::config::builder::KatalystBuilder;
 use serde_yaml;
 use std::ffi::OsStr;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 
-pub fn parse_file(file_path: &str) -> GatewayBuilder {
+pub fn parse_file(file_path: &str) -> KatalystBuilder {
     let path = Path::new(file_path);
     let contents = load_file(path);
 

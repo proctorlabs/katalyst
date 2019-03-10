@@ -13,6 +13,8 @@ pub enum KatalystError {
     ConfigParseError,
     NotFound,
     GatewayTimeout,
+    Forbidden,
+    Unauthorized,
 }
 
 impl Error for KatalystError {}
@@ -27,6 +29,8 @@ impl fmt::Display for KatalystError {
             KatalystError::ConfigParseError => write!(f, "Failed to parse configuration"),
             KatalystError::NotFound => write!(f, "Not Found"),
             KatalystError::GatewayTimeout => write!(f, "Gateway Timeout"),
+            KatalystError::Forbidden => write!(f, "Forbidden"),
+            KatalystError::Unauthorized => write!(f, "Unauthorized"),
         }
     }
 }

@@ -11,5 +11,7 @@ routes:
     downstream:
       base_url: "http://postman-echo.com"
       path: "/get?foo1=bar"
+    authenticators:
+      - backend: never
 listener:
   interface: "0.0.0.0:8000"
