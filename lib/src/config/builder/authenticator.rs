@@ -12,8 +12,8 @@ pub struct AuthenticatorBuilder {
     backend: String,
 }
 
-impl AuthenticatorBuilder {
-    pub fn build(&self, engine: Arc<KatalystEngine>) -> Result<Authenticator, KatalystError> {
+impl Builder<Authenticator> for AuthenticatorBuilder {
+    fn build(&self, engine: Arc<KatalystEngine>) -> Result<Authenticator, KatalystError> {
         let authenticators = engine.locate::<AuthenticatorDirectory>().unwrap();
         Ok(Authenticator {
             authenticator: authenticators.get(&self.backend.as_str()).unwrap().clone(),

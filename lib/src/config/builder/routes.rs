@@ -19,8 +19,8 @@ pub struct RouteBuilder {
     authenticators: Option<Vec<AuthenticatorBuilder>>,
 }
 
-impl RouteBuilder {
-    pub fn build(&self, engine: Arc<KatalystEngine>) -> Result<Route, KatalystError> {
+impl Builder<Route> for RouteBuilder {
+    fn build(&self, engine: Arc<KatalystEngine>) -> Result<Route, KatalystError> {
         let routebuilders: &Option<Vec<RouteBuilder>> = &self.children;
         let routes = match routebuilders {
             Some(b) => {

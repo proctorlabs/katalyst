@@ -7,8 +7,15 @@ use std::sync::Arc;
 
 #[derive(Debug, Default)]
 pub struct KatalystState {
+    pub hosts: Vec<Hosts>,
     pub routes: Vec<Arc<Route>>,
     pub listener: Listener,
+}
+
+#[derive(Debug, Default)]
+pub struct Hosts {
+    pub name: String,
+    pub servers: Vec<String>,
 }
 
 #[derive(Debug)]

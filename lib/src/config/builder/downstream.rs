@@ -1,3 +1,4 @@
+use super::Builder;
 use crate::app::KatalystEngine;
 use crate::error::KatalystError;
 use crate::state::Downstream;
@@ -13,8 +14,8 @@ pub struct DownstreamBuilder {
     path: String,
 }
 
-impl DownstreamBuilder {
-    pub fn build(&self, engine: Arc<KatalystEngine>) -> Result<Downstream, KatalystError> {
+impl Builder<Downstream> for DownstreamBuilder {
+    fn build(&self, engine: Arc<KatalystEngine>) -> Result<Downstream, KatalystError> {
         let providers = engine.locate::<Providers>().unwrap();
         Ok(Downstream {
             base_url: self.base_url.to_owned(),

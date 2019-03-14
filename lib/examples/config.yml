@@ -1,3 +1,11 @@
+listener:
+  interface: "0.0.0.0:8000"
+
+hosts:
+  - name: test
+    servers:
+      - "https://postman-echo.com"
+
 routes:
   - pattern: "^/test/(?P<cap>.*)$"
     methods:
@@ -7,6 +15,7 @@ routes:
       path: "/get?env_user={{env=>USER}}&regex_cap={{regex=>cap}}&method={{http=>method}}&ip={{http=>ip}}&header={{header=>user-agent}}&claim={{claim=>KatalystAuthenticator}}"
     authenticators:
       - backend: always
+
   - pattern: "^/test/post$"
     methods:
       - post
@@ -15,5 +24,3 @@ routes:
       path: "/get?foo1=bar"
     authenticators:
       - backend: never
-listener:
-  interface: "0.0.0.0:8000"
