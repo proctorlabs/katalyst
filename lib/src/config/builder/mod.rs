@@ -15,6 +15,7 @@ use crate::app::KatalystEngine;
 use crate::error::KatalystError;
 use crate::state::KatalystState;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::sync::Arc;
 
 pub trait Builder<T> {
@@ -24,7 +25,7 @@ pub trait Builder<T> {
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct KatalystBuilder {
-    hosts: Vec<HostsBuilder>,
+    hosts: HashMap<String, HostsBuilder>,
     routes: Vec<RouteBuilder>,
     listener: ListenerBuilder,
 }

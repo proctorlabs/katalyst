@@ -2,19 +2,18 @@ use crate::authentication::KatalystAuthenticator;
 use crate::KatalystTemplatePlaceholder;
 use http::Method;
 use regex::Regex;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 #[derive(Debug, Default)]
 pub struct KatalystState {
-    pub hosts: Vec<Hosts>,
+    pub hosts: HashMap<String, Hosts>,
     pub routes: Vec<Arc<Route>>,
     pub listener: Listener,
 }
 
 #[derive(Debug, Default)]
 pub struct Hosts {
-    pub name: String,
     pub servers: Vec<String>,
 }
 
@@ -47,6 +46,6 @@ impl Default for Listener {
 
 #[derive(Debug)]
 pub struct Downstream {
-    pub base_url: String,
+    pub host: String,
     pub path_parts: Vec<Box<KatalystTemplatePlaceholder>>,
 }

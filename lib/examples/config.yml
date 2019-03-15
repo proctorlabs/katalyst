@@ -2,7 +2,7 @@ listener:
   interface: "0.0.0.0:8000"
 
 hosts:
-  - name: test
+  echo:
     servers:
       - "https://postman-echo.com"
 
@@ -11,7 +11,7 @@ routes:
     methods:
       - get
     downstream:
-      base_url: "https://postman-echo.com"
+      host: echo
       path: "/get?env_user={{env=>USER}}&regex_cap={{regex=>cap}}&method={{http=>method}}&ip={{http=>ip}}&header={{header=>user-agent}}&claim={{claim=>KatalystAuthenticator}}"
     authenticators:
       - backend: always
@@ -20,7 +20,7 @@ routes:
     methods:
       - post
     downstream:
-      base_url: "http://postman-echo.com"
+      host: echo
       path: "/get?foo1=bar"
     authenticators:
       - backend: never

@@ -10,7 +10,7 @@ use std::sync::Arc;
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct DownstreamBuilder {
-    base_url: String,
+    host: String,
     path: String,
 }
 
@@ -18,7 +18,7 @@ impl Builder<Downstream> for DownstreamBuilder {
     fn build(&self, engine: Arc<KatalystEngine>) -> Result<Downstream, KatalystError> {
         let providers = engine.locate::<Providers>().unwrap();
         Ok(Downstream {
-            base_url: self.base_url.to_owned(),
+            host: self.host.to_owned(),
             path_parts: providers.process_template(&self.path.to_owned()),
         })
     }

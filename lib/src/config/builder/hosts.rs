@@ -1,29 +1,27 @@
 use super::*;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::string::String;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct HostsBuilder {
-    name: String,
     servers: Vec<String>,
 }
 
-impl Builder<Hosts> for HostsBuilder {
-    fn build(&self, _: Arc<KatalystEngine>) -> Result<Hosts, KatalystError> {
-        Ok(Hosts {
-            name: self.name.to_string(),
-            servers: self.servers.clone(),
-        })
-    }
-}
-
-impl Builder<Vec<Hosts>> for Vec<HostsBuilder> {
-    fn build(&self, engine: Arc<KatalystEngine>) -> Result<Vec<Hosts>, KatalystError> {
+impl Builder<HashMap<String, Hosts>> for HashMap<String, HostsBuilder> {
+    fn build(&self, _: Arc<KatalystEngine>) -> Result<HashMap<String, Hosts>, KatalystError> {
         Ok(self
             .iter()
-            .map(|h| h.build(engine.clone()).unwrap())
+            .map(|v| {
+                (
+                    v.0.clone(),
+                    Hosts {
+                        servers: v.1.servers.clone(),
+                    },
+                )
+            })
             .collect())
     }
 }

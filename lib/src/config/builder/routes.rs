@@ -60,7 +60,7 @@ impl Builder<Route> for RouteBuilder {
         };
 
         Ok(Route {
-            pattern: Regex::new(&self.pattern).unwrap(),
+            pattern: Regex::new(&self.pattern)?,
             children: routes,
             downstream: downstream,
             methods: methods,

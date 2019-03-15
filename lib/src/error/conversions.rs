@@ -21,3 +21,9 @@ impl From<AddrParseError> for KatalystError {
         KatalystError::ConfigParseError
     }
 }
+
+impl From<regex::Error> for KatalystError {
+    fn from(_: regex::Error) -> Self {
+        KatalystError::ConfigFailure
+    }
+}
