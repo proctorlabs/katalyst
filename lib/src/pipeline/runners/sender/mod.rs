@@ -19,7 +19,7 @@ impl Pipeline for Sender {
             }
             None => {
                 return Box::new(err::<PipelineState, KatalystError>(
-                    KatalystError::Unavailable,
+                    KatalystError::FeatureUnavailable,
                 ));
             }
         };

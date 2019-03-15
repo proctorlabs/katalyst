@@ -56,8 +56,11 @@ impl KatalystEngine {
         Ok(())
     }
 
-    pub fn locate<T: Locatable>(&self) -> Option<Arc<T>> {
-        self.locator.locate::<T>()
+    pub fn locate<T: Locatable>(&self) -> Result<Arc<T>, KatalystError> {
+        match self.locator.locate::<T>() {
+            Some(t) => Ok(t),
+            None => Err(KatalystError::FeatureUnavailable),
+        }
     }
 
     /// Get a copy of the currently running API Gateway configuration.

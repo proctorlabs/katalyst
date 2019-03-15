@@ -17,7 +17,7 @@ impl Pipeline for Builder {
         let downstream = match &state_ref.context.matched_route {
             Some(route) => &route.downstream,
             None => {
-                return Err(KatalystError::Unavailable);
+                return Err(KatalystError::FeatureUnavailable);
             }
         };
 

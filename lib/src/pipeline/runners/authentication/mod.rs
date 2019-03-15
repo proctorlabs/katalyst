@@ -11,7 +11,7 @@ impl Pipeline for Authenticator {
     fn prepare_request(&self, mut state: PipelineState) -> PipelineResult {
         let route = match &state.context.matched_route {
             Some(s) => s,
-            None => return Err(KatalystError::Unavailable),
+            None => return Err(KatalystError::FeatureUnavailable),
         };
         let mut atcs = vec![];
         match &route.authenticators {

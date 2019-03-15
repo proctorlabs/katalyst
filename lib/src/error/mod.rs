@@ -9,7 +9,7 @@ pub enum KatalystError {
     StateUpdateFailure,
     StateUnavailable,
     ConfigFailure,
-    Unavailable,
+    FeatureUnavailable,
     ConfigParseError,
     NotFound,
     GatewayTimeout,
@@ -25,7 +25,9 @@ impl fmt::Display for KatalystError {
             KatalystError::ConfigFailure => write!(f, "Configuration failure occurred"),
             KatalystError::StateUpdateFailure => write!(f, "Unable to update internal state"),
             KatalystError::StateUnavailable => write!(f, "State is currently unavailable"),
-            KatalystError::Unavailable => write!(f, "Feature unavailable"),
+            KatalystError::FeatureUnavailable => {
+                write!(f, "This feature is unavailable in this context")
+            }
             KatalystError::ConfigParseError => write!(f, "Failed to parse configuration"),
             KatalystError::NotFound => write!(f, "Not Found"),
             KatalystError::GatewayTimeout => write!(f, "Gateway Timeout"),

@@ -16,7 +16,7 @@ pub struct DownstreamBuilder {
 
 impl Builder<Downstream> for DownstreamBuilder {
     fn build(&self, engine: Arc<KatalystEngine>) -> Result<Downstream, KatalystError> {
-        let providers = engine.locate::<Providers>().unwrap();
+        let providers = engine.locate::<Providers>()?;
         Ok(Downstream {
             host: self.host.to_owned(),
             path_parts: providers.process_template(&self.path.to_owned()),

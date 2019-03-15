@@ -22,7 +22,7 @@ impl EngineService for Arc<KatalystEngine> {
         let server = Server::bind(&addr)
             .serve(make_service_fn(move |conn: &AddrStream| {
                 let engine = engine.clone();
-                let pipeline = engine.locate::<PipelineRunner>().unwrap();
+                let pipeline: Arc<PipelineRunner> = engine.locate().unwrap();
                 let remote_addr = conn.remote_addr();
                 service_fn(move |req: Request<Body>| -> HyperResult {
                     pipeline.run(remote_addr, req, engine.clone())
