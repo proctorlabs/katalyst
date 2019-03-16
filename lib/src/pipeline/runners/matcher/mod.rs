@@ -25,7 +25,7 @@ impl Pipeline for Matcher {
             let path = request.uri().path();
             if method_match && route.pattern.is_match(path) {
                 let mut cap_map = HashMap::new();
-                let caps = route.pattern.captures(path).unwrap();
+                let caps = route.pattern.captures(path)?;
                 for name_option in route.pattern.capture_names() {
                     if name_option.is_some() {
                         let name = name_option.unwrap();

@@ -25,7 +25,7 @@ impl KatalystTemplatePlaceholder for RegexTemplatePlaceholder {
         match &state.context.captures {
             Some(caps) => {
                 let res = caps.get(&self.val).unwrap_or_else(|| self.none());
-                String::from_str(res).unwrap().to_string()
+                String::from_str(res).unwrap_or_default().to_string()
             }
             None => self.none().to_string(),
         }

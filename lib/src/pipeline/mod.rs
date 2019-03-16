@@ -113,7 +113,9 @@ impl PipelineRunner {
             )
         }
         Box::new(result.then(|s| match s {
-            Ok(res) => ok::<Response<Body>, hyper::Error>(res.upstream.response.unwrap()),
+            Ok(res) => {
+                ok::<Response<Body>, hyper::Error>(res.upstream.response.unwrap_or_default())
+            }
             Err(e) => ok::<Response<Body>, hyper::Error>({
                 let mut resp = Response::default();
                 *resp.status_mut() = e.status_code();

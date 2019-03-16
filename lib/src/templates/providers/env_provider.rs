@@ -13,7 +13,7 @@ impl KatalystTemplateProvider for EnvTemplateProvider {
             std::env::var_os(value)
                 .expect("Environment variable not set!")
                 .to_str()
-                .unwrap()
+                .unwrap_or_default()
                 .to_owned(),
         )
     }

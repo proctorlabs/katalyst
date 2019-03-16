@@ -27,9 +27,9 @@ require completion before being ready for production.
 
 - ~~Host grouping in configuration~~
 - Load balancing
+- Register signals from OS
 - Ability to modify downstream headers
 - Cleaner upstream path definitions
-- API for modifying routes after start
 - INotify for config file changes
 - Caching implementation (local, redis, etc.)
 - Customizable pipeline for request processing
@@ -45,3 +45,4 @@ require completion before being ready for production.
 - Service discovery
 - Health checks
 - Websockets
+- API for modifying routes after start

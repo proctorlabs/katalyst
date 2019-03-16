@@ -35,13 +35,20 @@ impl Pipeline for Builder {
         let (mut parts, body) = state.upstream.request.unwrap().into_parts();
         debug!("Routing request to {}", path);
         parts.uri = path.parse().unwrap();
-        parts = forwarding_headers::add_forwarding_headers(parts, state.remote_addr);
-        parts = hop_headers::strip_hop_headers(parts);
+        forwarding_headers::add_forwarding_headers(&mut parts.headers, state.remote_addr);
+        hop_headers::strip_hop_headers(&mut parts.headers);
         let client_req = Request::from_parts(parts, body);
 
         state.upstream.request = None;
         state.downstream.request = Some(client_req);
 
         Ok(state)
+    }
+
+    fn process_response(&self, mut state: PipelineState) -> PipelineState {
+        if let Some(r) = &mut state.upstream.response {
+            hop_headers::strip_hop_headers(r.headers_mut());
+        }
+        state
     }
 }

@@ -23,7 +23,7 @@ impl KatalystTemplatePlaceholder for HeaderTemplatePlaceholder {
     fn get_value(&self, state: &PipelineState, _config: &KatalystState) -> String {
         match &state.upstream.request {
             Some(s) => match s.headers().get(&self.header) {
-                Some(t) => t.to_str().unwrap().to_string(),
+                Some(t) => t.to_str().unwrap_or_default().to_string(),
                 None => self.none().to_string(),
             },
             None => self.none().to_string(),

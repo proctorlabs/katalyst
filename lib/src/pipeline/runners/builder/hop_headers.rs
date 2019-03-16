@@ -1,4 +1,4 @@
-use http::request::Parts;
+use http::HeaderMap;
 
 lazy_static! {
     static ref HOP_HEADERS: Vec<&'static str> = vec![
@@ -13,9 +13,8 @@ lazy_static! {
     ];
 }
 
-pub fn strip_hop_headers(mut parts: Parts) -> Parts {
+pub fn strip_hop_headers(headers: &mut HeaderMap) {
     for header in HOP_HEADERS.iter() {
-        parts.headers.remove(*header);
+        headers.remove(*header);
     }
-    parts
 }
