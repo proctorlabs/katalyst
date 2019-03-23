@@ -24,6 +24,7 @@ pub struct RequestContext {
     pub captures: Option<HashMap<String, String>>,
     pub timestamps: HashMap<String, Instant>,
     pub authentication: Option<KatalystAuthenticationInfo>,
+    pub balancer_lease: Option<Arc<String>>,
 }
 
 pub struct PipelineState {

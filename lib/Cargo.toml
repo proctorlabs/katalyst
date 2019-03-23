@@ -24,6 +24,7 @@ hyper-rustls = "0.16"
 http = "0.1"
 lazy_static = "1.2"
 webpki-roots = "0.16"
+rand = "0.6.5"
 
 [dev-dependencies]
 simple_logger = "1.0.1"

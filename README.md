@@ -26,7 +26,7 @@ require completion before being ready for production.
 ### Future Enhancements
 
 - ~~Host grouping in configuration~~
-- Load balancing
+- ~~Load balancing~~
 - Register signals from OS
 - Ability to modify downstream headers
 - Cleaner upstream path definitions

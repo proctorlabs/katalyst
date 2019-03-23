@@ -1,4 +1,5 @@
 use crate::authentication;
+use crate::balancer;
 use crate::config::parsers;
 use crate::error::*;
 use crate::locator::{Locatable, Locator};
@@ -39,6 +40,7 @@ impl Default for KatalystEngine {
         locator.register::<HttpsClient>(builder.build(HttpsConnector::from((http_connector, tls))));
         locator.register(PipelineRunner::new());
         locator.register(authentication::all());
+        locator.register(balancer::all());
 
         KatalystEngine {
             state: RwLock::default(),

@@ -3,8 +3,10 @@ listener:
 
 hosts:
   echo:
+    balancer: least_connection
     servers:
-      - "https://postman-echo.com"
+      - "https://postman-echo.com/get?host=host1&"
+      - "https://postman-echo.com/get?host=host2&"
 
 routes:
   - pattern: "^/test/(?P<cap>.*)$"
@@ -12,7 +14,7 @@ routes:
       - get
     downstream:
       host: echo
-      path: "/get?env_user={{env=>USER}}&regex_cap={{regex=>cap}}&method={{http=>method}}&ip={{http=>ip}}&header={{header=>user-agent}}&claim={{claim=>KatalystAuthenticator}}"
+      path: "env_user={{env=>USER}}&regex_cap={{regex=>cap}}&method={{http=>method}}&ip={{http=>ip}}&header={{header=>user-agent}}&claim={{claim=>KatalystAuthenticator}}"
     authenticators:
       - backend: always
 
@@ -21,6 +23,6 @@ routes:
       - post
     downstream:
       host: echo
-      path: "/get?foo1=bar"
+      path: "foo1=bar"
     authenticators:
       - backend: never

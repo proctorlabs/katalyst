@@ -1,4 +1,5 @@
 use crate::authentication::KatalystAuthenticator;
+use crate::balancer::{default_balancer, KatalystBalancer};
 use crate::KatalystTemplatePlaceholder;
 use http::Method;
 use regex::Regex;
@@ -12,9 +13,17 @@ pub struct KatalystState {
     pub listener: Listener,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Hosts {
-    pub servers: Vec<String>,
+    pub servers: Arc<KatalystBalancer>,
+}
+
+impl Default for Hosts {
+    fn default() -> Self {
+        Hosts {
+            servers: default_balancer(),
+        }
+    }
 }
 
 #[derive(Debug)]
