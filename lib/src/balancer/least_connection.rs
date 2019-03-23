@@ -25,11 +25,12 @@ pub struct LeastConnectionBalancer {
 impl KatalystBalancer for LeastConnectionBalancer {
     fn lease(&self) -> BalancerLease {
         let element = self.hosts.iter().fold(&self.hosts[0], |last, current| {
-            if Arc::strong_count(current) > Arc::strong_count(last) {
-                return current;
+            if Arc::strong_count(current) < Arc::strong_count(last) {
+                current
+            } else {
+                last
             }
-            last
         });
-        Ok(element.clone())
+        Ok(Arc::clone(element))
     }
 }
