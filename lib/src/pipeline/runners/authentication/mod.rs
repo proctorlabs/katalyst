@@ -1,5 +1,7 @@
+use crate::authentication::KatalystAuthenticator;
 use crate::pipeline::*;
 use futures::future::*;
+use std::sync::Arc;
 
 #[derive(Default)]
 pub struct Authenticator {}
@@ -9,29 +11,29 @@ impl Pipeline for Authenticator {
         "authenticator"
     }
 
-    fn prepare_request_future(&self, mut state: PipelineState) -> AsyncPipelineResult {
+    fn prepare_request_future(&self, state: PipelineState) -> AsyncPipelineResult {
         let route = match &state.context.matched_route {
             Some(s) => s,
             None => {
                 return Box::new(err(KatalystError::FeatureUnavailable));
             }
         };
-        let mut atcs = vec![];
         match &route.authenticators {
-            Some(authenticators) => {
-                for a in authenticators {
-                    atcs.push(&a.authenticator);
+            Some(state_authenticators) => {
+                let authenticators: Vec<Arc<KatalystAuthenticator>> = state_authenticators
+                    .iter()
+                    .map(|a| a.authenticator.clone())
+                    .collect();
+                let mut result: AsyncPipelineResult = Box::new(ok(state));
+                for a in authenticators.iter() {
+                    result = Box::new(result.and_then({
+                        let r = a.clone();
+                        move |s| r.authenticate(s)
+                    }));
                 }
+                result
             }
-            None => return Box::new(ok(state)),
-        };
-        for a in atcs {
-            let result = a.authenticate(&state);
-            if let Ok(auth_result) = result {
-                state.context.authentication = Some(auth_result);
-                return Box::new(ok(state));
-            }
+            None => Box::new(ok(state)),
         }
-        Box::new(err(KatalystError::Unauthorized))
     }
 }

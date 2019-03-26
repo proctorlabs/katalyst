@@ -16,7 +16,7 @@ impl Builder<Authenticator> for AuthenticatorBuilder {
     fn build(&self, engine: Arc<KatalystEngine>) -> Result<Authenticator, KatalystError> {
         let authenticators = engine.locate::<AuthenticatorDirectory>()?;
         Ok(Authenticator {
-            authenticator: authenticators.get(&self.backend.as_str()).unwrap().clone(),
+            authenticator: authenticators.get(&self.backend.as_str()).unwrap().build(),
         })
     }
 }
