@@ -17,7 +17,7 @@ use std::sync::Arc;
 use std::sync::RwLock;
 use tokio::runtime::Runtime;
 
-/// This is the API Gateway container
+/// The Katalyst Engine
 pub struct KatalystEngine {
     state: RwLock<Arc<KatalystState>>,
     locator: Locator,
@@ -94,7 +94,7 @@ pub struct Katalyst {
 
 impl Katalyst {
     #[inline]
-    pub fn engine(&self) -> Arc<KatalystEngine> {
+    fn engine(&self) -> Arc<KatalystEngine> {
         self.engine.clone()
     }
 
@@ -111,5 +111,14 @@ impl Katalyst {
         self.engine.run_service()?;
         self.engine.wait()?;
         Ok(())
+    }
+
+    /// This is the primary entrypoint for the API Gateway.
+    /// config_file must be the path (relative or absolute) to a YAML or JSON configuration file.
+    pub fn start(config_file: &str) -> Result<Katalyst, KatalystError> {
+        let mut app = Katalyst::default();
+        app.load(config_file)?;
+        app.run()?;
+        Ok(app)
     }
 }

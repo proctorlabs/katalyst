@@ -1,3 +1,10 @@
+//! # Katalyst
+//!
+//! Katalyst is a fast, simple, and efficient API Gateway.
+//!
+//! Katalyst can be used as a library in other rust projects (FFI for other languages planned)
+//! or as a standalone application.
+
 //Define package-wide macro providers
 #[macro_use]
 extern crate log;
@@ -23,12 +30,3 @@ pub use error::KatalystError;
 pub use templates::KatalystTemplatePlaceholder;
 pub use templates::KatalystTemplateProvider;
 pub use templates::Providers;
-
-/// This is the primary entrypoint for the API Gateway.
-/// config_file must be the path (relative or absolute) to a YAML or JSON configuration file.
-pub fn start_katalyst(config_file: &str) -> Result<Katalyst, KatalystError> {
-    let mut app = Katalyst::default();
-    app.load(config_file)?;
-    app.run()?;
-    Ok(app)
-}

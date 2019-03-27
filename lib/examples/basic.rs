@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate log;
 
-use katalyst;
+use katalyst::Katalyst;
 use log::Level;
 use std::env;
 use std::io;
@@ -19,5 +19,5 @@ fn main() {
     let path_buf = config_path().expect("Couldn't create path");
     let path = path_buf.to_string_lossy();
     info!("Loading file from {}", &path);
-    katalyst::start_katalyst(&path).unwrap();
+    Katalyst::start(&path).unwrap();
 }

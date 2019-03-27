@@ -4,6 +4,7 @@ mod status_codes;
 use std::error::Error;
 use std::fmt;
 
+/// KatalystError is the error type used by most operations within the Katalyst library.
 #[derive(Debug)]
 pub enum KatalystError {
     StateUpdateFailure,

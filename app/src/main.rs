@@ -3,7 +3,7 @@ extern crate clap;
 
 mod cli;
 mod options;
-use katalyst;
+use katalyst::Katalyst;
 use options::*;
 
 fn main() {
@@ -15,5 +15,5 @@ fn main() {
 
 fn start(opts: KatalystOptions) {
     simple_logger::init_with_level(opts.log_level).unwrap();
-    katalyst::start_katalyst(&opts.config_file).unwrap();
+    Katalyst::start(&opts.config_file).unwrap();
 }
