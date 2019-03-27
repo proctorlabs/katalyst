@@ -42,7 +42,7 @@ pub trait KatalystAuthenticator: Send + Sync + Debug {
     fn authenticate(&self, state: PipelineState) -> AsyncPipelineResult;
 }
 
-pub fn all() -> AuthenticatorDirectory {
+pub(crate) fn all() -> AuthenticatorDirectory {
     let mut result: AuthenticatorDirectory = HashMap::new();
     let mut authenticators: Vec<Arc<KatalystAuthenticatorBuilder>> = vec![
         always::AlwaysAuthenticatorBuilder::arc(),

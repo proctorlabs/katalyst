@@ -1,7 +1,7 @@
 mod providers;
 mod template_traits;
 
-pub use providers::*;
+use providers::*;
 use regex::Regex;
 use std::collections::HashMap;
 pub use template_traits::KatalystTemplatePlaceholder;

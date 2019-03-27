@@ -49,7 +49,7 @@ impl PipelineState {
     }
 }
 
-pub type HyperResult = Box<Future<Item = Response<Body>, Error = hyper::Error> + Send>;
+pub(crate) type HyperResult = Box<Future<Item = Response<Body>, Error = hyper::Error> + Send>;
 
 pub type AsyncPipelineResult = Box<Future<Item = PipelineState, Error = KatalystError> + Send>;
 pub type PipelineResult = Result<PipelineState, KatalystError>;
@@ -74,7 +74,7 @@ pub trait Pipeline: Send + Sync {
     }
 }
 
-pub struct PipelineRunner {
+pub(crate) struct PipelineRunner {
     pipelines: Arc<[Arc<Pipeline>]>,
 }
 

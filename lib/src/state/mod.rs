@@ -1,6 +1,6 @@
 use crate::authentication::KatalystAuthenticator;
 use crate::balancer::{default_balancer, KatalystBalancer};
-use crate::KatalystTemplatePlaceholder;
+use crate::templates::KatalystTemplatePlaceholder;
 use http::Method;
 use regex::Regex;
 use std::collections::{HashMap, HashSet};

@@ -22,7 +22,7 @@ pub trait KatalystBalancer: Send + Sync + Debug {
     fn lease(&self) -> BalancerLease;
 }
 
-pub fn all() -> BalancerDirectory {
+pub(crate) fn all() -> BalancerDirectory {
     let mut result: BalancerDirectory = HashMap::new();
     let mut balancers: Vec<Arc<KatalystBalancerBuilder>> = vec![
         round_robin::RoundRobinBalancerBuilder::arc(),
@@ -35,6 +35,6 @@ pub fn all() -> BalancerDirectory {
     result
 }
 
-pub fn default_balancer() -> Arc<KatalystBalancer> {
+pub(crate) fn default_balancer() -> Arc<KatalystBalancer> {
     Arc::new(round_robin::RoundRobinBalancer::default())
 }

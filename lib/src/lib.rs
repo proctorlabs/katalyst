@@ -13,20 +13,16 @@ extern crate lazy_static;
 
 //Load mods
 mod app;
-mod authentication;
-mod balancer;
+pub mod authentication;
+pub mod balancer;
 mod common;
-mod config;
-mod error;
+pub mod config;
+pub mod error;
 mod locator;
-mod pipeline;
+pub mod pipeline;
 mod service;
 mod state;
-mod templates;
+pub mod templates;
 
 //Expose consumable APIs
 pub use app::Katalyst;
-pub use error::KatalystError;
-pub use templates::KatalystTemplatePlaceholder;
-pub use templates::KatalystTemplateProvider;
-pub use templates::Providers;

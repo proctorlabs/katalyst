@@ -98,14 +98,14 @@ impl Katalyst {
         self.engine.clone()
     }
 
-    /// Load a configuration file
+    /// Update the Katalyst instance with the configuration from the specified file.
     pub fn load(&self, config_file: &str) -> Result<(), KatalystError> {
         let config = parsers::parse_file(config_file);
         self.engine.update_state(config.build(self.engine())?)?;
         Ok(())
     }
 
-    /// Start the API Gateway
+    /// Run the Katalyst instance. This thread will block and run the async runtime.
     #[inline]
     pub fn run(&mut self) -> Result<(), KatalystError> {
         self.engine.run_service()?;
@@ -113,8 +113,8 @@ impl Katalyst {
         Ok(())
     }
 
-    /// This is the primary entrypoint for the API Gateway.
-    /// config_file must be the path (relative or absolute) to a YAML or JSON configuration file.
+    /// This is a convenience method to start an instance of Katalyst from a configuration file.
+    /// This will load the configuration from the specified file and run the gateway.
     pub fn start(config_file: &str) -> Result<Katalyst, KatalystError> {
         let mut app = Katalyst::default();
         app.load(config_file)?;
