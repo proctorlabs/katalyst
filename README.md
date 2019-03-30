@@ -1,5 +1,7 @@
 # Katalyst API Gateway
 
+[![Crate](https://img.shields.io/crates/v/katalyst.svg)](https://crates.io/crates/katalyst)
+
 ## THIS IS NOT READY FOR USE! This is currently experimental
 
 Katalyst is a high performance and low memory API Gateway. It can be used as either an
