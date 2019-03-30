@@ -9,7 +9,7 @@ impl KatalystAuthenticatorBuilder for AlwaysAuthenticatorBuilder {
         "always"
     }
 
-    fn build(&self) -> Arc<KatalystAuthenticator> {
+    fn build(&self, _: &AuthenticatorBuilder) -> Arc<KatalystAuthenticator> {
         Arc::new(AlwaysAuthenticator {})
     }
 }

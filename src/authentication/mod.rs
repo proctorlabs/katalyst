@@ -1,7 +1,9 @@
 mod always;
+mod http;
 mod never;
 
 use crate::common::KatalystCommonUtilities;
+use crate::config::builder::AuthenticatorBuilder;
 use crate::error::KatalystError;
 use crate::pipeline::{AsyncPipelineResult, PipelineState};
 use std::collections::HashMap;
@@ -35,7 +37,7 @@ impl KatalystAuthenticationInfo {
 pub trait KatalystAuthenticatorBuilder: Send + Sync + Debug {
     fn name(&self) -> &'static str;
 
-    fn build(&self) -> Arc<KatalystAuthenticator>;
+    fn build(&self, config: &AuthenticatorBuilder) -> Arc<KatalystAuthenticator>;
 }
 
 pub trait KatalystAuthenticator: Send + Sync + Debug {
@@ -47,6 +49,7 @@ pub(crate) fn all() -> AuthenticatorDirectory {
     let mut authenticators: Vec<Arc<KatalystAuthenticatorBuilder>> = vec![
         always::AlwaysAuthenticatorBuilder::arc(),
         never::NeverAuthenticatorBuilder::arc(),
+        http::HttpAuthenticatorBuilder::arc(),
     ];
     while let Some(authenticator) = authenticators.pop() {
         result.insert(authenticator.name(), authenticator);

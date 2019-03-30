@@ -1,9 +1,11 @@
-//! # Katalyst
-//!
-//! Katalyst is a fast, simple, and efficient API Gateway.
-//!
-//! Katalyst can be used as a library in other rust projects (FFI for other languages planned)
-//! or as a standalone application.
+/*!
+# Katalyst
+
+Katalyst is a fast, simple, and efficient API Gateway.
+
+Katalyst can be used as a library in other rust projects (FFI for other languages planned)
+or as a standalone application.
+*/
 
 //Define package-wide macro providers
 #[macro_use]
