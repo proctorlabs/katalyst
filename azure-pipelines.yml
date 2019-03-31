@@ -8,18 +8,17 @@ strategy:
   matrix:
     stable:
       rustup_toolchain: stable
+      release: no
     beta:
       rustup_toolchain: beta
+      release: no
     nightly:
       rustup_toolchain: nightly
+      release: no
 
 pool:
   vmImage: "ubuntu-16.04"
 
 steps:
   - template: "_build/install-rust.yml"
-    inputs:
-      rustup_toolchain: $RUSTUP_TOOLCHAIN
   - template: "_build/cargo-build-and-test.yml"
-    inputs:
-      release: no
