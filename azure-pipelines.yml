@@ -1,3 +1,9 @@
+trigger:
+  branches:
+    include: ['*']
+  tags:
+    include: ['*']
+
 strategy:
   matrix:
     stable:
