@@ -1,7 +1,7 @@
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::io::Write;
+use std::io::{Read, Write};
 use cargo_readme;
 
 //This isn't necessary for the library itself, but allows the examples to be easily run.
@@ -42,6 +42,10 @@ fn build_readme() {
         true,
     ).unwrap();
 
-    let mut f = fs::File::create("README.md").unwrap();
-    f.write_all(content.as_bytes()).unwrap();
+    let mut orig = String::new();
+    f.read_to_string(&mut orig).unwrap();
+    if orig != content.as_str().to_string() {
+        let mut f = fs::File::create("README.md").unwrap();
+        f.write_all(content.as_bytes()).unwrap();
+    }
 }

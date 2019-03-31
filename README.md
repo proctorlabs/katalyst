@@ -1,4 +1,7 @@
+[![MIT License](https://img.shields.io/github/license/proctorlabs/katalyst.svg)](LICENSE)
 [![Crate](https://img.shields.io/crates/v/katalyst.svg)](https://crates.io/crates/katalyst)
+[![Build](https://img.shields.io/azure-devops/build/proctorlabs/katalyst/1.svg)](https://dev.azure.com/proctorlabs/katalyst/_build?definitionId=1)
+![Maintenance](https://img.shields.io/badge/maintenance-experimental-blue.svg)
 
 # Katalyst API Gateway
 
@@ -24,7 +27,3 @@ Current features include:
 * Load balancing with Round Robin/Least Connection/Random algorithms
 * Configurable service locator allowing for internal functionality to be overridden
 * Flexible templating for value replacement in downstream requests
-
-## License
-
-* MIT license ([LICENSE-MIT](LICENSE) or https://opensource.org/licenses/MIT)
