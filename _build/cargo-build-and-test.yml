@@ -1,0 +1,8 @@
+parameters:
+  release: no
+
+steps:
+  - script: cargo build --all
+    displayName: Cargo build
+  - script: cargo test --all
+    displayName: Cargo test
