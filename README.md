@@ -1,13 +1,17 @@
-# Katalyst API Gateway
-
 [![Crate](https://img.shields.io/crates/v/katalyst.svg)](https://crates.io/crates/katalyst)
 
-## THIS IS NOT READY FOR USE! This is currently experimental
+# Katalyst API Gateway
+
+**THIS IS NOT READY FOR USE! This is currently experimental**
+
+## Documentation
+
+[Complete Documentation can be found at docs.rs](https://docs.rs/katalyst/)
 
 Katalyst is a high performance and low memory API Gateway. It can be used as either an
-appliance through Docker or it can be used as a rust library.
+appliance through Docker or it can be used as a library.
 
-### Features
+## Features
 
 Katalyst is still an experimental work in progress. Please see the [Roadmap](ROADMAP.md)
 to see expected features.
@@ -21,7 +25,6 @@ Current features include:
 * Configurable service locator allowing for internal functionality to be overridden
 * Flexible templating for value replacement in downstream requests
 
-### Documentation
+## License
 
-While in the current experimental/alpha state, the documentation is likely going to be consistently
-out of date. However, the documentation for the latest published crate can be seen [in the official rustdocs.](https://docs.rs/katalyst/)
+* MIT license ([LICENSE-MIT](LICENSE) or https://opensource.org/licenses/MIT)

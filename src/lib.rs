@@ -1,10 +1,20 @@
 /*!
-# Katalyst
+Katalyst is a high performance and low memory API Gateway. It can be used as either an
+appliance through Docker or it can be used as a library.
 
-Katalyst is a fast, simple, and efficient API Gateway.
+# Features
 
-Katalyst can be used as a library in other rust projects (FFI for other languages planned)
-or as a standalone application.
+Katalyst is still an experimental work in progress. Please see the [Roadmap](ROADMAP.md)
+to see expected features.
+
+Current features include:
+
+* Simple YAML/JSON Gateway configuration
+* Sophisticated regex routing
+* API hooks for authentication modules
+* Load balancing with Round Robin/Least Connection/Random algorithms
+* Configurable service locator allowing for internal functionality to be overridden
+* Flexible templating for value replacement in downstream requests
 */
 
 //Define package-wide macro providers
