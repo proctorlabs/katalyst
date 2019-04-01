@@ -1,0 +1,22 @@
+[tasks.package-deb]
+install_crate = "cargo-deb"
+command = "cargo"
+args = ["deb"]
+
+[tasks.readme]
+install_crate = "cargo-readme"
+command = "cargo"
+args = ["readme", "-o", "README.md"]
+
+[tasks.watch]
+install_crate = "cargo-watch"
+command = "cargo"
+args = ["watch", "-x", "run -- -c examples/config.yml"]
+
+[tasks.build]
+command = "cargo"
+args = ["build"]
+
+[tasks.test]
+command = "cargo"
+args = ["test"]

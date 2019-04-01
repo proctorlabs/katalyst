@@ -21,6 +21,10 @@ fn main() {
     dest_path.push("config.yml");
 
     //Finally, copy the file over
-    println!("Copying {} to {}", src_path.to_str().unwrap(), dest_path.to_str().unwrap());
+    println!(
+        "Copying {} to {}",
+        src_path.to_str().unwrap(),
+        dest_path.to_str().unwrap()
+    );
     fs::copy(src_path, dest_path).unwrap();
 }
