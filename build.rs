@@ -1,8 +1,6 @@
 use std::env;
 use std::fs;
-use std::path::{Path, PathBuf};
-use std::io::{Read, Write};
-use cargo_readme;
+use std::path::Path;
 
 //This isn't necessary for the library itself, but allows the examples to be easily run.
 fn main() {
@@ -25,27 +23,4 @@ fn main() {
     //Finally, copy the file over
     println!("Copying {} to {}", src_path.to_str().unwrap(), dest_path.to_str().unwrap());
     fs::copy(src_path, dest_path).unwrap();
-    build_readme();
-}
-
-
-fn build_readme() {
-    let mut f = fs::File::open("src/lib.rs").unwrap();
-    let mut t = fs::File::open("README.tpl").unwrap();
-    let content = cargo_readme::generate_readme(
-        &PathBuf::from("./"),
-        &mut f,
-        Some(&mut t),
-        false,
-        false,
-        false,
-        true,
-    ).unwrap();
-
-    let mut orig = String::new();
-    f.read_to_string(&mut orig).unwrap();
-    if orig != content.as_str().to_string() {
-        let mut f = fs::File::create("README.md").unwrap();
-        f.write_all(content.as_bytes()).unwrap();
-    }
 }
