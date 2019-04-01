@@ -1,0 +1,6 @@
+steps:
+  - script: |
+      sed -i 'Cargo.toml' -e 's/version = "0.1.3"/version = "$(build_name)"/'
+      cargo publish --token $(cargo.login)
+    displayName: Publish Crate
+    condition: and(eq( variables['is_tag'], 'True' ), eq( variables['rustup_toolchain'], 'stable' ))

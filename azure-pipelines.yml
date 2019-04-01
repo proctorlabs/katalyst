@@ -8,17 +8,19 @@ strategy:
   matrix:
     stable:
       rustup_toolchain: stable
-      release: no
     beta:
       rustup_toolchain: beta
-      release: no
     nightly:
       rustup_toolchain: nightly
-      release: no
+
+variables:
+  build_name: "$(Build.SourceBranchName)"
+  is_tag: "${{ startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}"
 
 pool:
   vmImage: "ubuntu-16.04"
 
 steps:
-  - template: "_build/install-rust.yml"
-  - template: "_build/cargo-build-and-test.yml"
+  - template: ".build/install-rust.yml"
+  - template: ".build/cargo-build-and-test.yml"
+  - template: ".build/publish-crate.yml"

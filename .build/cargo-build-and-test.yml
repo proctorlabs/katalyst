@@ -1,0 +1,5 @@
+steps:
+  - script: |
+      cargo build --all
+      cargo test --all
+    displayName: Run cargo build and tests
