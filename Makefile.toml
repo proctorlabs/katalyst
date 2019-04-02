@@ -1,22 +1,85 @@
-[tasks.package-deb]
+[tasks.setup]
+description = "Setup local development environment"
+command = "./util/scripts/setup.sh"
+
+[tasks.deb]
+description = "Create a debian package"
 install_crate = "cargo-deb"
 command = "cargo"
 args = ["deb"]
 
 [tasks.readme]
+description = "Regenerate the README.md from the doc notes in lib.rs"
 install_crate = "cargo-readme"
 command = "cargo"
 args = ["readme", "-o", "README.md"]
 
 [tasks.watch]
+description = "Run the project, monitor for changes and rerun when changed"
 install_crate = "cargo-watch"
 command = "cargo"
 args = ["watch", "-x", "run -- -c examples/config.yml"]
 
 [tasks.build]
+description = "Build the project"
 command = "cargo"
 args = ["build"]
 
 [tasks.test]
+description = "Run the unit tests"
 command = "cargo"
 args = ["test"]
+
+[tasks.build-release]
+description = "Build the project with optimizations"
+command = "cargo"
+args = ["build", "--release"]
+
+[tasks.start-nginx-host]
+description = "Run nginx in a docker container"
+script = [
+    "docker run -d --name nginx-test -v $(pwd)/util/benchmark/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro -p 9999:80 nginx"
+]
+
+[tasks.stop-nginx-host]
+description = "Stop nginx container"
+script = [
+    "docker stop nginx-test || true",
+    "docker rm nginx-test || true"
+]
+
+[tasks.start-katalyst-host]
+description = "Start katalyst in container"
+dependencies = [
+    "build-release"
+]
+script = [
+    "docker run -d --name katalyst-test --net host -v $(pwd)/target/release/katalyst:/opt/katalyst:ro -v $(pwd)/examples/config.yml:/opt/config.yml:ro debian:stable-slim /opt/katalyst -c /opt/config.yml -l error"
+]
+
+[tasks.stop-katalyst-host]
+description = "Stop katalyst container"
+script = [
+    "docker stop katalyst-test || true",
+    "docker rm katalyst-test || true"
+]
+
+[tasks.run-benchmark-client]
+description = "Build/Run the benchmark client"
+script = [
+    "docker build -t bench-client -f util/benchmark/Dockerfile util/",
+    "echo 'running benchmark against nginx host'",
+    "docker run -it --rm --net=host bench-client -c 500 -n 300000 -k -G 16 -r http://127.0.0.1:9999",
+    "echo 'running benchmark against katalyst host'",
+    "docker run -it --rm --net=host bench-client -c 500 -n 300000 -k -G 16 -r http://127.0.0.1:8000"
+]
+
+[tasks.benchmark]
+description = "Run the full benchmark workflow"
+dependencies = [
+    "start-nginx-host",
+    "start-katalyst-host",
+    "run-benchmark-client",
+    "stop-katalyst-host",
+    "stop-nginx-host"
+]

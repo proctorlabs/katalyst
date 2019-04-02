@@ -2,6 +2,10 @@ listener:
   interface: "0.0.0.0:8000"
 
 hosts:
+  nginx:
+    balancer: round_robin
+    servers:
+      - "http://localhost:9999"
   echo:
     balancer: least_connection
     servers:
@@ -9,12 +13,21 @@ hosts:
       - "https://postman-echo.com/get?host=host2&"
 
 routes:
+  - pattern: "^/$"
+    methods:
+      - get
+    downstream:
+      host: nginx
+      path: "/"
+    authenticators:
+      - backend: always
+
   - pattern: "^/test/(?P<cap>.*)$"
     methods:
       - get
     downstream:
       host: echo
-      path: "env_user={{env=>USER}}&regex_cap={{regex=>cap}}&method={{http=>method}}&ip={{http=>ip}}&header={{header=>user-agent}}&claim={{claim=>KatalystAuthenticator}}"
+      path: "regex_cap={{regex=>cap}}&method={{http=>method}}&ip={{http=>ip}}&header={{header=>user-agent}}&claim={{claim=>KatalystAuthenticator}}"
     authenticators:
       - backend: http
         url: "https://postman-echo.com/get?thing=something"

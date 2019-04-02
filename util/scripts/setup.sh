@@ -3,7 +3,7 @@ ROOT=$(git rev-parse --show-toplevel)
 TARGET=${ROOT}/.git/hooks/pre-commit
 
 echo 'Installing cargo-make...'
-(cargo install cargo-make || true)
+(cargo install -q cargo-make || true)
 
 echo 'Setting up git commit hooks...'
 cat > $TARGET <<EOF
