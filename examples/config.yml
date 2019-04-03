@@ -19,8 +19,6 @@ routes:
     downstream:
       host: nginx
       path: "/"
-    authenticators:
-      - backend: always
 
   - pattern: "^/test/(?P<cap>.*)$"
     methods:
