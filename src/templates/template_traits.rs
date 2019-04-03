@@ -1,3 +1,4 @@
+use super::StringTemplate;
 use crate::pipeline::PipelineState;
 use crate::state::KatalystState;
 use std::fmt::Debug;
@@ -44,5 +45,19 @@ impl KatalystTemplatePlaceholder for String {
 
     fn duplicate(&self) -> Box<KatalystTemplatePlaceholder> {
         Box::new(self.to_owned())
+    }
+}
+
+pub trait Templatizable {
+    fn get_value(&self, state: &PipelineState, config: &KatalystState) -> String;
+}
+
+impl Templatizable for StringTemplate {
+    fn get_value(&self, state: &PipelineState, config: &KatalystState) -> String {
+        let mut result = String::new();
+        for part in self.iter() {
+            result.push_str(&part.get_value(state, config));
+        }
+        result
     }
 }

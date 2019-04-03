@@ -6,6 +6,9 @@ use regex::Regex;
 use std::collections::HashMap;
 pub use template_traits::KatalystTemplatePlaceholder;
 pub use template_traits::KatalystTemplateProvider;
+pub use template_traits::Templatizable;
+
+pub type StringTemplate = Vec<Box<KatalystTemplatePlaceholder>>;
 
 const METHOD: &str = r"\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*";
 const TEMPLATE: &str = r"\{\{\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*}}";
@@ -58,8 +61,29 @@ impl Providers {
         }
     }
 
-    pub fn process_template(&self, template: &str) -> Vec<Box<KatalystTemplatePlaceholder>> {
-        let mut result_placeholders: Vec<Box<KatalystTemplatePlaceholder>> = vec![];
+    pub fn process_template_map(
+        &self,
+        template: &Option<HashMap<String, String>>,
+    ) -> Option<HashMap<String, StringTemplate>> {
+        match template {
+            Some(m) => Some(
+                m.iter()
+                    .map(|(k, v)| (k.to_string(), self.process_template(&v)))
+                    .collect(),
+            ),
+            None => None,
+        }
+    }
+
+    pub fn process_template_option(&self, template: &Option<String>) -> Option<StringTemplate> {
+        match template {
+            Some(s) => Some(self.process_template(&s)),
+            None => None,
+        }
+    }
+
+    pub fn process_template(&self, template: &str) -> StringTemplate {
+        let mut result_placeholders: StringTemplate = vec![];
         if TEMPLATE_MATCHER.is_match(template) {
             let mut last_segment_index = 0;
             for cap in TEMPLATE_MATCHER.find_iter(template) {

@@ -1,7 +1,10 @@
 mod forwarding_headers;
 mod hop_headers;
 use crate::pipeline::*;
+use crate::templates::Templatizable;
+use http::header::{HeaderName, HeaderValue};
 use hyper::Request;
+use std::str::FromStr;
 
 #[derive(Default)]
 pub struct Builder {}
@@ -28,21 +31,52 @@ impl Pipeline for Builder {
         };
         let mut path = balancer_lease.to_string();
         state.context.balancer_lease = Some(balancer_lease);
+        path.push_str(&downstream.path.get_value(&state, &config));
 
-        for part in downstream.path_parts.iter() {
-            path.push_str(&part.get_value(&state, &config));
+        if let Some(query) = &downstream.query {
+            path.push_str("?");
+            for (key, val) in query.iter() {
+                path.push_str(&key);
+                path.push_str("=");
+                path.push_str(&val.get_value(&state, &config));
+                path.push_str("&");
+            }
+            path.truncate(path.len() - 1);
         }
 
-        let (mut parts, body) = state.upstream.request.unwrap().into_parts();
+        let (mut parts, mut body) = state.upstream.request.unwrap().into_parts();
+        state.upstream.request = None;
         debug!("Routing request to {}", path);
+
         parts.uri = path.parse().unwrap();
         forwarding_headers::add_forwarding_headers(&mut parts.headers, state.remote_addr);
         hop_headers::strip_hop_headers(&mut parts.headers);
-        let client_req = Request::from_parts(parts, body);
 
+        if let Some(method) = &downstream.method {
+            parts.method = http::Method::from_bytes(method.to_uppercase().as_bytes()).unwrap();
+        }
+
+        if let Some(headers) = &downstream.headers {
+            for (key, val) in headers.iter() {
+                while parts.headers.contains_key(key) {
+                    parts.headers.remove(key);
+                }
+                let hdr_val = val.get_value(&state, &config);
+                if let (Ok(hdr), Ok(hdr_key)) =
+                    (HeaderValue::from_str(&hdr_val), HeaderName::from_str(&key))
+                {
+                    parts.headers.append(hdr_key, hdr);
+                }
+            }
+        }
+
+        if let Some(body_str) = &downstream.body {
+            body = hyper::Body::from(body_str.get_value(&state, &config));
+        }
+
+        let client_req = Request::from_parts(parts, body);
         state.upstream.request = None;
         state.downstream.request = Some(client_req);
-
         Ok(state)
     }
 
