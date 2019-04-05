@@ -31,14 +31,14 @@ impl Pipeline for Builder {
         };
         let mut path = balancer_lease.to_string();
         state.context.balancer_lease = Some(balancer_lease);
-        path.push_str(&downstream.path.get_value(&state, &config));
+        path.push_str(&downstream.path.get_value(&state));
 
         if let Some(query) = &downstream.query {
             path.push_str("?");
             for (key, val) in query.iter() {
                 path.push_str(&key);
                 path.push_str("=");
-                path.push_str(&val.get_value(&state, &config));
+                path.push_str(&val.get_value(&state));
                 path.push_str("&");
             }
             path.truncate(path.len() - 1);
@@ -53,7 +53,7 @@ impl Pipeline for Builder {
         hop_headers::strip_hop_headers(&mut parts.headers);
 
         if let Some(method) = &downstream.method {
-            parts.method = http::Method::from_bytes(method.to_uppercase().as_bytes()).unwrap();
+            parts.method = method.clone();
         }
 
         if let Some(headers) = &downstream.headers {
@@ -61,7 +61,7 @@ impl Pipeline for Builder {
                 while parts.headers.contains_key(key) {
                     parts.headers.remove(key);
                 }
-                let hdr_val = val.get_value(&state, &config);
+                let hdr_val = val.get_value(&state);
                 if let (Ok(hdr), Ok(hdr_key)) =
                     (HeaderValue::from_str(&hdr_val), HeaderName::from_str(&key))
                 {
@@ -71,7 +71,7 @@ impl Pipeline for Builder {
         }
 
         if let Some(body_str) = &downstream.body {
-            body = hyper::Body::from(body_str.get_value(&state, &config));
+            body = hyper::Body::from(body_str.get_value(&state));
         }
 
         let client_req = Request::from_parts(parts, body);

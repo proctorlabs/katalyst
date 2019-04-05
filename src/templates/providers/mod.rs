@@ -5,7 +5,6 @@ mod http_provider;
 mod regex_provider;
 
 use crate::pipeline::PipelineState;
-use crate::state::KatalystState;
 use crate::templates::KatalystTemplatePlaceholder;
 
 pub use claim_provider::ClaimTemplateProvider;
@@ -28,7 +27,7 @@ impl PrecomputedPlaceholder {
 }
 
 impl KatalystTemplatePlaceholder for PrecomputedPlaceholder {
-    fn get_value(&self, _state: &PipelineState, _config: &KatalystState) -> String {
+    fn get_value(&self, _state: &PipelineState) -> String {
         self.result.to_string()
     }
 

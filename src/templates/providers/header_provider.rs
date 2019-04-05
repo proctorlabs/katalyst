@@ -1,5 +1,4 @@
 use crate::pipeline::PipelineState;
-use crate::state::KatalystState;
 use crate::templates::{KatalystTemplatePlaceholder, KatalystTemplateProvider};
 
 pub struct HeaderTemplateProvider {}
@@ -20,7 +19,7 @@ struct HeaderTemplatePlaceholder {
 }
 
 impl KatalystTemplatePlaceholder for HeaderTemplatePlaceholder {
-    fn get_value(&self, state: &PipelineState, _config: &KatalystState) -> String {
+    fn get_value(&self, state: &PipelineState) -> String {
         match &state.upstream.request {
             Some(s) => match s.headers().get(&self.header) {
                 Some(t) => t.to_str().unwrap_or_default().to_string(),
