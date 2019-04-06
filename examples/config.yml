@@ -30,6 +30,7 @@ routes:
         regex_cap: "{{regex=>cap}}"
         method: "{{http=>method}}"
         ip: "{{http=>ip}}"
+      headers:
         header: "{{header=>user-agent}}"
         claim: "{{claim=>KatalystAuthenticator}}"
     authenticators:

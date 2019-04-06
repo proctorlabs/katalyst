@@ -19,49 +19,82 @@ pub struct Downstream {
 }
 
 impl Downstream {
-    pub fn build_request(
+    pub fn transformer(
         &self,
-        request: Request<Body>,
         state: &PipelineState,
-        lease: &str,
-    ) -> Result<Request<Body>, KatalystError> {
-        let mut path = lease.to_string();
-        path.push_str(&self.path.get_value(&state));
-
+        lease_str: String,
+    ) -> Result<DownstreamTransformer, KatalystError> {
+        let mut uri = lease_str;
+        uri.push_str(&self.path.get_value(state));
         if let Some(query) = &self.query {
-            path.push_str("?");
+            uri.push_str("?");
             for (key, val) in query.iter() {
-                path.push_str(&key);
-                path.push_str("=");
-                path.push_str(&val.get_value(&state));
-                path.push_str("&");
+                uri.push_str(&key);
+                uri.push_str("=");
+                uri.push_str(&val.get_value(&state));
+                uri.push_str("&");
             }
-            path.truncate(path.len() - 1);
+            uri.truncate(uri.len() - 1);
+        };
+
+        let method = self.method.clone();
+
+        let headers = match &self.headers {
+            Some(h) => Some(
+                h.iter()
+                    .map(|(key, val)| (key.to_string(), val.get_value(state)))
+                    .collect(),
+            ),
+            None => None,
+        };
+
+        let body = match &self.body {
+            Some(b) => Some(b.get_value(&state)),
+            None => None,
+        };
+
+        Ok(DownstreamTransformer {
+            uri: uri,
+            method: method,
+            headers: headers,
+            body: body,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct DownstreamTransformer {
+    pub uri: String,
+    pub method: Option<Method>,
+    pub headers: Option<HashMap<String, String>>,
+    pub body: Option<String>,
+}
+
+impl DownstreamTransformer {
+    pub fn transform(self, req: Request<Body>) -> Result<Request<Body>, KatalystError> {
+        let (mut parts, mut body) = req.into_parts();
+        parts.uri = self.uri.parse().unwrap();
+
+        if let Some(method) = self.method {
+            parts.method = method;
         }
 
-        let (mut parts, mut body) = request.into_parts();
-        parts.uri = path.parse().unwrap();
-
-        if let Some(method) = &self.method {
-            parts.method = method.clone();
+        if let Some(body_str) = self.body {
+            body = hyper::Body::from(body_str);
         }
 
-        if let Some(headers) = &self.headers {
-            for (key, val) in headers.iter() {
-                while parts.headers.contains_key(key) {
-                    parts.headers.remove(key);
-                }
-                let hdr_val = val.get_value(&state);
-                if let (Ok(hdr), Ok(hdr_key)) =
-                    (HeaderValue::from_str(&hdr_val), HeaderName::from_str(&key))
-                {
-                    parts.headers.append(hdr_key, hdr);
+        if let Some(headers) = self.headers {
+            for (key_str, val_str) in headers.iter() {
+                if let (Ok(key), Ok(val)) = (
+                    HeaderName::from_str(&key_str),
+                    HeaderValue::from_str(val_str),
+                ) {
+                    while parts.headers.contains_key(key_str) {
+                        parts.headers.remove(key_str);
+                    }
+                    parts.headers.append(key, val);
                 }
             }
-        }
-
-        if let Some(body_str) = &self.body {
-            body = hyper::Body::from(body_str.get_value(&state));
         }
 
         Ok(Request::from_parts(parts, body))
