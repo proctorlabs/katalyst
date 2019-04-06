@@ -1,6 +1,6 @@
-//! # Katalyst Configuration
-//!
-//! Out of the box, Katalyst supports configuration using YAML or JSON
+/*!
+Configuration of Katalyst is available in YAML and JSON formats.
+*/
 
 pub mod builder;
 pub mod parsers;

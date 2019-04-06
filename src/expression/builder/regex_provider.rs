@@ -1,5 +1,5 @@
+use crate::expression::*;
 use crate::pipeline::PipelineState;
-use crate::templates::{KatalystTemplatePlaceholder, KatalystTemplateProvider};
 use std::str::FromStr;
 
 pub struct RegexTemplateProvider {}

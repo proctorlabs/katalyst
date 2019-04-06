@@ -4,8 +4,8 @@ mod header_provider;
 mod http_provider;
 mod regex_provider;
 
+use crate::expression::*;
 use crate::pipeline::PipelineState;
-use crate::templates::KatalystTemplatePlaceholder;
 
 pub use claim_provider::ClaimTemplateProvider;
 pub use env_provider::EnvTemplateProvider;

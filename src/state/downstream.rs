@@ -1,6 +1,6 @@
 use crate::error::KatalystError;
+use crate::expression::*;
 use crate::pipeline::PipelineState;
-use crate::templates::{StringTemplate, Templatizable};
 use http::header::{HeaderName, HeaderValue};
 use http::Method;
 use hyper::Body;

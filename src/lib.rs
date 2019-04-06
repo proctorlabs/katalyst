@@ -30,11 +30,11 @@ pub mod balancer;
 mod common;
 pub mod config;
 pub mod error;
+pub mod expression;
 mod locator;
 pub mod pipeline;
 mod service;
 mod state;
-pub mod templates;
 
 //Expose consumable APIs
 pub use app::Katalyst;

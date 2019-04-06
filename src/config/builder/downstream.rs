@@ -1,8 +1,8 @@
 use super::Builder;
 use crate::app::KatalystEngine;
 use crate::error::KatalystError;
+use crate::expression::Providers;
 use crate::state::Downstream;
-use crate::templates::Providers;
 use http::Method;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

@@ -1,5 +1,5 @@
 use super::PrecomputedPlaceholder;
-use crate::templates::{KatalystTemplatePlaceholder, KatalystTemplateProvider};
+use crate::expression::*;
 
 pub struct EnvTemplateProvider {}
 
