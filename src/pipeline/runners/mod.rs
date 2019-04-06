@@ -5,7 +5,7 @@ mod matcher;
 mod sender;
 
 use super::Pipeline;
-use crate::common::*;
+use crate::prelude::*;
 use authentication::Authenticator;
 use builder::Builder;
 use logger::Logger;

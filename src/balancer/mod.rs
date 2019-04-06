@@ -2,7 +2,7 @@ mod least_connection;
 mod random;
 mod round_robin;
 
-use crate::common::KatalystCommonUtilities;
+use crate::prelude::*;
 use crate::error::KatalystError;
 use std::collections::HashMap;
 use std::fmt::Debug;

@@ -10,9 +10,9 @@ impl Pipeline for Builder {
         "builder"
     }
 
-    fn prepare_request(&self, mut state: PipelineState) -> PipelineResult {
-        let config = state.engine.get_state()?;
-        let downstream = match &state.context.matched_route {
+    fn prepare_request(&self, mut ctx: Context) -> PipelineResult {
+        let config = ctx.engine.get_state()?;
+        let downstream = match &ctx.context.matched_route {
             Some(route) => &route.downstream,
             None => {
                 return Err(KatalystError::FeatureUnavailable);
@@ -26,29 +26,26 @@ impl Pipeline for Builder {
             }
         };
 
-        let transformer = downstream.transformer(&state, balancer_lease.to_string())?;
-        state.context.balancer_lease = Some(balancer_lease);
+        let transformer = downstream.transformer(&ctx, balancer_lease.to_string())?;
+        ctx.context.balancer_lease = Some(balancer_lease);
 
-        let request = match state.upstream.request {
+        let request = match ctx.upstream.request {
             Some(req) => req,
             None => return Err(KatalystError::FeatureUnavailable),
         };
 
         let mut client_req = transformer.transform(request)?;
-        state.upstream.request = None;
-        forwarding_headers::add_forwarding_headers(
-            &mut client_req.headers_mut(),
-            state.remote_addr,
-        );
+        ctx.upstream.request = None;
+        forwarding_headers::add_forwarding_headers(&mut client_req.headers_mut(), ctx.remote_addr);
         hop_headers::strip_hop_headers(&mut client_req.headers_mut());
-        state.downstream.request = Some(client_req);
-        Ok(state)
+        ctx.downstream.request = Some(client_req);
+        Ok(ctx)
     }
 
-    fn process_response(&self, mut state: PipelineState) -> PipelineState {
-        if let Some(r) = &mut state.upstream.response {
+    fn process_response(&self, mut ctx: Context) -> Context {
+        if let Some(r) = &mut ctx.upstream.response {
             hop_headers::strip_hop_headers(r.headers_mut());
         }
-        state
+        ctx
     }
 }

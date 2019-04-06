@@ -9,24 +9,23 @@ impl Pipeline for Logger {
         "logger"
     }
 
-    fn prepare_request(&self, mut state: PipelineState) -> PipelineResult {
-        state
-            .context
+    fn prepare_request(&self, mut ctx: Context) -> PipelineResult {
+        ctx.context
             .timestamps
             .insert("started".to_string(), Instant::now());
-        match &state.upstream.request {
+        match &ctx.upstream.request {
             Some(r) => info!("Request started to: {:?}", r.uri().path()),
             None => warn!("Request started with no request in context!!"),
         }
-        Ok(state)
+        Ok(ctx)
     }
 
-    fn process_response(&self, state: PipelineState) -> PipelineState {
-        let started = state.context.timestamps["started"];
+    fn process_response(&self, ctx: Context) -> Context {
+        let started = ctx.context.timestamps["started"];
         let duration = Instant::now().duration_since(started);
         let total_ms = u64::from(duration.subsec_millis()) + (duration.as_secs() * 1000);
         debug!("Request processed in {:?}ms", total_ms);
-        state
+        ctx
     }
 
     fn process_error(&self, err: KatalystError) -> KatalystError {

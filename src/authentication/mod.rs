@@ -2,10 +2,10 @@ mod always;
 mod http;
 mod never;
 
-use crate::common::KatalystCommonUtilities;
 use crate::config::builder::AuthenticatorBuilder;
 use crate::error::KatalystError;
-use crate::pipeline::{AsyncPipelineResult, PipelineState};
+use crate::pipeline::AsyncPipelineResult;
+use crate::prelude::*;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::sync::Arc;
@@ -41,7 +41,7 @@ pub trait KatalystAuthenticatorBuilder: Send + Sync + Debug {
 }
 
 pub trait KatalystAuthenticator: Send + Sync + Debug {
-    fn authenticate(&self, state: PipelineState) -> AsyncPipelineResult;
+    fn authenticate(&self, ctx: Context) -> AsyncPipelineResult;
 }
 
 pub(crate) fn all() -> AuthenticatorDirectory {

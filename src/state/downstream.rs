@@ -1,6 +1,6 @@
 use crate::error::KatalystError;
 use crate::expression::*;
-use crate::pipeline::PipelineState;
+use crate::prelude::*;
 use http::header::{HeaderName, HeaderValue};
 use http::Method;
 use hyper::Body;
@@ -21,17 +21,17 @@ pub struct Downstream {
 impl Downstream {
     pub fn transformer(
         &self,
-        state: &PipelineState,
+        ctx: &Context,
         lease_str: String,
     ) -> Result<DownstreamTransformer, KatalystError> {
         let mut uri = lease_str;
-        uri.push_str(&self.path.get_value(state));
+        uri.push_str(&self.path.get_value(ctx));
         if let Some(query) = &self.query {
             uri.push_str("?");
             for (key, val) in query.iter() {
                 uri.push_str(&key);
                 uri.push_str("=");
-                uri.push_str(&val.get_value(&state));
+                uri.push_str(&val.get_value(&ctx));
                 uri.push_str("&");
             }
             uri.truncate(uri.len() - 1);
@@ -42,14 +42,14 @@ impl Downstream {
         let headers = match &self.headers {
             Some(h) => Some(
                 h.iter()
-                    .map(|(key, val)| (key.to_string(), val.get_value(state)))
+                    .map(|(key, val)| (key.to_string(), val.get_value(ctx)))
                     .collect(),
             ),
             None => None,
         };
 
         let body = match &self.body {
-            Some(b) => Some(b.get_value(&state)),
+            Some(b) => Some(b.get_value(&ctx)),
             None => None,
         };
 

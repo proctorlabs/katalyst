@@ -1,4 +1,5 @@
 use crate::authentication::*;
+use crate::prelude::*;
 use futures::future::err;
 
 #[derive(Default, Debug)]
@@ -18,9 +19,7 @@ impl KatalystAuthenticatorBuilder for NeverAuthenticatorBuilder {
 pub struct NeverAuthenticator {}
 
 impl KatalystAuthenticator for NeverAuthenticator {
-    fn authenticate(&self, _: PipelineState) -> AsyncPipelineResult {
-        Box::new(err::<PipelineState, KatalystError>(
-            KatalystError::Unauthorized,
-        ))
+    fn authenticate(&self, _: Context) -> AsyncPipelineResult {
+        Box::new(err::<Context, KatalystError>(KatalystError::Unauthorized))
     }
 }

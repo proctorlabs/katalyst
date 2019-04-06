@@ -1,4 +1,5 @@
 use crate::authentication::*;
+use crate::prelude::*;
 use futures::future::ok;
 
 #[derive(Default, Debug)]
@@ -18,10 +19,10 @@ impl KatalystAuthenticatorBuilder for AlwaysAuthenticatorBuilder {
 pub struct AlwaysAuthenticator {}
 
 impl KatalystAuthenticator for AlwaysAuthenticator {
-    fn authenticate(&self, mut state: PipelineState) -> AsyncPipelineResult {
+    fn authenticate(&self, mut ctx: Context) -> AsyncPipelineResult {
         let mut result = KatalystAuthenticationInfo::default();
         result.add_claim("KatalystAuthenticator".to_string(), "always".to_string());
-        state.context.authentication = Some(result);
-        Box::new(ok::<PipelineState, KatalystError>(state))
+        ctx.context.authentication = Some(result);
+        Box::new(ok::<Context, KatalystError>(ctx))
     }
 }

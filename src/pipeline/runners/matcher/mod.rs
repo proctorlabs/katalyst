@@ -8,12 +8,12 @@ impl Pipeline for Matcher {
         "matcher"
     }
 
-    fn prepare_request(&self, mut state: PipelineState) -> PipelineResult {
-        let request = match &state.upstream.request {
+    fn prepare_request(&self, mut ctx: Context) -> PipelineResult {
+        let request = match &ctx.upstream.request {
             Some(r) => r,
             None => return Err(KatalystError::NotFound),
         };
-        let config = state.engine.get_state()?;
+        let config = ctx.engine.get_state()?;
         for route in config.routes.iter() {
             let method_match = match &route.methods {
                 Some(methods) => {
@@ -35,10 +35,10 @@ impl Pipeline for Matcher {
                         );
                     }
                 }
-                state.context.matched_route = Some(route.clone());
-                state.context.captures = Some(cap_map);
+                ctx.context.matched_route = Some(route.clone());
+                ctx.context.captures = Some(cap_map);
                 debug!("Request has been matched to route!");
-                return Ok(state);
+                return Ok(ctx);
             }
         }
         Err(KatalystError::NotFound)

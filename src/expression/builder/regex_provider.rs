@@ -1,5 +1,5 @@
 use crate::expression::*;
-use crate::pipeline::PipelineState;
+use crate::prelude::*;
 use std::str::FromStr;
 
 pub struct RegexTemplateProvider {}
@@ -20,8 +20,8 @@ struct RegexTemplatePlaceholder {
 }
 
 impl KatalystTemplatePlaceholder for RegexTemplatePlaceholder {
-    fn get_value(&self, state: &PipelineState) -> String {
-        match &state.context.captures {
+    fn get_value(&self, ctx: &Context) -> String {
+        match &ctx.context.captures {
             Some(caps) => {
                 let res = caps.get(&self.val).unwrap_or_else(|| self.none());
                 String::from_str(res).unwrap_or_default().to_string()

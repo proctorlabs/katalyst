@@ -1,5 +1,5 @@
 use crate::expression::*;
-use crate::pipeline::PipelineState;
+use crate::prelude::*;
 
 pub struct ClaimTemplateProvider {}
 
@@ -19,8 +19,8 @@ struct ClaimTemplatePlaceholder {
 }
 
 impl KatalystTemplatePlaceholder for ClaimTemplatePlaceholder {
-    fn get_value(&self, state: &PipelineState) -> String {
-        if let Some(auth_info) = &state.context.authentication {
+    fn get_value(&self, ctx: &Context) -> String {
+        if let Some(auth_info) = &ctx.context.authentication {
             auth_info.get_claim(self.claim_key.to_string())
         } else {
             self.none().to_string()

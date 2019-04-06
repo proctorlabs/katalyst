@@ -1,7 +1,7 @@
-mod int;
+mod container;
 
-use int::ArcObject;
-pub use int::Locatable;
+use container::ArcObject;
+pub use container::Locatable;
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
 use std::sync::Arc;

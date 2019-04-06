@@ -11,28 +11,28 @@ impl Pipeline for Sender {
         "sender"
     }
 
-    fn prepare_request_future(&self, mut state: PipelineState) -> AsyncPipelineResult {
-        let dsr = match state.downstream.request {
+    fn prepare_request_future(&self, mut ctx: Context) -> AsyncPipelineResult {
+        let dsr = match ctx.downstream.request {
             Some(s) => {
-                state.downstream.request = None;
+                ctx.downstream.request = None;
                 s
             }
             None => {
-                return Box::new(err::<PipelineState, KatalystError>(
+                return Box::new(err::<Context, KatalystError>(
                     KatalystError::FeatureUnavailable,
                 ));
             }
         };
-        let client: Arc<HttpsClient> = state.engine.locate().unwrap();
+        let client: Arc<HttpsClient> = ctx.engine.locate().unwrap();
         let res = client.request(dsr);
         Box::new(res.then(|response| match response {
             Ok(r) => {
-                state.upstream.response = Some(r);
-                ok::<PipelineState, KatalystError>(state)
+                ctx.upstream.response = Some(r);
+                ok::<Context, KatalystError>(ctx)
             }
             Err(e) => {
                 warn!("Could not send upstream request! Caused by: {:?}", e);
-                err::<PipelineState, KatalystError>(KatalystError::GatewayTimeout)
+                err::<Context, KatalystError>(KatalystError::GatewayTimeout)
             }
         }))
     }

@@ -1,72 +1,34 @@
 mod runners;
 
 use crate::app::KatalystEngine;
-use crate::authentication::KatalystAuthenticationInfo;
 use crate::error::KatalystError;
-use crate::state::Route;
+use crate::prelude::*;
+
 use futures::future::*;
 use futures::Future;
 use hyper::{Body, Request, Response};
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;
-use std::time::Instant;
-
-#[derive(Default)]
-pub struct RequestResponse {
-    pub request: Option<Request<Body>>,
-    pub response: Option<Response<Body>>,
-}
-
-#[derive(Default)]
-pub struct RequestContext {
-    pub matched_route: Option<Arc<Route>>,
-    pub captures: Option<HashMap<String, String>>,
-    pub timestamps: HashMap<String, Instant>,
-    pub authentication: Option<KatalystAuthenticationInfo>,
-    pub balancer_lease: Option<Arc<String>>,
-}
-
-pub struct PipelineState {
-    pub upstream: RequestResponse,
-    pub downstream: RequestResponse,
-    pub context: RequestContext,
-    pub remote_addr: SocketAddr,
-    pub engine: Arc<KatalystEngine>,
-}
-
-impl PipelineState {
-    fn new(request: Request<Body>, engine: Arc<KatalystEngine>, remote: SocketAddr) -> Self {
-        let mut state = PipelineState {
-            upstream: RequestResponse::default(),
-            downstream: RequestResponse::default(),
-            context: RequestContext::default(),
-            engine: engine,
-            remote_addr: remote,
-        };
-        state.upstream.request = Some(request);
-        state
-    }
-}
 
 pub(crate) type HyperResult = Box<Future<Item = Response<Body>, Error = hyper::Error> + Send>;
 
-pub type AsyncPipelineResult = Box<Future<Item = PipelineState, Error = KatalystError> + Send>;
-pub type PipelineResult = Result<PipelineState, KatalystError>;
+pub type AsyncPipelineResult = Box<Future<Item = Context, Error = KatalystError> + Send>;
+pub type PipelineResult = Result<Context, KatalystError>;
 
 pub trait Pipeline: Send + Sync {
     fn name(&self) -> &'static str;
 
-    fn prepare_request_future(&self, state: PipelineState) -> AsyncPipelineResult {
-        Box::new(result(self.prepare_request(state)))
+    fn prepare_request_future(&self, ctx: Context) -> AsyncPipelineResult {
+        Box::new(result(self.prepare_request(ctx)))
     }
 
-    fn prepare_request(&self, state: PipelineState) -> PipelineResult {
-        Ok(state)
+    fn prepare_request(&self, ctx: Context) -> PipelineResult {
+        Ok(ctx)
     }
 
-    fn process_response(&self, state: PipelineState) -> PipelineState {
-        state
+    fn process_response(&self, ctx: Context) -> Context {
+        ctx
     }
 
     fn process_error(&self, err: KatalystError) -> KatalystError {
@@ -92,7 +54,7 @@ impl PipelineRunner {
         engine: Arc<KatalystEngine>,
     ) -> HyperResult {
         let mut result: AsyncPipelineResult = Box::new(lazy(move || {
-            ok::<PipelineState, KatalystError>(PipelineState::new(request, engine, remote_addr))
+            ok::<Context, KatalystError>(Context::new(request, engine, remote_addr))
         }));
         for pip in self.pipelines.iter() {
             result = Box::new(result.and_then({

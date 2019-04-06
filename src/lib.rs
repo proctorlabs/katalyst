@@ -27,12 +27,13 @@ extern crate lazy_static;
 mod app;
 pub mod authentication;
 pub mod balancer;
-mod common;
 pub mod config;
+pub mod context;
 pub mod error;
 pub mod expression;
 mod locator;
 pub mod pipeline;
+mod prelude;
 mod service;
 mod state;
 

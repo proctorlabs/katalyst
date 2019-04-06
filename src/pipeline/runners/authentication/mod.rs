@@ -11,8 +11,8 @@ impl Pipeline for Authenticator {
         "authenticator"
     }
 
-    fn prepare_request_future(&self, state: PipelineState) -> AsyncPipelineResult {
-        let route = match &state.context.matched_route {
+    fn prepare_request_future(&self, ctx: Context) -> AsyncPipelineResult {
+        let route = match &ctx.context.matched_route {
             Some(s) => s,
             None => {
                 return Box::new(err(KatalystError::FeatureUnavailable));
@@ -24,7 +24,7 @@ impl Pipeline for Authenticator {
                     .iter()
                     .map(|a| a.authenticator.clone())
                     .collect();
-                let mut result: AsyncPipelineResult = Box::new(ok(state));
+                let mut result: AsyncPipelineResult = Box::new(ok(ctx));
                 for a in authenticators.iter() {
                     result = Box::new(result.and_then({
                         let r = a.clone();
@@ -33,7 +33,7 @@ impl Pipeline for Authenticator {
                 }
                 result
             }
-            None => Box::new(ok(state)),
+            None => Box::new(ok(ctx)),
         }
     }
 }

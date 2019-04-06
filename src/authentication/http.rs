@@ -1,6 +1,7 @@
 use crate::app::HttpsClient;
 use crate::authentication::*;
 use crate::pipeline::*;
+use crate::prelude::*;
 use futures::future::*;
 use futures::stream::Stream;
 use futures::Future;
@@ -31,8 +32,8 @@ pub struct HttpAuthenticator {
 }
 
 impl KatalystAuthenticator for HttpAuthenticator {
-    fn authenticate(&self, mut state: PipelineState) -> AsyncPipelineResult {
-        let client: Arc<HttpsClient> = state.engine.locate().unwrap();
+    fn authenticate(&self, mut ctx: Context) -> AsyncPipelineResult {
+        let client: Arc<HttpsClient> = ctx.engine.locate().unwrap();
         let mut request = Request::builder();
         request.uri(&self.url.to_string());
         let res = client.request(request.body(Body::empty()).unwrap());
@@ -51,10 +52,10 @@ impl KatalystAuthenticator for HttpAuthenticator {
                 debug!("{}", body);
                 let mut auth = KatalystAuthenticationInfo::default();
                 auth.add_claim("KatalystAuthenticator".to_string(), "http".to_string());
-                state.context.authentication = Some(auth);
-                ok::<PipelineState, KatalystError>(state)
+                ctx.context.authentication = Some(auth);
+                ok::<Context, KatalystError>(ctx)
             }
-            Err(_) => err::<PipelineState, KatalystError>(KatalystError::Forbidden),
+            Err(_) => err::<Context, KatalystError>(KatalystError::Forbidden),
         }))
     }
 }
