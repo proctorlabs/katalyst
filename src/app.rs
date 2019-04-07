@@ -2,7 +2,7 @@ use crate::authentication;
 use crate::balancer;
 use crate::config::parsers;
 use crate::error::*;
-use crate::expression::Providers;
+use crate::expression::Compiler;
 use crate::locator::{Locatable, Locator};
 use crate::pipeline::PipelineRunner;
 use crate::service::EngineService;
@@ -36,7 +36,7 @@ impl Default for KatalystEngine {
         tls.root_store
             .add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
 
-        locator.register(Providers::default());
+        locator.register(Compiler::default());
         locator.register::<HttpsClient>(builder.build(HttpsConnector::from((http_connector, tls))));
         locator.register(PipelineRunner::new());
         locator.register(authentication::all());

@@ -22,7 +22,7 @@ impl KatalystAuthenticator for AlwaysAuthenticator {
     fn authenticate(&self, mut ctx: Context) -> AsyncPipelineResult {
         let mut result = KatalystAuthenticationInfo::default();
         result.add_claim("KatalystAuthenticator".to_string(), "always".to_string());
-        ctx.context.authentication = Some(result);
+        ctx.detail.authentication = Some(result);
         Box::new(ok::<Context, KatalystError>(ctx))
     }
 }

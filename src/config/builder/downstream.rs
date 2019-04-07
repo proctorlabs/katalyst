@@ -1,7 +1,7 @@
 use super::Builder;
 use crate::app::KatalystEngine;
 use crate::error::KatalystError;
-use crate::expression::Providers;
+use crate::expression::Compiler;
 use crate::state::Downstream;
 use http::Method;
 use serde::{Deserialize, Serialize};
@@ -22,7 +22,7 @@ pub struct DownstreamBuilder {
 
 impl Builder<Downstream> for DownstreamBuilder {
     fn build(&self, engine: Arc<KatalystEngine>) -> Result<Downstream, KatalystError> {
-        let providers = engine.locate::<Providers>()?;
+        let providers = engine.locate::<Compiler>()?;
         let method = match &self.method {
             Some(m) => Some(Method::from_bytes(m.to_uppercase().as_bytes()).unwrap()),
             None => None,

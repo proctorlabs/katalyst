@@ -1,24 +1,24 @@
 use crate::expression::*;
 use crate::prelude::*;
 
-pub struct HeaderTemplateProvider {}
+pub struct HeaderExpressionBuilder {}
 
-impl KatalystTemplateProvider for HeaderTemplateProvider {
+impl ExpressionBuilder for HeaderExpressionBuilder {
     fn identifier(&self) -> &'static str {
         "header"
     }
 
-    fn build_placeholder(&self, value: String) -> Box<KatalystTemplatePlaceholder> {
-        Box::new(HeaderTemplatePlaceholder { header: value })
+    fn build_placeholder(&self, value: String) -> Box<CompiledExpression> {
+        Box::new(HeaderCompiledExpression { header: value })
     }
 }
 
 #[derive(Debug)]
-struct HeaderTemplatePlaceholder {
+struct HeaderCompiledExpression {
     header: String,
 }
 
-impl KatalystTemplatePlaceholder for HeaderTemplatePlaceholder {
+impl CompiledExpression for HeaderCompiledExpression {
     fn get_value(&self, ctx: &Context) -> String {
         match &ctx.upstream.request {
             Some(s) => match s.headers().get(&self.header) {
@@ -29,8 +29,8 @@ impl KatalystTemplatePlaceholder for HeaderTemplatePlaceholder {
         }
     }
 
-    fn duplicate(&self) -> Box<KatalystTemplatePlaceholder> {
-        HeaderTemplatePlaceholder {
+    fn duplicate(&self) -> Box<CompiledExpression> {
+        HeaderCompiledExpression {
             header: self.header.to_owned(),
         }
         .boxed()

@@ -12,7 +12,7 @@ impl Pipeline for Builder {
 
     fn prepare_request(&self, mut ctx: Context) -> PipelineResult {
         let config = ctx.engine.get_state()?;
-        let downstream = match &ctx.context.matched_route {
+        let downstream = match &ctx.detail.matched_route {
             Some(route) => &route.downstream,
             None => {
                 return Err(KatalystError::FeatureUnavailable);
@@ -27,7 +27,7 @@ impl Pipeline for Builder {
         };
 
         let transformer = downstream.transformer(&ctx, balancer_lease.to_string())?;
-        ctx.context.balancer_lease = Some(balancer_lease);
+        ctx.detail.balancer_lease = Some(balancer_lease);
 
         let request = match ctx.upstream.request {
             Some(req) => req,

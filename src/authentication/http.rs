@@ -52,7 +52,7 @@ impl KatalystAuthenticator for HttpAuthenticator {
                 debug!("{}", body);
                 let mut auth = KatalystAuthenticationInfo::default();
                 auth.add_claim("KatalystAuthenticator".to_string(), "http".to_string());
-                ctx.context.authentication = Some(auth);
+                ctx.detail.authentication = Some(auth);
                 ok::<Context, KatalystError>(ctx)
             }
             Err(_) => err::<Context, KatalystError>(KatalystError::Forbidden),

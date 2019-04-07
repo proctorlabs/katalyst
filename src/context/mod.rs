@@ -14,7 +14,7 @@ pub struct RequestResponse {
 }
 
 #[derive(Default)]
-pub struct RequestContext {
+pub struct Detail {
     pub matched_route: Option<Arc<Route>>,
     pub captures: Option<HashMap<String, String>>,
     pub timestamps: HashMap<String, Instant>,
@@ -25,7 +25,7 @@ pub struct RequestContext {
 pub struct Context {
     pub upstream: RequestResponse,
     pub downstream: RequestResponse,
-    pub context: RequestContext,
+    pub detail: Detail,
     pub remote_addr: SocketAddr,
     pub engine: Arc<KatalystEngine>,
 }
@@ -35,7 +35,7 @@ impl Context {
         let mut state = Context {
             upstream: RequestResponse::default(),
             downstream: RequestResponse::default(),
-            context: RequestContext::default(),
+            detail: Detail::default(),
             engine: engine,
             remote_addr: remote,
         };

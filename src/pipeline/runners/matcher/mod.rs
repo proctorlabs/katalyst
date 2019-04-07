@@ -35,8 +35,8 @@ impl Pipeline for Matcher {
                         );
                     }
                 }
-                ctx.context.matched_route = Some(route.clone());
-                ctx.context.captures = Some(cap_map);
+                ctx.detail.matched_route = Some(route.clone());
+                ctx.detail.captures = Some(cap_map);
                 debug!("Request has been matched to route!");
                 return Ok(ctx);
             }

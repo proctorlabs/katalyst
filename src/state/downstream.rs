@@ -11,11 +11,11 @@ use std::str::FromStr;
 #[derive(Debug)]
 pub struct Downstream {
     pub host: String,
-    pub path: StringTemplate,
+    pub path: Expression,
     pub method: Option<Method>,
-    pub query: Option<HashMap<String, StringTemplate>>,
-    pub headers: Option<HashMap<String, StringTemplate>>,
-    pub body: Option<StringTemplate>,
+    pub query: Option<HashMap<String, Expression>>,
+    pub headers: Option<HashMap<String, Expression>>,
+    pub body: Option<Expression>,
 }
 
 impl Downstream {

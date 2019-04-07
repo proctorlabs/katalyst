@@ -1,6 +1,6 @@
+use crate::expression::*;
 use regex::Regex;
 use std::collections::HashMap;
-use crate::expression::*;
 
 const METHOD: &str = r"\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*";
 const TEMPLATE: &str = r"\{\{\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*}}";
@@ -10,17 +10,17 @@ lazy_static! {
     static ref METHOD_MATCHER: Regex = Regex::new(METHOD).unwrap();
 }
 
-pub struct Providers {
-    providers: HashMap<&'static str, Box<KatalystTemplateProvider>>,
+pub struct Compiler {
+    builders: HashMap<&'static str, Box<ExpressionBuilder>>,
 }
 
-impl Providers {
-    pub fn get_from_template(&self, placeholder_text: String) -> Box<KatalystTemplatePlaceholder> {
+impl Compiler {
+    pub fn get_from_template(&self, placeholder_text: String) -> Box<CompiledExpression> {
         match TEMPLATE_MATCHER.captures(&placeholder_text) {
             Some(cap) => {
                 let key = &cap[1];
                 let val = &cap[2];
-                match self.providers.get(key) {
+                match self.builders.get(key) {
                     Some(p) => p.build_placeholder(val.to_string()),
                     None => Box::new(placeholder_text),
                 }
@@ -29,12 +29,12 @@ impl Providers {
         }
     }
 
-    pub fn get_from_method(&self, placeholder_text: String) -> Box<KatalystTemplatePlaceholder> {
+    pub fn get_from_method(&self, placeholder_text: String) -> Box<CompiledExpression> {
         match METHOD_MATCHER.captures(&placeholder_text) {
             Some(cap) => {
                 let key = &cap[1];
                 let val = &cap[2];
-                match self.providers.get(key) {
+                match self.builders.get(key) {
                     Some(p) => p.build_placeholder(val.to_string()),
                     None => Box::new(placeholder_text),
                 }
@@ -43,20 +43,20 @@ impl Providers {
         }
     }
 
-    pub fn register(&mut self, provider: Box<KatalystTemplateProvider>) {
-        self.providers.insert(provider.identifier(), provider);
+    pub fn register(&mut self, provider: Box<ExpressionBuilder>) {
+        self.builders.insert(provider.identifier(), provider);
     }
 
     pub fn empty() -> Self {
-        Providers {
-            providers: HashMap::new(),
+        Compiler {
+            builders: HashMap::new(),
         }
     }
 
     pub fn process_template_map(
         &self,
         template: &Option<HashMap<String, String>>,
-    ) -> Option<HashMap<String, StringTemplate>> {
+    ) -> Option<HashMap<String, Expression>> {
         match template {
             Some(m) => Some(
                 m.iter()
@@ -67,15 +67,15 @@ impl Providers {
         }
     }
 
-    pub fn process_template_option(&self, template: &Option<String>) -> Option<StringTemplate> {
+    pub fn process_template_option(&self, template: &Option<String>) -> Option<Expression> {
         match template {
             Some(s) => Some(self.process_template(&s)),
             None => None,
         }
     }
 
-    pub fn process_template(&self, template: &str) -> StringTemplate {
-        let mut result_placeholders: StringTemplate = vec![];
+    pub fn process_template(&self, template: &str) -> Expression {
+        let mut result_placeholders: Expression = vec![];
         if TEMPLATE_MATCHER.is_match(template) {
             let mut last_segment_index = 0;
             for cap in TEMPLATE_MATCHER.find_iter(template) {
@@ -107,14 +107,14 @@ impl Providers {
     }
 }
 
-impl Default for Providers {
+impl Default for Compiler {
     fn default() -> Self {
-        let mut providers = Providers::empty();
-        providers.register(Box::new(EnvTemplateProvider {}));
-        providers.register(Box::new(RegexTemplateProvider {}));
-        providers.register(Box::new(HeaderTemplateProvider {}));
-        providers.register(Box::new(HttpTemplateProvider {}));
-        providers.register(Box::new(ClaimTemplateProvider {}));
+        let mut providers = Compiler::empty();
+        providers.register(Box::new(EnvExpressionBuilder {}));
+        providers.register(Box::new(RegexExpressionBuilder {}));
+        providers.register(Box::new(HeaderExpressionBuilder {}));
+        providers.register(Box::new(HttpExpressionBuilder {}));
+        providers.register(Box::new(ClaimExpressionBuilder {}));
         providers
     }
 }

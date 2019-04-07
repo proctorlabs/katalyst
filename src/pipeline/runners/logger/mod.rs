@@ -10,7 +10,7 @@ impl Pipeline for Logger {
     }
 
     fn prepare_request(&self, mut ctx: Context) -> PipelineResult {
-        ctx.context
+        ctx.detail
             .timestamps
             .insert("started".to_string(), Instant::now());
         match &ctx.upstream.request {
@@ -21,7 +21,7 @@ impl Pipeline for Logger {
     }
 
     fn process_response(&self, ctx: Context) -> Context {
-        let started = ctx.context.timestamps["started"];
+        let started = ctx.detail.timestamps["started"];
         let duration = Instant::now().duration_since(started);
         let total_ms = u64::from(duration.subsec_millis()) + (duration.as_secs() * 1000);
         debug!("Request processed in {:?}ms", total_ms);

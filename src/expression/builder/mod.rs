@@ -1,38 +1,38 @@
-mod claim_provider;
-mod env_provider;
-mod header_provider;
-mod http_provider;
-mod regex_provider;
+mod claim;
+mod env;
+mod header;
+mod http;
+mod regex;
 
 use crate::expression::*;
 use crate::prelude::*;
 
-pub use claim_provider::ClaimTemplateProvider;
-pub use env_provider::EnvTemplateProvider;
-pub use header_provider::HeaderTemplateProvider;
-pub use http_provider::HttpTemplateProvider;
-pub use regex_provider::RegexTemplateProvider;
+pub use self::claim::ClaimExpressionBuilder;
+pub use self::env::EnvExpressionBuilder;
+pub use self::header::HeaderExpressionBuilder;
+pub use self::http::HttpExpressionBuilder;
+pub use self::regex::RegexExpressionBuilder;
 
 #[derive(Debug)]
-struct PrecomputedPlaceholder {
+struct PrecomputedExpression {
     result: String,
 }
 
-impl PrecomputedPlaceholder {
-    fn make(precomputed_str: String) -> Box<KatalystTemplatePlaceholder> {
-        Box::new(PrecomputedPlaceholder {
+impl PrecomputedExpression {
+    fn make(precomputed_str: String) -> Box<CompiledExpression> {
+        Box::new(PrecomputedExpression {
             result: precomputed_str,
         })
     }
 }
 
-impl KatalystTemplatePlaceholder for PrecomputedPlaceholder {
+impl CompiledExpression for PrecomputedExpression {
     fn get_value(&self, _: &Context) -> String {
         self.result.to_string()
     }
 
-    fn duplicate(&self) -> Box<KatalystTemplatePlaceholder> {
-        PrecomputedPlaceholder {
+    fn duplicate(&self) -> Box<CompiledExpression> {
+        PrecomputedExpression {
             result: self.result.to_owned(),
         }
         .boxed()

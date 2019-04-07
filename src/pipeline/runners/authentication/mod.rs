@@ -12,7 +12,7 @@ impl Pipeline for Authenticator {
     }
 
     fn prepare_request_future(&self, ctx: Context) -> AsyncPipelineResult {
-        let route = match &ctx.context.matched_route {
+        let route = match &ctx.detail.matched_route {
             Some(s) => s,
             None => {
                 return Box::new(err(KatalystError::FeatureUnavailable));
