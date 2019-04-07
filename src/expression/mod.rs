@@ -4,13 +4,24 @@ mod traits;
 
 use builder::*;
 pub use compiler::Compiler;
+use std::sync::Arc;
+pub use traits::ExpressionRenderFn;
 pub use traits::*;
 
-pub type Expression = Vec<Box<CompiledExpression>>;
+pub type Expression = Vec<Arc<CompiledExpression>>;
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn compile_simple_expression() {
+        let cmp = Compiler::default();
+        let result = cmp
+            .compile("blah blah {{ regex () }} blah blah {{ regex(xx) }} blah")
+            .unwrap();
+        println!("{:?}", result);
+    }
 
     #[test]
     fn positive_template_match() {

@@ -6,6 +6,7 @@ mod regex;
 
 use crate::expression::*;
 use crate::prelude::*;
+use std::sync::Arc;
 
 pub use self::claim::ClaimExpressionBuilder;
 pub use self::env::EnvExpressionBuilder;
@@ -19,22 +20,21 @@ struct PrecomputedExpression {
 }
 
 impl PrecomputedExpression {
-    fn make(precomputed_str: String) -> Box<CompiledExpression> {
-        Box::new(PrecomputedExpression {
+    fn make(precomputed_str: String) -> Arc<CompiledExpression> {
+        Arc::new(PrecomputedExpression {
             result: precomputed_str,
         })
     }
 }
 
 impl CompiledExpression for PrecomputedExpression {
-    fn get_value(&self, _: &Context) -> String {
+    fn render(&self, _: &Context) -> String {
         self.result.to_string()
     }
 
-    fn duplicate(&self) -> Box<CompiledExpression> {
-        PrecomputedExpression {
+    fn duplicate(&self) -> Arc<CompiledExpression> {
+        Arc::new(PrecomputedExpression {
             result: self.result.to_owned(),
-        }
-        .boxed()
+        })
     }
 }

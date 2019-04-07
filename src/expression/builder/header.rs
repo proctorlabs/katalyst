@@ -1,5 +1,6 @@
 use crate::expression::*;
 use crate::prelude::*;
+use std::sync::Arc;
 
 pub struct HeaderExpressionBuilder {}
 
@@ -8,8 +9,15 @@ impl ExpressionBuilder for HeaderExpressionBuilder {
         "header"
     }
 
-    fn build_placeholder(&self, value: String) -> Box<CompiledExpression> {
-        Box::new(HeaderCompiledExpression { header: value })
+    fn build(&self, value: String) -> Arc<CompiledExpression> {
+        Arc::new(HeaderCompiledExpression { header: value })
+    }
+
+    fn make_fn(
+        &self,
+        args: Vec<Arc<CompiledExpression>>,
+    ) -> Result<ExpressionRenderFn, KatalystError> {
+        Ok(Arc::new(|_, _| "".to_string()))
     }
 }
 
@@ -19,7 +27,7 @@ struct HeaderCompiledExpression {
 }
 
 impl CompiledExpression for HeaderCompiledExpression {
-    fn get_value(&self, ctx: &Context) -> String {
+    fn render(&self, ctx: &Context) -> String {
         match &ctx.upstream.request {
             Some(s) => match s.headers().get(&self.header) {
                 Some(t) => t.to_str().unwrap_or_default().to_string(),
@@ -29,10 +37,9 @@ impl CompiledExpression for HeaderCompiledExpression {
         }
     }
 
-    fn duplicate(&self) -> Box<CompiledExpression> {
-        HeaderCompiledExpression {
+    fn duplicate(&self) -> Arc<CompiledExpression> {
+        Arc::new(HeaderCompiledExpression {
             header: self.header.to_owned(),
-        }
-        .boxed()
+        })
     }
 }

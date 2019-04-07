@@ -1,5 +1,7 @@
 use super::PrecomputedExpression;
 use crate::expression::*;
+use crate::prelude::*;
+use std::sync::Arc;
 
 pub struct EnvExpressionBuilder {}
 
@@ -8,7 +10,7 @@ impl ExpressionBuilder for EnvExpressionBuilder {
         "env"
     }
 
-    fn build_placeholder(&self, value: String) -> Box<CompiledExpression> {
+    fn build(&self, value: String) -> Arc<CompiledExpression> {
         PrecomputedExpression::make(
             std::env::var_os(value)
                 .expect("Environment variable not set!")
@@ -16,5 +18,12 @@ impl ExpressionBuilder for EnvExpressionBuilder {
                 .unwrap_or_default()
                 .to_owned(),
         )
+    }
+
+    fn make_fn(
+        &self,
+        args: Vec<Arc<CompiledExpression>>,
+    ) -> Result<ExpressionRenderFn, KatalystError> {
+        Ok(Arc::new(|_, _| "".to_string()))
     }
 }

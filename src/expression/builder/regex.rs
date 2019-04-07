@@ -1,6 +1,7 @@
 use crate::expression::*;
 use crate::prelude::*;
 use std::str::FromStr;
+use std::sync::Arc;
 
 pub struct RegexExpressionBuilder {}
 
@@ -9,8 +10,15 @@ impl ExpressionBuilder for RegexExpressionBuilder {
         "regex"
     }
 
-    fn build_placeholder(&self, value: String) -> Box<CompiledExpression> {
-        Box::new(RegexCompiledExpression { val: value })
+    fn build(&self, value: String) -> Arc<CompiledExpression> {
+        Arc::new(RegexCompiledExpression { val: value })
+    }
+
+    fn make_fn(
+        &self,
+        args: Vec<Arc<CompiledExpression>>,
+    ) -> Result<ExpressionRenderFn, KatalystError> {
+        Ok(Arc::new(|_, _| "".to_string()))
     }
 }
 
@@ -20,7 +28,7 @@ struct RegexCompiledExpression {
 }
 
 impl CompiledExpression for RegexCompiledExpression {
-    fn get_value(&self, ctx: &Context) -> String {
+    fn render(&self, ctx: &Context) -> String {
         match &ctx.detail.captures {
             Some(caps) => {
                 let res = caps.get(&self.val).unwrap_or_else(|| self.none());
@@ -30,10 +38,9 @@ impl CompiledExpression for RegexCompiledExpression {
         }
     }
 
-    fn duplicate(&self) -> Box<CompiledExpression> {
-        RegexCompiledExpression {
+    fn duplicate(&self) -> Arc<CompiledExpression> {
+        Arc::new(RegexCompiledExpression {
             val: self.val.to_owned(),
-        }
-        .boxed()
+        })
     }
 }

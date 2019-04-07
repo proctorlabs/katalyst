@@ -1,11 +1,23 @@
 use crate::expression::*;
+use crate::prelude::*;
 use regex::Regex;
 use std::collections::HashMap;
+use std::sync::Arc;
+
+const TEMPLATE_FINDER_STR: &str = r"\{\{([^}]*)}}"; // Matches {{ }} templates
+const COMMA_SPLIT_STR: &str = r",(?![^(]*\))"; // Match commas not in parenthesis for splitting arguments
+const QUOTE_MATCH_STR: &str = r"'([^']|'')*'|(\+)"; // Match values that are quoted in single quotes, '' is escaped
+const METHOD_MATCH_STR: &str = r"\s*(\S*)\s*\((.*)\)\s*"; // Match ' fn ( content ) ', group1 -> fn , group2 -> content
 
 const METHOD: &str = r"\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*";
 const TEMPLATE: &str = r"\{\{\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*}}";
 
 lazy_static! {
+    static ref TEMPLATE_FINDER: Regex = Regex::new(TEMPLATE_FINDER_STR).unwrap();
+    //static ref COMMA_SPLIT: Regex = Regex::new(COMMA_SPLIT_STR).unwrap();
+    static ref METHOD_MATCH: Regex = Regex::new(METHOD_MATCH_STR).unwrap();
+    static ref QUOTE_MATCH: Regex = Regex::new(QUOTE_MATCH_STR).unwrap();
+    //old below
     static ref TEMPLATE_MATCHER: Regex = Regex::new(TEMPLATE).unwrap();
     static ref METHOD_MATCHER: Regex = Regex::new(METHOD).unwrap();
 }
@@ -15,31 +27,31 @@ pub struct Compiler {
 }
 
 impl Compiler {
-    pub fn get_from_template(&self, placeholder_text: String) -> Box<CompiledExpression> {
+    pub fn get_from_template(&self, placeholder_text: String) -> Arc<CompiledExpression> {
         match TEMPLATE_MATCHER.captures(&placeholder_text) {
             Some(cap) => {
                 let key = &cap[1];
                 let val = &cap[2];
                 match self.builders.get(key) {
-                    Some(p) => p.build_placeholder(val.to_string()),
-                    None => Box::new(placeholder_text),
+                    Some(p) => p.build(val.to_string()),
+                    None => Arc::new(placeholder_text),
                 }
             }
-            None => Box::new(placeholder_text),
+            None => Arc::new(placeholder_text),
         }
     }
 
-    pub fn get_from_method(&self, placeholder_text: String) -> Box<CompiledExpression> {
+    pub fn get_from_method(&self, placeholder_text: String) -> Arc<CompiledExpression> {
         match METHOD_MATCHER.captures(&placeholder_text) {
             Some(cap) => {
                 let key = &cap[1];
                 let val = &cap[2];
                 match self.builders.get(key) {
-                    Some(p) => p.build_placeholder(val.to_string()),
-                    None => Box::new(placeholder_text),
+                    Some(p) => p.build(val.to_string()),
+                    None => Arc::new(placeholder_text),
                 }
             }
-            None => Box::new(placeholder_text),
+            None => Arc::new(placeholder_text),
         }
     }
 
@@ -74,6 +86,63 @@ impl Compiler {
         }
     }
 
+    pub fn compile_match(&self, mtch: &str) -> Result<Arc<CompiledExpression>, KatalystError> {
+        if let Some(caps) = METHOD_MATCH.captures(mtch) {
+            let (key, val) = (&caps[1], &caps[2]);
+            if let Some(builder) = self.builders.get(key) {
+                let expr_fn = builder.make_fn(vec![self.compile_match(val)?])?;
+                Ok(CompiledExpressionImpl::make(
+                    mtch.to_string(),
+                    vec![self.compile_match(val)?],
+                    expr_fn,
+                ))
+            } else {
+                Err(KatalystError::ConfigParseError)
+            }
+        } else {
+            Ok(Arc::new(mtch.to_string()))
+        }
+    }
+
+    pub fn compile(&self, expression_str: &str) -> Result<Expression, KatalystError> {
+        //Compile a raw string into an expression
+        let mut result: Expression = vec![];
+        if TEMPLATE_FINDER.is_match(expression_str) {
+            let mut last_segment_index = 0;
+            for cap in TEMPLATE_FINDER.find_iter(expression_str) {
+                //Push any segments between this cap and the previous
+                if cap.start() > last_segment_index {
+                    let offset = cap.start() - last_segment_index;
+                    let segment: String = expression_str
+                        .chars()
+                        .skip(last_segment_index)
+                        .take(offset)
+                        .collect();
+                    result.push(Arc::new(segment));
+                }
+
+                //Now we've captured the string, let's process it and push it
+                let caps = TEMPLATE_FINDER.captures(cap.as_str()).unwrap();
+                result.push(self.compile_match(&caps[1])?);
+                last_segment_index = cap.end();
+            }
+            //Catch any trailing segments
+            if last_segment_index < expression_str.len() {
+                let offset = expression_str.len() - last_segment_index;
+                let segment: String = expression_str
+                    .chars()
+                    .skip(last_segment_index)
+                    .take(offset)
+                    .collect();
+                result.push(Arc::new(segment));
+            }
+        } else {
+            //There were no matches in this string, let's just push the whole string to the result list
+            result.push(Arc::new(expression_str.to_owned()));
+        }
+        Ok(result)
+    }
+
     pub fn process_template(&self, template: &str) -> Expression {
         let mut result_placeholders: Expression = vec![];
         if TEMPLATE_MATCHER.is_match(template) {
@@ -86,7 +155,7 @@ impl Compiler {
                         .skip(last_segment_index)
                         .take(offset)
                         .collect();
-                    result_placeholders.push(Box::new(segment));
+                    result_placeholders.push(Arc::new(segment));
                 }
                 result_placeholders.push(self.get_from_template(cap.as_str().to_owned()));
                 last_segment_index = cap.end();
@@ -98,10 +167,10 @@ impl Compiler {
                     .skip(last_segment_index)
                     .take(offset)
                     .collect();
-                result_placeholders.push(Box::new(segment));
+                result_placeholders.push(Arc::new(segment));
             }
         } else {
-            result_placeholders.push(Box::new(template.to_owned()));
+            result_placeholders.push(Arc::new(template.to_owned()));
         }
         result_placeholders
     }
