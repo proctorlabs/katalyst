@@ -1,22 +1,25 @@
 use crate::expression::*;
 use crate::prelude::*;
+use onig::Regex as Onig;
 use regex::Regex;
 use std::collections::HashMap;
 use std::sync::Arc;
 
 const TEMPLATE_FINDER_STR: &str = r"\{\{([^}]*)}}"; // Matches {{ }} templates
-const COMMA_SPLIT_STR: &str = r",(?![^(]*\))"; // Match commas not in parenthesis for splitting arguments
-const QUOTE_MATCH_STR: &str = r"'([^']|'')*'|(\+)"; // Match values that are quoted in single quotes, '' is escaped
+const QUOTE_MATCH_STR: &str = r"^\s*(?:'(?P<str>(?:[^']|'')*)')\s*(?:,|$)"; // Matches if the first argument in the list is a quoted string, '' escapes
 const METHOD_MATCH_STR: &str = r"\s*(\S*)\s*\((.*)\)\s*"; // Match ' fn ( content ) ', group1 -> fn , group2 -> content
+const WHITESPACE_STR: &str = r"^\s*$";
+const TOKENIZER_STR: &str = r"(?<root>(?P<exp>[^\s\(,]*)\s*\((?P<args>(?:(?P>root)|(?:,)|(?:\s*))*)\)|(?:'(?P<str>(?:[^']|'')*)')|(?P<int>[\d]+)|(?P<sep>,)|(?P<ws>\s+))";
 
 const METHOD: &str = r"\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*";
 const TEMPLATE: &str = r"\{\{\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*}}";
 
 lazy_static! {
-    static ref TEMPLATE_FINDER: Regex = Regex::new(TEMPLATE_FINDER_STR).unwrap();
-    //static ref COMMA_SPLIT: Regex = Regex::new(COMMA_SPLIT_STR).unwrap();
-    static ref METHOD_MATCH: Regex = Regex::new(METHOD_MATCH_STR).unwrap();
-    static ref QUOTE_MATCH: Regex = Regex::new(QUOTE_MATCH_STR).unwrap();
+    static ref TEMPLATE_FINDER: Onig = Onig::new(TEMPLATE_FINDER_STR).unwrap();
+    static ref METHOD_MATCH: Onig = Onig::new(METHOD_MATCH_STR).unwrap();
+    static ref QUOTE_MATCH: Onig = Onig::new(QUOTE_MATCH_STR).unwrap();
+    static ref WHITESPACE_MATCH: Onig = Onig::new(WHITESPACE_STR).unwrap();
+    static ref TOKENIZER: Onig = Onig::new(TOKENIZER_STR).unwrap();
     //old below
     static ref TEMPLATE_MATCHER: Regex = Regex::new(TEMPLATE).unwrap();
     static ref METHOD_MATCHER: Regex = Regex::new(METHOD).unwrap();
@@ -87,7 +90,7 @@ impl Compiler {
     }
 
     pub fn compile_match(&self, mtch: &str) -> Result<Arc<CompiledExpression>, KatalystError> {
-        if let Some(caps) = METHOD_MATCH.captures(mtch) {
+        /*if let Some(caps) = METHOD_MATCH.captures(mtch) {
             let (key, val) = (&caps[1], &caps[2]);
             if let Some(builder) = self.builders.get(key) {
                 let expr_fn = builder.make_fn(vec![self.compile_match(val)?])?;
@@ -101,30 +104,38 @@ impl Compiler {
             }
         } else {
             Ok(Arc::new(mtch.to_string()))
-        }
+        }*/
+        Err(KatalystError::FeatureUnavailable)
     }
 
     pub fn compile(&self, expression_str: &str) -> Result<Expression, KatalystError> {
         //Compile a raw string into an expression
         let mut result: Expression = vec![];
-        if TEMPLATE_FINDER.is_match(expression_str) {
+        println!("0");
+        for matched in TEMPLATE_FINDER.captures_iter(expression_str) {
+            println!("1");
             let mut last_segment_index = 0;
-            for cap in TEMPLATE_FINDER.find_iter(expression_str) {
-                //Push any segments between this cap and the previous
-                if cap.start() > last_segment_index {
-                    let offset = cap.start() - last_segment_index;
-                    let segment: String = expression_str
-                        .chars()
-                        .skip(last_segment_index)
-                        .take(offset)
-                        .collect();
-                    result.push(Arc::new(segment));
-                }
+            for (i, cap_opt) in matched.iter().enumerate() {
+                println!("2");
+                if let Some(cap) = cap_opt {
+                    if let Some((start, end)) = matched.pos(0) {
+                        //Push any segments between this cap and the previous
+                        if start > last_segment_index {
+                            let offset = start - last_segment_index;
+                            let segment: String = expression_str
+                                .chars()
+                                .skip(last_segment_index)
+                                .take(offset)
+                                .collect();
+                            result.push(Arc::new(segment));
+                        }
 
-                //Now we've captured the string, let's process it and push it
-                let caps = TEMPLATE_FINDER.captures(cap.as_str()).unwrap();
-                result.push(self.compile_match(&caps[1])?);
-                last_segment_index = cap.end();
+                        //Now we've captured the string, let's process it and push it
+                        //if let Some(capped) = cap.at(1) {
+                        result.push(self.compile_match(cap)?);
+                        last_segment_index = end;
+                    }
+                }
             }
             //Catch any trailing segments
             if last_segment_index < expression_str.len() {
@@ -136,7 +147,8 @@ impl Compiler {
                     .collect();
                 result.push(Arc::new(segment));
             }
-        } else {
+        }
+        if result.is_empty() {
             //There were no matches in this string, let's just push the whole string to the result list
             result.push(Arc::new(expression_str.to_owned()));
         }
