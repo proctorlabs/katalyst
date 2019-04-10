@@ -15,15 +15,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn compile_simple_expression() {
-        let cmp = Compiler::default();
-        let result = cmp
-            .compile("blah blah {{ regex () }} blah blah {{ regex(xx) }} blah")
-            .unwrap();
-        println!("{:?}", result);
-    }
-
-    #[test]
     fn positive_template_match() {
         let provider = Compiler::default();
         let result = provider.process_template("/testing/test/{{boo=>rai}}/boom");

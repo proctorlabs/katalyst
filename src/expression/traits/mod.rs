@@ -27,14 +27,14 @@ pub trait ExpressionBuilder: Send + Sync {
 
 pub struct CompiledExpressionImpl {
     raw: String,
-    args: Vec<Arc<CompiledExpression>>,
+    args: Expression,
     eval: ExpressionRenderFn,
 }
 
 impl CompiledExpressionImpl {
     pub fn make(
         raw: String,
-        args: Vec<Arc<CompiledExpression>>,
+        args: Expression,
         eval: ExpressionRenderFn,
     ) -> Arc<CompiledExpression> {
         Arc::new(CompiledExpressionImpl {

@@ -16,7 +16,7 @@ impl ExpressionBuilder for RegexExpressionBuilder {
 
     fn make_fn(
         &self,
-        args: Vec<Arc<CompiledExpression>>,
+        _args: Vec<Arc<CompiledExpression>>,
     ) -> Result<ExpressionRenderFn, KatalystError> {
         Ok(Arc::new(|_, _| "".to_string()))
     }
