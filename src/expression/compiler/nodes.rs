@@ -1,20 +1,23 @@
 #![allow(dead_code)]
 #![allow(clippy::eval_order_dependence)]
+use super::*;
+use crate::prelude::*;
 use std::fmt;
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
-use syn::{parenthesized, token, Ident, LitInt, LitStr, Result, Token};
+use syn::{parenthesized, token, Ident, LitBool, LitInt, LitStr, Result, Token};
 
 pub enum DynamicNode {
     Method(MethodNode),
     Text(LitStr),
     Number(LitInt),
+    Bool(LitBool),
 }
 
 pub struct MethodNode {
-    ident: Ident,
-    paren_token: token::Paren,
-    args: Punctuated<DynamicNode, Token![,]>,
+    pub ident: Ident,
+    pub paren_token: token::Paren,
+    pub args: Punctuated<DynamicNode, Token![,]>,
 }
 
 impl Parse for MethodNode {
@@ -48,6 +51,8 @@ impl Parse for DynamicNode {
             input.parse().map(DynamicNode::Text)
         } else if lookahead.peek(LitInt) {
             input.parse().map(DynamicNode::Number)
+        } else if lookahead.peek(LitBool) {
+            input.parse().map(DynamicNode::Bool)
         } else {
             Err(lookahead.error())
         }
@@ -60,6 +65,48 @@ impl fmt::Debug for DynamicNode {
             DynamicNode::Method(method) => method.fmt(f),
             DynamicNode::Text(text) => write!(f, "Text: {}", text.value()),
             DynamicNode::Number(number) => write!(f, "Number: {}", number.value()),
+            DynamicNode::Bool(cnd) => write!(f, "Bool: {}", cnd.value),
         }
+    }
+}
+
+impl DynamicNode {
+    pub fn build(raw: &str) -> std::result::Result<DynamicNode, KatalystError> {
+        match syn::parse_str(raw) {
+            Ok(res) => Ok(res),
+            Err(_) => Err(KatalystError::ConfigParseError),
+        }
+    }
+
+    pub fn compile(
+        &self,
+        directory: &BuilderDirectory,
+    ) -> std::result::Result<Arc<CompiledExpressionNode>, KatalystError> {
+        match self {
+            DynamicNode::Method(node) => {
+                let mut args: Vec<Arc<CompiledExpressionNode>> = vec![];
+                for arg in node.args.iter() {
+                    args.push(arg.compile(directory)?);
+                }
+                Ok(Arc::new(CompiledExpressionNode {
+                    args: args,
+                    render_fn: Arc::new(|_, _| "".to_string()),
+                    result: ExpressionResultType::Text,
+                }))
+            }
+            _ => Err(KatalystError::FeatureUnavailable),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn tokenize_simple_expression() {
+        let exp = " some (\"string\", true) ";
+        let node: DynamicNode = syn::parse_str(exp).unwrap();
+        println!("{:?}", node);
     }
 }

@@ -1,3 +1,4 @@
+#![allow(clippy::implicit_hasher)]
 use super::*;
 use crate::balancer::BalancerDirectory;
 use serde::{Deserialize, Serialize};

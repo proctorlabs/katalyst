@@ -8,6 +8,7 @@ use std::sync::Arc;
 pub use traits::ExpressionRenderFn;
 pub use traits::*;
 
+pub type ExpressionArgs = Vec<Arc<CompiledExpression>>;
 pub type Expression = Vec<Arc<CompiledExpression>>;
 
 #[cfg(test)]

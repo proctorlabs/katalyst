@@ -1,9 +1,13 @@
+mod compiled;
 mod nodes;
 
 use crate::expression::*;
+use compiled::*;
 use regex::Regex;
 use std::collections::HashMap;
 use std::sync::Arc;
+
+type BuilderDirectory = HashMap<&'static str, Box<ExpressionBuilder>>;
 
 //const TEMPLATE_FINDER_STR: &str = r"\{\{([^}]*)}}"; // Matches {{ }} templates
 const METHOD: &str = r"\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*";
@@ -15,7 +19,7 @@ lazy_static! {
 }
 
 pub struct Compiler {
-    builders: HashMap<&'static str, Box<ExpressionBuilder>>,
+    builders: BuilderDirectory,
 }
 
 impl Compiler {
