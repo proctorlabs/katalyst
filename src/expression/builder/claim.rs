@@ -4,6 +4,16 @@ use std::sync::Arc;
 
 pub struct ClaimExpressionBuilder {}
 
+impl ClaimExpressionBuilder {
+    fn call(ctx: &Context, args: &[ExpressionArg]) -> String {
+        if let Some(auth_info) = &ctx.detail.authentication {
+            auth_info.get_claim(args[0].render(&ctx))
+        } else {
+            "".to_string()
+        }
+    }
+}
+
 impl ExpressionBuilder for ClaimExpressionBuilder {
     fn identifier(&self) -> &'static str {
         "claim"
@@ -13,11 +23,8 @@ impl ExpressionBuilder for ClaimExpressionBuilder {
         Arc::new(ClaimCompiledExpression { claim_key: value })
     }
 
-    fn make_fn(
-        &self,
-        _args: Vec<Arc<CompiledExpression>>,
-    ) -> Result<ExpressionRenderMethod, KatalystError> {
-        Ok(Arc::new(|_, _| "".to_string()))
+    fn make_fn(&self, _: &[ExpressionArg]) -> Result<ExpressionRenderMethod, KatalystError> {
+        Ok(Arc::new(ClaimExpressionBuilder::call))
     }
 }
 

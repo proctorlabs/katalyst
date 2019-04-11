@@ -14,10 +14,7 @@ impl ExpressionBuilder for RegexExpressionBuilder {
         Arc::new(RegexCompiledExpression { val: value })
     }
 
-    fn make_fn(
-        &self,
-        _args: Vec<Arc<CompiledExpression>>,
-    ) -> Result<ExpressionRenderMethod, KatalystError> {
+    fn make_fn(&self, _: &[ExpressionArg]) -> Result<ExpressionRenderMethod, KatalystError> {
         Ok(Arc::new(|_, _| "".to_string()))
     }
 }

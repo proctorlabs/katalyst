@@ -8,8 +8,8 @@ lazy_static! {
     static ref DEF_STRING: String = String::default();
 }
 
-pub type ExpressionRenderMethod =
-    Arc<Fn(&Context, &Vec<Arc<CompiledExpression>>) -> String + Send + Sync>;
+pub type ExpressionArg = Arc<CompiledExpression>;
+pub type ExpressionRenderMethod = Arc<Fn(&Context, &[ExpressionArg]) -> String + Send + Sync>;
 
 #[derive(Clone)]
 pub enum ExpressionResultType {
@@ -26,10 +26,7 @@ pub trait ExpressionBuilder: Send + Sync {
     /// Note that these are reused and should be immutable once made.
     fn build(&self, value: String) -> Arc<CompiledExpression>;
 
-    fn make_fn(
-        &self,
-        args: Vec<Arc<CompiledExpression>>,
-    ) -> Result<ExpressionRenderMethod, KatalystError>;
+    fn make_fn(&self, args: &[ExpressionArg]) -> Result<ExpressionRenderMethod, KatalystError>;
 }
 
 pub struct CompiledExpressionImpl {

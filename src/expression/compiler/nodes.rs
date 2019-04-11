@@ -95,7 +95,7 @@ impl DynamicNode {
                         Ok(Arc::new(CompiledExpressionNode {
                             name: method_name.to_string(),
                             args: args.clone(),
-                            render_fn: b.make_fn(args.clone())?,
+                            render_fn: b.make_fn(&args)?,
                             result: ExpressionResultType::Text,
                         }))
                     }
