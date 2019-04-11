@@ -11,7 +11,7 @@ use std::sync::Arc;
 type BuilderDirectory = HashMap<&'static str, Box<ExpressionBuilder>>;
 
 lazy_static! {
-    static ref TEMPLATE_FINDER: Regex = Regex::new(r"\{{2}(.*)}{2}").unwrap(); // Matches {{ }} templates
+    static ref TEMPLATE_FINDER: Regex = Regex::new(r"\{{2}((?:[^}])*)}}").unwrap(); // Matches {{ }} templates
 }
 
 pub struct Compiler {
