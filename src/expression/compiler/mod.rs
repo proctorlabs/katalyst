@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 type BuilderDirectory = HashMap<&'static str, Box<ExpressionBuilder>>;
 
-//const TEMPLATE_FINDER_STR: &str = r"\{\{([^}]*)}}"; // Matches {{ }} templates
+//const TEMPLATE_FINDER_STR: &str = r"\{\{((?:\\\}|[^\}])*)}}"; // Matches {{ }} templates
 const METHOD: &str = r"\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*";
 const TEMPLATE: &str = r"\{\{\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*}}";
 

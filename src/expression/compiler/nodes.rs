@@ -81,20 +81,30 @@ impl DynamicNode {
     pub fn compile(
         &self,
         directory: &BuilderDirectory,
-    ) -> std::result::Result<Arc<CompiledExpressionNode>, KatalystError> {
+    ) -> std::result::Result<Arc<CompiledExpression>, KatalystError> {
         match self {
             DynamicNode::Method(node) => {
-                let mut args: Vec<Arc<CompiledExpressionNode>> = vec![];
-                for arg in node.args.iter() {
-                    args.push(arg.compile(directory)?);
+                let method_name = node.ident.to_string();
+                let builder = directory.get(&method_name.as_str());
+                match builder {
+                    Some(b) => {
+                        let mut args: Vec<Arc<CompiledExpression>> = vec![];
+                        for arg in node.args.iter() {
+                            args.push(arg.compile(directory)?);
+                        }
+                        Ok(Arc::new(CompiledExpressionNode {
+                            name: method_name.to_string(),
+                            args: args.clone(),
+                            render_fn: b.make_fn(args.clone())?,
+                            result: ExpressionResultType::Text,
+                        }))
+                    }
+                    None => Err(KatalystError::ConfigParseError),
                 }
-                Ok(Arc::new(CompiledExpressionNode {
-                    args: args,
-                    render_fn: Arc::new(|_, _| "".to_string()),
-                    result: ExpressionResultType::Text,
-                }))
             }
-            _ => Err(KatalystError::FeatureUnavailable),
+            DynamicNode::Text(text) => Ok(Arc::new(text.value())),
+            DynamicNode::Number(number) => Ok(Arc::new(number.value())),
+            DynamicNode::Bool(cnd) => Ok(Arc::new(cnd.value)),
         }
     }
 }
@@ -108,5 +118,16 @@ mod tests {
         let exp = " some (\"string\", true) ";
         let node: DynamicNode = syn::parse_str(exp).unwrap();
         println!("{:?}", node);
+    }
+
+    #[test]
+    fn compile_from_expression() {
+        let exp = " http (http(60), true, http(\"string\")) ";
+        let node: DynamicNode = syn::parse_str(exp).unwrap();
+        let mut directory = BuilderDirectory::default();
+        let builder = Box::new(HttpExpressionBuilder {});
+        directory.insert(builder.identifier(), builder);
+        let result = node.compile(&directory).unwrap();
+        println!("{:?}", result);
     }
 }

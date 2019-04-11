@@ -5,7 +5,6 @@ mod traits;
 use builder::*;
 pub use compiler::Compiler;
 use std::sync::Arc;
-pub use traits::ExpressionRenderFn;
 pub use traits::*;
 
 pub type ExpressionArgs = Vec<Arc<CompiledExpression>>;

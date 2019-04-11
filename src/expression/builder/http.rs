@@ -21,7 +21,7 @@ impl ExpressionBuilder for HttpExpressionBuilder {
     fn make_fn(
         &self,
         _args: Vec<Arc<CompiledExpression>>,
-    ) -> Result<ExpressionRenderFn, KatalystError> {
+    ) -> Result<ExpressionRenderMethod, KatalystError> {
         Ok(Arc::new(|_, _| "".to_string()))
     }
 }

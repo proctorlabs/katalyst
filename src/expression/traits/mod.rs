@@ -8,8 +8,15 @@ lazy_static! {
     static ref DEF_STRING: String = String::default();
 }
 
-pub type ExpressionRenderFn =
+pub type ExpressionRenderMethod =
     Arc<Fn(&Context, &Vec<Arc<CompiledExpression>>) -> String + Send + Sync>;
+
+#[derive(Clone)]
+pub enum ExpressionResultType {
+    Text,
+    Number,
+    Boolean,
+}
 
 /// This is the trait used by Katalyst for building the placeholders used in a downstream URL template
 pub trait ExpressionBuilder: Send + Sync {
@@ -22,20 +29,20 @@ pub trait ExpressionBuilder: Send + Sync {
     fn make_fn(
         &self,
         args: Vec<Arc<CompiledExpression>>,
-    ) -> Result<ExpressionRenderFn, KatalystError>;
+    ) -> Result<ExpressionRenderMethod, KatalystError>;
 }
 
 pub struct CompiledExpressionImpl {
     raw: String,
     args: Expression,
-    eval: ExpressionRenderFn,
+    eval: ExpressionRenderMethod,
 }
 
 impl CompiledExpressionImpl {
     pub fn make(
         raw: String,
         args: Expression,
-        eval: ExpressionRenderFn,
+        eval: ExpressionRenderMethod,
     ) -> Arc<CompiledExpression> {
         Arc::new(CompiledExpressionImpl {
             raw: raw,
@@ -76,16 +83,6 @@ pub trait CompiledExpression: Send + Sync + Debug {
     /// Returned when no match is found for placeholder
     fn none(&self) -> &String {
         &DEF_STRING
-    }
-}
-
-impl CompiledExpression for String {
-    fn render(&self, _: &Context) -> String {
-        self.to_string()
-    }
-
-    fn duplicate(&self) -> Arc<CompiledExpression> {
-        Arc::new(self.to_owned())
     }
 }
 
