@@ -3,19 +3,15 @@ mod nodes;
 
 use crate::expression::*;
 use compiled::*;
+use nodes::DynamicNode;
 use regex::Regex;
 use std::collections::HashMap;
 use std::sync::Arc;
 
 type BuilderDirectory = HashMap<&'static str, Box<ExpressionBuilder>>;
 
-//const TEMPLATE_FINDER_STR: &str = r"\{\{((?:\\\}|[^\}])*)}}"; // Matches {{ }} templates
-const METHOD: &str = r"\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*";
-const TEMPLATE: &str = r"\{\{\s*([^}(=>)\s]+)\s*(?:=>)\s*([^}\s]*)\s*}}";
-
 lazy_static! {
-    static ref TEMPLATE_MATCHER: Regex = Regex::new(TEMPLATE).unwrap();
-    static ref METHOD_MATCHER: Regex = Regex::new(METHOD).unwrap();
+    static ref TEMPLATE_FINDER: Regex = Regex::new(r"\{{2}(.*)}{2}").unwrap(); // Matches {{ }} templates
 }
 
 pub struct Compiler {
@@ -23,34 +19,6 @@ pub struct Compiler {
 }
 
 impl Compiler {
-    pub fn get_from_template(&self, placeholder_text: String) -> Arc<CompiledExpression> {
-        match TEMPLATE_MATCHER.captures(&placeholder_text) {
-            Some(cap) => {
-                let key = &cap[1];
-                let val = &cap[2];
-                match self.builders.get(key) {
-                    Some(p) => p.build(val.to_string()),
-                    None => Arc::new(placeholder_text),
-                }
-            }
-            None => Arc::new(placeholder_text),
-        }
-    }
-
-    pub fn get_from_method(&self, placeholder_text: String) -> Arc<CompiledExpression> {
-        match METHOD_MATCHER.captures(&placeholder_text) {
-            Some(cap) => {
-                let key = &cap[1];
-                let val = &cap[2];
-                match self.builders.get(key) {
-                    Some(p) => p.build(val.to_string()),
-                    None => Arc::new(placeholder_text),
-                }
-            }
-            None => Arc::new(placeholder_text),
-        }
-    }
-
     pub fn register(&mut self, provider: Box<ExpressionBuilder>) {
         self.builders.insert(provider.identifier(), provider);
     }
@@ -61,57 +29,57 @@ impl Compiler {
         }
     }
 
-    pub fn process_template_map(
+    pub fn compile_template_map(
         &self,
         template: &Option<HashMap<String, String>>,
     ) -> Option<HashMap<String, Expression>> {
         match template {
             Some(m) => Some(
                 m.iter()
-                    .map(|(k, v)| (k.to_string(), self.process_template(&v)))
+                    .filter_map(|(k, v)| match self.compile_template_option(Some(v)) {
+                        Some(x) => Some((k.to_string(), x)),
+                        None => None,
+                    })
                     .collect(),
             ),
             None => None,
         }
     }
 
-    pub fn process_template_option(&self, template: &Option<String>) -> Option<Expression> {
-        match template {
-            Some(s) => Some(self.process_template(&s)),
-            None => None,
+    pub fn compile_template_option(&self, template: Option<&str>) -> Option<Expression> {
+        match self.compile_template(template) {
+            Ok(s) => Some(s),
+            Err(_) => None,
         }
     }
 
-    pub fn process_template(&self, template: &str) -> Expression {
-        let mut result_placeholders: Expression = vec![];
-        if TEMPLATE_MATCHER.is_match(template) {
+    pub fn compile_template(&self, raw_str: Option<&str>) -> Result<Expression, KatalystError> {
+        if let Some(raw) = raw_str {
+            let mut results: Expression = vec![];
             let mut last_segment_index = 0;
-            for cap in TEMPLATE_MATCHER.find_iter(template) {
-                if cap.start() > last_segment_index {
-                    let offset = cap.start() - last_segment_index;
-                    let segment: String = template
-                        .chars()
-                        .skip(last_segment_index)
-                        .take(offset)
-                        .collect();
-                    result_placeholders.push(Arc::new(segment));
+            if TEMPLATE_FINDER.is_match(raw) {
+                for cap in TEMPLATE_FINDER.captures_iter(raw) {
+                    let (mtch, expr) = (cap.get(0).unwrap(), &cap[1]);
+                    if mtch.start() > last_segment_index {
+                        let offset = mtch.start() - last_segment_index;
+                        let segment: String =
+                            raw.chars().skip(last_segment_index).take(offset).collect();
+                        results.push(Arc::new(segment));
+                    }
+                    let node = DynamicNode::build(expr)?;
+                    results.push(node.compile(&self.builders)?);
+                    last_segment_index = mtch.end();
                 }
-                result_placeholders.push(self.get_from_template(cap.as_str().to_owned()));
-                last_segment_index = cap.end();
             }
-            if last_segment_index < template.len() {
-                let offset = template.len() - last_segment_index;
-                let segment: String = template
-                    .chars()
-                    .skip(last_segment_index)
-                    .take(offset)
-                    .collect();
-                result_placeholders.push(Arc::new(segment));
+            if last_segment_index == 0 || last_segment_index < raw.len() {
+                let offset = raw.len() - last_segment_index;
+                let segment: String = raw.chars().skip(last_segment_index).take(offset).collect();
+                results.push(Arc::new(segment));
             }
+            Ok(results)
         } else {
-            result_placeholders.push(Arc::new(template.to_owned()));
+            Err(KatalystError::NotFound)
         }
-        result_placeholders
     }
 }
 
