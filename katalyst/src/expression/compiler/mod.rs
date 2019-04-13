@@ -86,11 +86,9 @@ impl Compiler {
 impl Default for Compiler {
     fn default() -> Self {
         let mut providers = Compiler::empty();
-        providers.register(Box::new(EnvExpressionBuilder {}));
-        providers.register(Box::new(RegexExpressionBuilder {}));
-        providers.register(Box::new(HeaderExpressionBuilder {}));
-        providers.register(Box::new(HttpExpressionBuilder {}));
-        providers.register(Box::new(ClaimExpressionBuilder {}));
+        providers.register(Box::new(EnvBinding {}));
+        providers.register(Box::new(HttpBinding {}));
+        providers.register(Box::new(AuthBinding {}));
         providers
     }
 }

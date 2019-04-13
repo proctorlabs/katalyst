@@ -27,12 +27,12 @@ routes:
       host: echo
       path: "/get"
       query:
-        regex_cap: '{{ regex("cap") }}'
-        method: '{{ http("method") }}'
-        ip: '{{ http("ip") }}'
+        regex_cap: '{{ http.matched("cap") }}'
+        method: "{{ http.method() }}"
+        ip: "{{ http.ip() }}"
       headers:
-        header: '{{ header("user-agent") }}'
-        claim: '{{ claim("KatalystAuthenticator") }}'
+        header: '{{ http.header("user-agent") }}'
+        claim: '{{ auth.claim("KatalystAuthenticator") }}'
     authenticators:
       - backend: http
         url: "https://postman-echo.com/get?thing=something"

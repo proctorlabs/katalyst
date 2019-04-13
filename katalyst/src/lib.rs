@@ -17,9 +17,12 @@ Current features include:
 * Flexible templating for value replacement in downstream requests
 */
 
-//Define package-wide macro providers
+#[macro_use]
+extern crate katalyst_macros;
+
 #[macro_use]
 extern crate log;
+
 #[macro_use]
 extern crate lazy_static;
 

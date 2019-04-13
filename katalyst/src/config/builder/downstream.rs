@@ -34,7 +34,7 @@ impl Builder<Downstream> for DownstreamBuilder {
         Ok(Downstream {
             host: self.host.to_owned(),
             path: providers.compile_template(Some(self.path.as_str()))?,
-            method: method,
+            method,
             query: providers.compile_template_map(&self.query),
             headers: providers.compile_template_map(&self.headers),
             body: providers.compile_template_option(body),

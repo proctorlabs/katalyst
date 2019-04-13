@@ -13,6 +13,7 @@ description = "Regenerate the README.md from the doc notes in lib.rs"
 install_crate = "cargo-readme"
 command = "cargo"
 args = ["readme", "-o", "README.md"]
+workspace = false
 
 [tasks.watch]
 description = "Run the project, monitor for changes and rerun when changed"

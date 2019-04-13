@@ -54,10 +54,10 @@ impl Downstream {
         };
 
         Ok(DownstreamTransformer {
-            uri: uri,
-            method: method,
-            headers: headers,
-            body: body,
+            uri,
+            method,
+            headers,
+            body,
         })
     }
 }

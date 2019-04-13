@@ -21,7 +21,11 @@ pub trait ExpressionBuilder: Send + Sync {
     /// The identifier in this template to locate that this provider should be used
     fn identifier(&self) -> &'static str;
     /// This returns the render function for this expression
-    fn make_fn(&self, args: &[ExpressionArg]) -> Result<ExpressionRenderMethod, KatalystError>;
+    fn make_fn(
+        &self,
+        name: &str,
+        args: &[ExpressionArg],
+    ) -> Result<ExpressionRenderMethod, KatalystError>;
 }
 
 /// This provides the actual value replacement used in the downstream URL template

@@ -16,6 +16,8 @@ pub enum DynamicNode {
 
 pub struct MethodNode {
     pub ident: Ident,
+    pub dot_token: Token![.],
+    pub ident2: Ident,
     pub paren_token: token::Paren,
     pub args: Punctuated<DynamicNode, Token![,]>,
 }
@@ -25,6 +27,8 @@ impl Parse for MethodNode {
         let content;
         Ok(MethodNode {
             ident: input.parse()?,
+            dot_token: input.parse()?,
+            ident2: input.parse()?,
             paren_token: parenthesized!(content in input),
             args: content.parse_terminated(DynamicNode::parse)?,
         })
@@ -92,10 +96,11 @@ impl DynamicNode {
                         for arg in node.args.iter() {
                             args.push(arg.compile(directory)?);
                         }
+                        let method = node.ident2.to_string();
                         Ok(Arc::new(CompiledExpressionNode {
                             name: method_name.to_string(),
                             args: args.clone(),
-                            render_fn: b.make_fn(&args)?,
+                            render_fn: b.make_fn(&method, &args)?,
                             result: ExpressionResultType::Text,
                         }))
                     }
@@ -115,17 +120,17 @@ mod tests {
 
     #[test]
     fn tokenize_simple_expression() {
-        let exp = " some (\"string\", true) ";
+        let exp = " some.thing (\"string\", true) ";
         let node: DynamicNode = syn::parse_str(exp).unwrap();
         println!("{:?}", node);
     }
 
     #[test]
     fn compile_from_expression() {
-        let exp = " http (http(60), true, http(\"string\")) ";
+        let exp = " http.matched (\"test\") ";
         let node: DynamicNode = syn::parse_str(exp).unwrap();
         let mut directory = BuilderDirectory::default();
-        let builder = Box::new(HttpExpressionBuilder {});
+        let builder = Box::new(HttpBinding {});
         directory.insert(builder.identifier(), builder);
         let result = node.compile(&directory).unwrap();
         println!("{:?}", result);

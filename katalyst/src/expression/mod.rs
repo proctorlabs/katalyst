@@ -29,7 +29,7 @@ mod tests {
     fn compile_template() {
         let compiler = Compiler::default();
         compiler
-            .compile_template(Some("/testing/the/parser/{{http()}}/test"))
+            .compile_template(Some("/testing/the/parser/{{http.ip()}}/test"))
             .unwrap();
     }
 

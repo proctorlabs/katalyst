@@ -44,7 +44,7 @@ impl Default for KatalystEngine {
 
         KatalystEngine {
             state: RwLock::default(),
-            locator: locator,
+            locator,
             rt: RwLock::new(Runtime::new().unwrap()),
         }
     }

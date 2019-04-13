@@ -31,13 +31,17 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn new(request: Request<Body>, engine: Arc<KatalystEngine>, remote: SocketAddr) -> Self {
+    pub fn new(
+        request: Request<Body>,
+        engine: Arc<KatalystEngine>,
+        remote_addr: SocketAddr,
+    ) -> Self {
         let mut state = Context {
             upstream: RequestResponse::default(),
             downstream: RequestResponse::default(),
             detail: Detail::default(),
-            engine: engine,
-            remote_addr: remote,
+            engine,
+            remote_addr,
         };
         state.upstream.request = Some(request);
         state
