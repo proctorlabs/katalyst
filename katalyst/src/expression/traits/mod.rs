@@ -17,7 +17,7 @@ pub enum ExpressionResultType {
 }
 
 /// This is the trait used by Katalyst for building the placeholders used in a downstream URL template
-pub trait ExpressionBuilder: Send + Sync {
+pub trait ExpressionBinding: Send + Sync {
     /// The identifier in this template to locate that this provider should be used
     fn identifier(&self) -> &'static str;
     /// This returns the render function for this expression

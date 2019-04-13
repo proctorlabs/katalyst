@@ -8,7 +8,7 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-type BuilderDirectory = HashMap<&'static str, Box<ExpressionBuilder>>;
+type BuilderDirectory = HashMap<&'static str, Box<ExpressionBinding>>;
 
 lazy_static! {
     static ref TEMPLATE_FINDER: Regex = Regex::new(r"\{{2}((?:[^}])*)}}").unwrap(); // Matches {{ }} templates
@@ -19,7 +19,7 @@ pub struct Compiler {
 }
 
 impl Compiler {
-    pub fn register(&mut self, provider: Box<ExpressionBuilder>) {
+    pub fn register(&mut self, provider: Box<ExpressionBinding>) {
         self.builders.insert(provider.identifier(), provider);
     }
 

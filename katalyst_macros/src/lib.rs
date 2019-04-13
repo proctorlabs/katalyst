@@ -111,12 +111,10 @@ pub fn binding(input: TokenStream) -> TokenStream {
         });
     }
 
-    // Ok(std::sync::Arc::new(|_, _| "".to_string()))
-
     let result = quote! {
         pub struct #ident {}
 
-        impl ExpressionBuilder for #ident {
+        impl ExpressionBinding for #ident {
             fn identifier(&self) -> &'static str {
                 #id_string
             }

@@ -1,9 +1,9 @@
-mod builder;
+mod bindings;
 mod compiler;
 mod traits;
 
 use crate::prelude::*;
-use builder::*;
+use bindings::*;
 pub use compiler::Compiler;
 use std::sync::Arc;
 pub use traits::*;
