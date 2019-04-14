@@ -8,7 +8,7 @@ edition = "2018"
 keywords = ["http", "api", "gateway"]
 categories = ["network-programming", "web-programming::http-server", "web-programming"]
 license = "MIT"
-readme = "README.md"
+readme = "../README.md"
 
 [dependencies]
 katalyst_macros = { version = "0.1", path = "../katalyst_macros" }

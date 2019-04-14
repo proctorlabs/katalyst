@@ -96,10 +96,6 @@ pub fn binding(input: TokenStream) -> TokenStream {
                     syn::Lit::Bool(b) => println!("{:?} : {:?}", vals.ident, b.value),
                     _ => (),
                 };
-
-                checks.push(quote! {
-                    println!("Test");
-                });
             }
         }
         fn_item.attrs.clear();

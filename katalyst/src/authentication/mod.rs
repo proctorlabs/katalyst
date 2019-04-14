@@ -10,7 +10,7 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 use std::sync::Arc;
 
-pub type AuthenticatorDirectory = HashMap<&'static str, Arc<KatalystAuthenticatorBuilder>>;
+pub(crate) type AuthenticatorDirectory = HashMap<&'static str, Arc<KatalystAuthenticatorBuilder>>;
 
 #[derive(Debug, Default)]
 pub struct KatalystAuthenticationInfo {

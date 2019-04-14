@@ -36,7 +36,7 @@ pub mod error;
 pub mod expression;
 mod locator;
 pub mod pipeline;
-mod prelude;
+pub mod prelude;
 mod service;
 mod state;
 

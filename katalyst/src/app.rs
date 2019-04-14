@@ -1,10 +1,9 @@
 use crate::authentication;
 use crate::balancer;
 use crate::config::parsers;
-use crate::error::*;
-use crate::expression::Compiler;
 use crate::locator::{Locatable, Locator};
 use crate::pipeline::PipelineRunner;
+use crate::prelude::*;
 use crate::service::EngineService;
 use crate::state::KatalystState;
 use futures::future::Future;
