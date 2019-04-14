@@ -29,7 +29,7 @@ impl Pipeline for Logger {
     }
 
     fn process_error(&self, err: RequestFailure) -> RequestFailure {
-        warn!("Request failed with error: {:?}", err);
+        warn!("Request failed with error: {}", err);
         err
     }
 }

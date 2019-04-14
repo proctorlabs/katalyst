@@ -47,4 +47,17 @@ impl Context {
         state.upstream.request = Some(request);
         state
     }
+
+    pub fn lock(self) -> ContextLock {
+        ContextLock {
+            detail: self.detail,
+            remote_addr: self.remote_addr,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct ContextLock {
+    pub detail: Detail,
+    pub remote_addr: SocketAddr,
 }

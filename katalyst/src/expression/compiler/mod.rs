@@ -32,24 +32,26 @@ impl Compiler {
     pub fn compile_template_map(
         &self,
         template: &Option<HashMap<String, String>>,
-    ) -> Option<HashMap<String, Expression>> {
+    ) -> Result<Option<HashMap<String, Expression>>, ConfigurationFailure> {
         match template {
-            Some(m) => Some(
-                m.iter()
-                    .filter_map(|(k, v)| match self.compile_template_option(Some(v)) {
-                        Some(x) => Some((k.to_string(), x)),
-                        None => None,
-                    })
-                    .collect(),
-            ),
-            None => None,
+            Some(m) => Ok(Some({
+                let mut result = HashMap::<String, Expression>::new();
+                for i in m {
+                    result.insert(i.0.to_string(), self.compile_template(Some(i.1))?);
+                }
+                result
+            })),
+            None => Ok(None),
         }
     }
 
-    pub fn compile_template_option(&self, template: Option<&str>) -> Option<Expression> {
-        match self.compile_template(template) {
-            Ok(s) => Some(s),
-            Err(_) => None,
+    pub fn compile_template_option(
+        &self,
+        template: Option<&str>,
+    ) -> Result<Option<Expression>, ConfigurationFailure> {
+        match template {
+            Some(_) => Ok(Some(self.compile_template(template)?)),
+            None => Ok(None),
         }
     }
 

@@ -35,9 +35,9 @@ impl Builder<Downstream> for DownstreamBuilder {
             host: self.host.to_owned(),
             path: providers.compile_template(Some(self.path.as_str()))?,
             method,
-            query: providers.compile_template_map(&self.query),
-            headers: providers.compile_template_map(&self.headers),
-            body: providers.compile_template_option(body),
+            query: providers.compile_template_map(&self.query)?,
+            headers: providers.compile_template_map(&self.headers)?,
+            body: providers.compile_template_option(body)?,
         })
     }
 }

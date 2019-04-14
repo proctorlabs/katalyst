@@ -9,10 +9,7 @@ impl Pipeline for Matcher {
     }
 
     fn prepare_request(&self, mut ctx: Context) -> PipelineResult {
-        let request = match &ctx.upstream.request {
-            Some(r) => r,
-            None => return Err(RequestFailure::NotFound),
-        };
+        let request = ctx.upstream.request.with()?;
         let config = ctx
             .engine
             .get_state()
@@ -44,6 +41,6 @@ impl Pipeline for Matcher {
                 return Ok(ctx);
             }
         }
-        Err(RequestFailure::NotFound)
+        Err(RequestFailure::NotFound(ctx.lock()))
     }
 }
