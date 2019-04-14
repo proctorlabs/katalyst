@@ -28,7 +28,7 @@ impl Pipeline for Logger {
         ctx
     }
 
-    fn process_error(&self, err: KatalystError) -> KatalystError {
+    fn process_error(&self, err: RequestFailure) -> RequestFailure {
         warn!("Request failed with error: {:?}", err);
         err
     }

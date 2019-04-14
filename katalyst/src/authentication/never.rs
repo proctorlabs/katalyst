@@ -20,6 +20,6 @@ pub struct NeverAuthenticator {}
 
 impl KatalystAuthenticator for NeverAuthenticator {
     fn authenticate(&self, _: Context) -> AsyncPipelineResult {
-        Box::new(err::<Context, KatalystError>(KatalystError::Unauthorized))
+        Box::new(err::<Context, RequestFailure>(RequestFailure::Unauthorized))
     }
 }

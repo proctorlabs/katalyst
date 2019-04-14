@@ -1,9 +1,13 @@
 #[macro_use]
 extern crate quote;
+
 #[macro_use]
 extern crate syn;
+
 extern crate proc_macro;
+
 extern crate proc_macro2;
+
 use proc_macro::TokenStream;
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
@@ -88,7 +92,7 @@ pub fn binding(input: TokenStream) -> TokenStream {
                         if vals.ident == "count" {
                             checks.push(quote! {
                                 if args.len() != #res {
-                                    Err(KatalystError::ConfigParseError)?;
+                                    Err(ConfigurationFailure::InvalidExpressionArgs("Incorrect argument count"))?;
                                 }
                             });
                         }
@@ -115,10 +119,10 @@ pub fn binding(input: TokenStream) -> TokenStream {
                 #id_string
             }
 
-            fn make_fn(&self, name: &str, args: &[ExpressionArg]) -> Result<ExpressionRenderMethod, KatalystError> {
+            fn make_fn(&self, name: &str, args: &[ExpressionArg]) -> Result<ExpressionRenderMethod, ConfigurationFailure> {
                 match name {
                     #(#match_options)*
-                    _ => Err(KatalystError::ConfigParseError)
+                    _ => Err(ConfigurationFailure::ExpressionItemNotFound(#id_string.to_string()))
                 }
             }
         }

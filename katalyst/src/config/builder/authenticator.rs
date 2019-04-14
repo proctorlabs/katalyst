@@ -1,7 +1,7 @@
 use super::*;
 use crate::app::KatalystEngine;
 use crate::authentication::AuthenticatorDirectory;
-use crate::error::KatalystError;
+use crate::error::ConfigurationFailure;
 use serde::{Deserialize, Serialize};
 use std::string::String;
 use std::sync::Arc;
@@ -14,7 +14,7 @@ pub struct AuthenticatorBuilder {
 }
 
 impl Builder<Authenticator> for AuthenticatorBuilder {
-    fn build(&self, engine: Arc<KatalystEngine>) -> Result<Authenticator, KatalystError> {
+    fn build(&self, engine: Arc<KatalystEngine>) -> Result<Authenticator, ConfigurationFailure> {
         let authenticators = engine.locate::<AuthenticatorDirectory>()?;
         Ok(Authenticator {
             authenticator: authenticators

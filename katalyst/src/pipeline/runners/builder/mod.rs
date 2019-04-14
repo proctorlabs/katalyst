@@ -11,30 +11,40 @@ impl Pipeline for Builder {
     }
 
     fn prepare_request(&self, mut ctx: Context) -> PipelineResult {
-        let config = ctx.engine.get_state()?;
+        let config = ctx
+            .engine
+            .get_state()
+            .context("Failed to get configuration")?;
         let downstream = match &ctx.detail.matched_route {
             Some(route) => &route.downstream,
             None => {
-                return Err(KatalystError::FeatureUnavailable);
+                return Err(RequestFailure::Internal);
             }
         };
 
         let balancer_lease = match config.hosts.get(&downstream.host) {
-            Some(s) => s.servers.lease()?,
+            Some(s) => s
+                .servers
+                .lease()
+                .context("Failed to get lease from specified pool")?,
             None => {
-                return Err(KatalystError::NotFound);
+                return Err(RequestFailure::NotFound);
             }
         };
 
-        let transformer = downstream.transformer(&ctx, balancer_lease.to_string())?;
+        let transformer = downstream
+            .transformer(&ctx, balancer_lease.to_string())
+            .context("Failed to create request")?;
         ctx.detail.balancer_lease = Some(balancer_lease);
 
         let request = match ctx.upstream.request {
             Some(req) => req,
-            None => return Err(KatalystError::FeatureUnavailable),
+            None => return Err(RequestFailure::Internal),
         };
 
-        let mut client_req = transformer.transform(request)?;
+        let mut client_req = transformer
+            .transform(request)
+            .context("Failed to create request")?;
         ctx.upstream.request = None;
         forwarding_headers::add_forwarding_headers(&mut client_req.headers_mut(), ctx.remote_addr);
         hop_headers::strip_hop_headers(&mut client_req.headers_mut());

@@ -3,7 +3,6 @@ mod http;
 mod never;
 
 use crate::config::builder::AuthenticatorBuilder;
-use crate::error::KatalystError;
 use crate::pipeline::AsyncPipelineResult;
 use crate::prelude::*;
 use std::collections::HashMap;

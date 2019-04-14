@@ -1,9 +1,7 @@
 mod runners;
 
 use crate::app::KatalystEngine;
-use crate::error::KatalystError;
 use crate::prelude::*;
-
 use futures::future::*;
 use futures::Future;
 use hyper::{Body, Request, Response};
@@ -13,8 +11,8 @@ use std::sync::Arc;
 
 pub(crate) type HyperResult = Box<Future<Item = Response<Body>, Error = hyper::Error> + Send>;
 
-pub type AsyncPipelineResult = Box<Future<Item = Context, Error = KatalystError> + Send>;
-pub type PipelineResult = Result<Context, KatalystError>;
+pub type AsyncPipelineResult = Box<Future<Item = Context, Error = RequestFailure> + Send>;
+pub type PipelineResult = Result<Context, RequestFailure>;
 
 pub trait Pipeline: Send + Sync {
     fn name(&self) -> &'static str;
@@ -31,7 +29,7 @@ pub trait Pipeline: Send + Sync {
         ctx
     }
 
-    fn process_error(&self, err: KatalystError) -> KatalystError {
+    fn process_error(&self, err: RequestFailure) -> RequestFailure {
         err
     }
 }
@@ -54,7 +52,7 @@ impl PipelineRunner {
         engine: Arc<KatalystEngine>,
     ) -> HyperResult {
         let mut result: AsyncPipelineResult = Box::new(lazy(move || {
-            ok::<Context, KatalystError>(Context::new(request, engine, remote_addr))
+            ok::<Context, RequestFailure>(Context::new(request, engine, remote_addr))
         }));
         for pip in self.pipelines.iter() {
             result = Box::new(result.and_then({

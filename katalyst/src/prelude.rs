@@ -3,9 +3,11 @@ use std::sync::Arc;
 
 pub use crate::authentication::*;
 pub use crate::context::Context;
-pub use crate::error::KatalystError;
+pub use crate::error::*;
 pub use crate::expression::*;
 pub use crate::locator::Locatable;
+#[allow(unused_imports)]
+pub(crate) use failure::ResultExt;
 
 pub(crate) trait KatalystCommonUtilities {
     fn arc() -> Arc<Self>

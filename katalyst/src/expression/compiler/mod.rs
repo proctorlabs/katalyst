@@ -53,7 +53,10 @@ impl Compiler {
         }
     }
 
-    pub fn compile_template(&self, raw_str: Option<&str>) -> Result<Expression, KatalystError> {
+    pub fn compile_template(
+        &self,
+        raw_str: Option<&str>,
+    ) -> Result<Expression, ConfigurationFailure> {
         if let Some(raw) = raw_str {
             let mut results: Expression = vec![];
             let mut last_segment_index = 0;
@@ -78,7 +81,7 @@ impl Compiler {
             }
             Ok(results)
         } else {
-            Err(KatalystError::NotFound)
+            Err(ConfigurationFailure::ElementExpected("template"))
         }
     }
 }

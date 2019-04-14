@@ -17,6 +17,7 @@ use std::sync::RwLock;
 use tokio::runtime::Runtime;
 
 /// The Katalyst Engine
+#[derive(Debug)]
 pub struct KatalystEngine {
     state: RwLock<Arc<KatalystState>>,
     locator: Locator,
@@ -86,7 +87,7 @@ impl KatalystEngine {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Katalyst {
     engine: Arc<KatalystEngine>,
 }

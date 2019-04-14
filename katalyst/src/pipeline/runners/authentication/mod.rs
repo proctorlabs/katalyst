@@ -15,7 +15,7 @@ impl Pipeline for Authenticator {
         let route = match &ctx.detail.matched_route {
             Some(s) => s,
             None => {
-                return Box::new(err(KatalystError::FeatureUnavailable));
+                return Box::new(err(RequestFailure::Internal));
             }
         };
         match &route.authenticators {

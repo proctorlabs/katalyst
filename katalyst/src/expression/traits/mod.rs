@@ -25,7 +25,7 @@ pub trait ExpressionBinding: Send + Sync {
         &self,
         name: &str,
         args: &[ExpressionArg],
-    ) -> Result<ExpressionRenderMethod, KatalystError>;
+    ) -> Result<ExpressionRenderMethod, ConfigurationFailure>;
 }
 
 /// This provides the actual value replacement used in the downstream URL template

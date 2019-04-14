@@ -23,6 +23,6 @@ impl KatalystAuthenticator for AlwaysAuthenticator {
         let mut result = KatalystAuthenticationInfo::default();
         result.add_claim("KatalystAuthenticator".to_string(), "always".to_string());
         ctx.detail.authentication = Some(result);
-        Box::new(ok::<Context, KatalystError>(ctx))
+        Box::new(ok::<Context, RequestFailure>(ctx))
     }
 }

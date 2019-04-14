@@ -75,17 +75,14 @@ impl fmt::Debug for DynamicNode {
 }
 
 impl DynamicNode {
-    pub fn build(raw: &str) -> std::result::Result<DynamicNode, KatalystError> {
-        match syn::parse_str(raw) {
-            Ok(res) => Ok(res),
-            Err(_) => Err(KatalystError::ConfigParseError),
-        }
+    pub fn build(raw: &str) -> std::result::Result<DynamicNode, ConfigurationFailure> {
+        Ok(syn::parse_str(raw)?)
     }
 
     pub fn compile(
         &self,
         directory: &BuilderDirectory,
-    ) -> std::result::Result<Arc<CompiledExpression>, KatalystError> {
+    ) -> std::result::Result<Arc<CompiledExpression>, ConfigurationFailure> {
         match self {
             DynamicNode::Method(node) => {
                 let method_name = node.ident.to_string();
@@ -104,7 +101,9 @@ impl DynamicNode {
                             result: ExpressionResultType::Text,
                         }))
                     }
-                    None => Err(KatalystError::ConfigParseError),
+                    None => Err(ConfigurationFailure::ExpressionItemNotFound(
+                        method_name.to_string(),
+                    )),
                 }
             }
             DynamicNode::Text(text) => Ok(Arc::new(text.value())),

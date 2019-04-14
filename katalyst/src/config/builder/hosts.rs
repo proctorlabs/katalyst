@@ -19,7 +19,10 @@ fn default_balancer() -> String {
 }
 
 impl Builder<HashMap<String, Hosts>> for HashMap<String, HostsBuilder> {
-    fn build(&self, engine: Arc<KatalystEngine>) -> Result<HashMap<String, Hosts>, KatalystError> {
+    fn build(
+        &self,
+        engine: Arc<KatalystEngine>,
+    ) -> Result<HashMap<String, Hosts>, ConfigurationFailure> {
         let balancers = engine.locate::<BalancerDirectory>()?;
         Ok(self
             .iter()

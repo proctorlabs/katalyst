@@ -18,9 +18,7 @@ impl Pipeline for Sender {
                 s
             }
             None => {
-                return Box::new(err::<Context, KatalystError>(
-                    KatalystError::FeatureUnavailable,
-                ));
+                return Box::new(err::<Context, RequestFailure>(RequestFailure::Internal));
             }
         };
         let client: Arc<HttpsClient> = ctx.engine.locate().unwrap();
@@ -28,11 +26,11 @@ impl Pipeline for Sender {
         Box::new(res.then(|response| match response {
             Ok(r) => {
                 ctx.upstream.response = Some(r);
-                ok::<Context, KatalystError>(ctx)
+                ok::<Context, RequestFailure>(ctx)
             }
             Err(e) => {
                 warn!("Could not send upstream request! Caused by: {:?}", e);
-                err::<Context, KatalystError>(KatalystError::GatewayTimeout)
+                err::<Context, RequestFailure>(RequestFailure::GatewayTimeout)
             }
         }))
     }

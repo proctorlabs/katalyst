@@ -7,13 +7,13 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Instant;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct RequestResponse {
     pub request: Option<Request<Body>>,
     pub response: Option<Response<Body>>,
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Detail {
     pub matched_route: Option<Arc<Route>>,
     pub captures: Option<HashMap<String, String>>,
@@ -22,6 +22,7 @@ pub struct Detail {
     pub balancer_lease: Option<Arc<String>>,
 }
 
+#[derive(Debug)]
 pub struct Context {
     pub upstream: RequestResponse,
     pub downstream: RequestResponse,

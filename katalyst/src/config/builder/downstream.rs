@@ -1,6 +1,6 @@
 use super::Builder;
 use crate::app::KatalystEngine;
-use crate::error::KatalystError;
+use crate::error::ConfigurationFailure;
 use crate::expression::Compiler;
 use crate::state::Downstream;
 use http::Method;
@@ -21,7 +21,7 @@ pub struct DownstreamBuilder {
 }
 
 impl Builder<Downstream> for DownstreamBuilder {
-    fn build(&self, engine: Arc<KatalystEngine>) -> Result<Downstream, KatalystError> {
+    fn build(&self, engine: Arc<KatalystEngine>) -> Result<Downstream, ConfigurationFailure> {
         let providers = engine.locate::<Compiler>()?;
         let method = match &self.method {
             Some(m) => Some(Method::from_bytes(m.to_uppercase().as_bytes()).unwrap()),

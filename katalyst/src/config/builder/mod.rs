@@ -12,14 +12,14 @@ pub use listener::ListenerBuilder;
 pub use routes::RouteBuilder;
 
 use crate::app::KatalystEngine;
-use crate::error::KatalystError;
+use crate::error::ConfigurationFailure;
 use crate::state::KatalystState;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
 
 pub trait Builder<T> {
-    fn build(&self, engine: Arc<KatalystEngine>) -> Result<T, KatalystError>;
+    fn build(&self, engine: Arc<KatalystEngine>) -> Result<T, ConfigurationFailure>;
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
@@ -31,7 +31,7 @@ pub struct KatalystBuilder {
 }
 
 impl KatalystBuilder {
-    pub fn build(self, engine: Arc<KatalystEngine>) -> Result<KatalystState, KatalystError> {
+    pub fn build(self, engine: Arc<KatalystEngine>) -> Result<KatalystState, ConfigurationFailure> {
         //build routes...
         let mut all_routes = vec![];
         for route in self.routes.iter() {

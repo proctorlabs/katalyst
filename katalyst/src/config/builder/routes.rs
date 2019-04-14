@@ -1,6 +1,5 @@
 use super::*;
 use crate::app::KatalystEngine;
-use crate::error::KatalystError;
 use crate::state::Route;
 use http::Method;
 use regex::Regex;
@@ -20,7 +19,7 @@ pub struct RouteBuilder {
 }
 
 impl Builder<Route> for RouteBuilder {
-    fn build(&self, engine: Arc<KatalystEngine>) -> Result<Route, KatalystError> {
+    fn build(&self, engine: Arc<KatalystEngine>) -> Result<Route, ConfigurationFailure> {
         let routebuilders: &Option<Vec<RouteBuilder>> = &self.children;
         let routes = match routebuilders {
             Some(b) => {

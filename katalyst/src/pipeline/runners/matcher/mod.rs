@@ -11,9 +11,12 @@ impl Pipeline for Matcher {
     fn prepare_request(&self, mut ctx: Context) -> PipelineResult {
         let request = match &ctx.upstream.request {
             Some(r) => r,
-            None => return Err(KatalystError::NotFound),
+            None => return Err(RequestFailure::NotFound),
         };
-        let config = ctx.engine.get_state()?;
+        let config = ctx
+            .engine
+            .get_state()
+            .context("Failed to get configuration")?;
         for route in config.routes.iter() {
             let method_match = match &route.methods {
                 Some(methods) => {
@@ -41,6 +44,6 @@ impl Pipeline for Matcher {
                 return Ok(ctx);
             }
         }
-        Err(KatalystError::NotFound)
+        Err(RequestFailure::NotFound)
     }
 }
