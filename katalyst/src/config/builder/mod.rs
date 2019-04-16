@@ -2,6 +2,7 @@ mod authenticator;
 mod downstream;
 mod hosts;
 mod listener;
+mod path;
 mod routes;
 
 pub use crate::state::*;
@@ -9,6 +10,7 @@ pub use authenticator::AuthenticatorBuilder;
 pub use downstream::DownstreamBuilder;
 pub use hosts::HostsBuilder;
 pub use listener::ListenerBuilder;
+pub use path::PathBuilder;
 pub use routes::RouteBuilder;
 
 use crate::app::KatalystEngine;

@@ -9,12 +9,15 @@ use std::string::String;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
-#[serde(default)]
+
 pub struct RouteBuilder {
-    pattern: String,
+    path: PathBuilder,
+    #[serde(default)]
     children: Option<Vec<RouteBuilder>>,
     downstream: DownstreamBuilder,
+    #[serde(default)]
     methods: Option<Vec<String>>,
+    #[serde(default)]
     authenticators: Option<Vec<AuthenticatorBuilder>>,
 }
 
@@ -58,7 +61,7 @@ impl Builder<Route> for RouteBuilder {
         };
 
         Ok(Route {
-            pattern: Regex::new(&self.pattern)?,
+            pattern: Regex::new(&self.path.build(engine)?)?,
             children: routes,
             downstream,
             methods,

@@ -8,14 +8,16 @@ hosts:
       - "http://httpbin.org"
 
 routes:
-  - pattern: "^/$"
-    methods:
-      - get
+  - path:
+      type: exact
+      path: "/"
     downstream:
       host: httpbin
       path: "/ip"
 
-  - pattern: "^/test/(?P<cap>.*)$"
+  - path:
+      type: regex
+      pattern: "^/test/(?P<cap>.*)$"
     methods:
       - get
     downstream:
@@ -32,7 +34,9 @@ routes:
       - backend: http
         url: "https://postman-echo.com/get?thing=something"
 
-  - pattern: "^/test/post$"
+  - path:
+      type: template
+      template: "/test/{{http.ip()}}/post"
     methods:
       - post
     downstream:

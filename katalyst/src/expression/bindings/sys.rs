@@ -2,9 +2,9 @@ use crate::expression::*;
 use crate::prelude::*;
 
 binding! {
-    Env {
+    Sys {
         #[args(count=1)]
-        fn get(ctx: &Context, args: &[ExpressionArg]) -> String {
+        fn env(ctx: &Context, args: &[ExpressionArg]) -> String {
             std::env::var_os(args[0].render(ctx))
             .expect("Environment variable not set!")
             .to_str()

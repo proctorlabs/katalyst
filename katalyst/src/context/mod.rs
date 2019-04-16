@@ -31,6 +31,18 @@ pub struct Context {
     pub engine: Arc<KatalystEngine>,
 }
 
+impl Default for Context {
+    fn default() -> Self {
+        Context {
+            upstream: RequestResponse::default(),
+            downstream: RequestResponse::default(),
+            detail: Detail::default(),
+            remote_addr: "127.0.0.1:1000".parse().unwrap(),
+            engine: Arc::default(),
+        }
+    }
+}
+
 impl Context {
     pub fn new(
         request: Request<Body>,
