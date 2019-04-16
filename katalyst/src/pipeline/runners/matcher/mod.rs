@@ -9,7 +9,10 @@ impl Pipeline for Matcher {
     }
 
     fn prepare_request(&self, mut ctx: Context) -> PipelineResult {
-        let request = ctx.upstream.request.with()?;
+        let request = ctx
+            .upstream
+            .request
+            .with("Upstream request required before matcher is used")?;
         let config = ctx
             .engine
             .get_state()
@@ -25,13 +28,19 @@ impl Pipeline for Matcher {
             let path = request.uri().path();
             if method_match && route.pattern.is_match(path) {
                 let mut cap_map = HashMap::new();
-                let caps = route.pattern.captures(path).unwrap();
+                let caps = route
+                    .pattern
+                    .captures(path)
+                    .ok_or_else(|| RequestFailure::Internal)?;
                 for name_option in route.pattern.capture_names() {
                     if name_option.is_some() {
-                        let name = name_option.unwrap();
+                        let name = name_option.ok_or_else(|| RequestFailure::Internal)?;
                         cap_map.insert(
                             name.to_string(),
-                            caps.name(name).unwrap().as_str().to_string(),
+                            caps.name(name)
+                                .ok_or_else(|| RequestFailure::Internal)?
+                                .as_str()
+                                .to_string(),
                         );
                     }
                 }

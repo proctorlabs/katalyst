@@ -71,9 +71,9 @@ pub struct DownstreamTransformer {
 }
 
 impl DownstreamTransformer {
-    pub fn transform(self, req: Request<Body>) -> Result<Request<Body>, KatalystError> {
+    pub fn transform(self, req: Request<Body>) -> Result<Request<Body>, RequestFailure> {
         let (mut parts, mut body) = req.into_parts();
-        parts.uri = self.uri.parse().unwrap();
+        parts.uri = self.uri.parse()?;
 
         if let Some(method) = self.method {
             parts.method = method;

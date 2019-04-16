@@ -100,7 +100,7 @@ impl Katalyst {
 
     /// Update the Katalyst instance with the configuration from the specified file.
     pub fn load(&self, config_file: &str) -> Result<(), KatalystError> {
-        let config = parsers::parse_file(config_file);
+        let config = parsers::parse_file(config_file)?;
         self.engine.update_state(config.build(self.engine())?)?;
         Ok(())
     }

@@ -17,7 +17,11 @@ impl Pipeline for Builder {
             .engine
             .get_state()
             .context("Failed to get configuration")?;
-        let downstream = &ctx.detail.matched_route.with()?.downstream;
+        let downstream = &ctx
+            .detail
+            .matched_route
+            .with("Request builder requires route to be matched")?
+            .downstream;
 
         let balancer_lease = match config.hosts.get(&downstream.host) {
             Some(s) => s

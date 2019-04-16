@@ -8,7 +8,7 @@ args = ["deb"]
 description = "Run the project, monitor for changes and rerun when changed"
 install_crate = "cargo-watch"
 command = "cargo"
-args = ["watch", "-x", "run -- -c examples/config.yml"]
+args = ["watch", "-x", "run -- -c ../assets/manual-test.yml"]
 
 [tasks.build]
 description = "Build the project"

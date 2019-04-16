@@ -38,8 +38,7 @@ impl Builder<Route> for RouteBuilder {
             Some(s) => {
                 let mut vec_methods: HashSet<Method> = HashSet::new();
                 for method_string in s {
-                    let method =
-                        Method::from_bytes(method_string.to_uppercase().as_bytes()).unwrap();
+                    let method = Method::from_bytes(method_string.to_uppercase().as_bytes())?;
                     vec_methods.insert(method);
                 }
                 Some(vec_methods)

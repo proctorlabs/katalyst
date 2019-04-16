@@ -19,7 +19,9 @@ impl Builder<Authenticator> for AuthenticatorBuilder {
         Ok(Authenticator {
             authenticator: authenticators
                 .get(&self.backend.as_str())
-                .unwrap()
+                .ok_or_else(|| {
+                    ConfigurationFailure::ExpressionItemNotFound("authenticator".to_string())
+                })?
                 .build(self),
         })
     }

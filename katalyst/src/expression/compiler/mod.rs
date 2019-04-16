@@ -64,7 +64,11 @@ impl Compiler {
             let mut last_segment_index = 0;
             if TEMPLATE_FINDER.is_match(raw) {
                 for cap in TEMPLATE_FINDER.captures_iter(raw) {
-                    let (mtch, expr) = (cap.get(0).unwrap(), &cap[1]);
+                    let (mtch, expr) = (
+                        cap.get(0)
+                            .ok_or_else(|| ConfigurationFailure::ElementExpected("Capture"))?,
+                        &cap[1],
+                    );
                     if mtch.start() > last_segment_index {
                         let offset = mtch.start() - last_segment_index;
                         let segment: String =

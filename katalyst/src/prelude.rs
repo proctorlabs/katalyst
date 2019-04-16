@@ -28,19 +28,30 @@ pub(crate) trait KatalystCommonUtilities {
 impl<T> KatalystCommonUtilities for T where T: Any {}
 
 pub(crate) trait OptionUtilities<T> {
-    fn with(&self) -> Result<&T, RequestFailure>;
+    fn with(&self, message: &'static str) -> Result<&T, RequestFailure>;
+    fn with_owned(self, message: &'static str) -> Result<T, RequestFailure>;
 }
 
 impl<T> OptionUtilities<T> for Option<T>
 where
     T: Any,
 {
-    fn with(&self) -> Result<&T, RequestFailure> {
+    fn with(&self, message: &'static str) -> Result<&T, RequestFailure> {
         match self {
             Some(t) => Ok(t),
             None => Err(RequestFailure::Other(
                 http::StatusCode::INTERNAL_SERVER_ERROR,
-                "Dependent resource not found",
+                message,
+            )),
+        }
+    }
+
+    fn with_owned(self, message: &'static str) -> Result<T, RequestFailure> {
+        match self {
+            Some(t) => Ok(t),
+            None => Err(RequestFailure::Other(
+                http::StatusCode::INTERNAL_SERVER_ERROR,
+                message,
             )),
         }
     }

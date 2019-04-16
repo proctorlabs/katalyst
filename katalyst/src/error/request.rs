@@ -50,3 +50,9 @@ impl From<Context<&'static str>> for RequestFailure {
         RequestFailure::Internal
     }
 }
+
+impl From<http::uri::InvalidUri> for RequestFailure {
+    fn from(_: http::uri::InvalidUri) -> RequestFailure {
+        RequestFailure::Internal
+    }
+}

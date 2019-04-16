@@ -36,7 +36,11 @@ impl KatalystAuthenticator for HttpAuthenticator {
         let client: Arc<HttpsClient> = ctx.engine.locate().unwrap();
         let mut request = Request::builder();
         request.uri(&self.url.to_string());
-        let res = client.request(request.body(Body::empty()).unwrap());
+        let res = client.request(
+            request
+                .body(Body::empty())
+                .ok_or_else(|| return RequestFailure::Internal),
+        );
         Box::new(res.then(|response| match response {
             Ok(resp) => {
                 let (_, body) = resp.into_parts();

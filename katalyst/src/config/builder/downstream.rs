@@ -24,7 +24,7 @@ impl Builder<Downstream> for DownstreamBuilder {
     fn build(&self, engine: Arc<KatalystEngine>) -> Result<Downstream, ConfigurationFailure> {
         let providers = engine.locate::<Compiler>()?;
         let method = match &self.method {
-            Some(m) => Some(Method::from_bytes(m.to_uppercase().as_bytes()).unwrap()),
+            Some(m) => Some(Method::from_bytes(m.to_uppercase().as_bytes())?),
             None => None,
         };
         let body = match &self.body {

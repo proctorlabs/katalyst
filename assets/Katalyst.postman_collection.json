@@ -1,0 +1,81 @@
+{
+	"info": {
+		"_postman_id": "0e914a98-06f5-46b2-8ac0-5fc665653c54",
+		"name": "Katalyst",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Root",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{host}}/",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test basic get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{host}}/test/something_capped",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"test",
+						"something_capped"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test post",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"body\": \"contents\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/test/post",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"test",
+						"post"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

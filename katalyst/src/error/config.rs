@@ -14,6 +14,10 @@ pub enum ConfigurationFailure {
     InvalidResource,
     #[fail(display = "Supplied address '{}' is invalid", _0)]
     InvalidAddress(&'static str),
+    #[fail(display = "Unknown HTTP method specified '{}'", _0)]
+    InvalidHttpMethod(String),
+    #[fail(display = "Could not parse configuration file: {}", _0)]
+    ConfigNotParseable(String),
 }
 
 impl From<syn::Error> for ConfigurationFailure {
@@ -31,5 +35,28 @@ impl From<regex::Error> for ConfigurationFailure {
 impl From<crate::error::KatalystError> for ConfigurationFailure {
     fn from(_: crate::error::KatalystError) -> Self {
         ConfigurationFailure::InvalidResource
+    }
+}
+
+impl From<http::method::InvalidMethod> for ConfigurationFailure {
+    fn from(m: http::method::InvalidMethod) -> Self {
+        ConfigurationFailure::InvalidHttpMethod(m.to_string())
+    }
+}
+
+impl From<serde_yaml::Error> for ConfigurationFailure {
+    fn from(m: serde_yaml::Error) -> Self {
+        ConfigurationFailure::ConfigNotParseable(m.to_string())
+    }
+}
+
+impl From<serde_json::Error> for ConfigurationFailure {
+    fn from(m: serde_json::Error) -> Self {
+        ConfigurationFailure::ConfigNotParseable(m.to_string())
+    }
+}
+impl From<std::io::Error> for ConfigurationFailure {
+    fn from(m: std::io::Error) -> Self {
+        ConfigurationFailure::ConfigNotParseable(m.to_string())
     }
 }

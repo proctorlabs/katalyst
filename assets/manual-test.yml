@@ -1,0 +1,40 @@
+listener:
+  interface: "0.0.0.0:8000"
+
+hosts:
+  httpbin:
+    balancer: round_robin
+    servers:
+      - "http://httpbin.org"
+
+routes:
+  - pattern: "^/$"
+    methods:
+      - get
+    downstream:
+      host: httpbin
+      path: "/ip"
+
+  - pattern: "^/test/(?P<cap>.*)$"
+    methods:
+      - get
+    downstream:
+      host: httpbin
+      path: "/get"
+      query:
+        regex_cap: '{{ http.matched("cap") }}'
+        method: "{{ http.method() }}"
+        ip: "{{ http.ip() }}"
+      headers:
+        header: '{{ http.header("user-agent") }}'
+        claim: '{{ auth.claim("KatalystAuthenticator") }}'
+    authenticators:
+      - backend: http
+        url: "https://postman-echo.com/get?thing=something"
+
+  - pattern: "^/test/post$"
+    methods:
+      - post
+    downstream:
+      host: httpbin
+      path: "/post"
