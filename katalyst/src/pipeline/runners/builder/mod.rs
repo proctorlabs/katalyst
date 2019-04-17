@@ -21,7 +21,7 @@ impl Pipeline for Builder {
             .detail
             .matched_route
             .with("Request builder requires route to be matched")?
-            .downstream;
+            .handler;
 
         let balancer_lease = match config.hosts.get(&downstream.host) {
             Some(s) => s

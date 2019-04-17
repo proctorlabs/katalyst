@@ -11,7 +11,8 @@ routes:
   - path:
       type: regex
       pattern: "^/$"
-    downstream:
+    handler:
+      type: host
       host: httpbin
       path: "/ip"
 
@@ -20,7 +21,8 @@ routes:
       template: '/test/{{ url.segment("segment") }}/{{ url.all("end") }}'
     methods:
       - get
-    downstream:
+    handler:
+      type: host
       host: httpbin
       path: "/get"
       query:
@@ -41,6 +43,7 @@ routes:
       path: "/test/post"
     methods:
       - post
-    downstream:
+    handler:
+      type: host
       host: httpbin
       path: "/post"

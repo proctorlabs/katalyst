@@ -9,12 +9,11 @@ use std::string::String;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
-
 pub struct RouteBuilder {
     path: PathBuilder,
     #[serde(default)]
     children: Option<Vec<RouteBuilder>>,
-    downstream: DownstreamBuilder,
+    handler: HandlerBuilder,
     #[serde(default)]
     methods: Option<Vec<String>>,
     #[serde(default)]
@@ -34,7 +33,7 @@ impl Builder<Route> for RouteBuilder {
             }
             None => None,
         };
-        let downstream = self.downstream.build(engine.clone())?;
+        let handler = self.handler.build(engine.clone())?;
 
         //Build method hashset
         let methods = match &self.methods {
@@ -63,7 +62,7 @@ impl Builder<Route> for RouteBuilder {
         Ok(Route {
             pattern: Regex::new(&self.path.build(engine)?)?,
             children: routes,
-            downstream,
+            handler,
             methods,
             authenticators,
         })

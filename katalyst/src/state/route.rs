@@ -8,7 +8,7 @@ use std::sync::Arc;
 pub struct Route {
     pub pattern: Regex,
     pub children: Option<Vec<Arc<Route>>>,
-    pub downstream: Downstream,
+    pub handler: Handler,
     pub methods: Option<HashSet<Method>>,
     pub authenticators: Option<Vec<Authenticator>>,
 }

@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use std::str::FromStr;
 
 #[derive(Debug)]
-pub struct Downstream {
+pub struct Handler {
     pub host: String,
     pub path: Expression,
     pub method: Option<Method>,
@@ -17,7 +17,7 @@ pub struct Downstream {
     pub body: Option<Expression>,
 }
 
-impl Downstream {
+impl Handler {
     pub fn transformer(
         &self,
         ctx: &Context,

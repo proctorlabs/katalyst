@@ -16,14 +16,16 @@ routes:
   - pattern: "^/$"
     methods:
       - get
-    downstream:
+    handler:
+      type: host
       host: nginx
       path: "/"
 
   - pattern: "^/test/(?P<cap>.*)$"
     methods:
       - get
-    downstream:
+    handler:
+      type: host
       host: echo
       path: "/get"
       query:
@@ -40,7 +42,8 @@ routes:
   - pattern: "^/test/post$"
     methods:
       - post
-    downstream:
+    handler:
+      type: host
       host: echo
       path: "foo1=bar"
     authenticators:

@@ -1,5 +1,5 @@
 mod authenticator;
-mod downstream;
+mod handler;
 mod hosts;
 mod listener;
 mod path;
@@ -7,7 +7,7 @@ mod routes;
 
 pub use crate::state::*;
 pub use authenticator::AuthenticatorBuilder;
-pub use downstream::DownstreamBuilder;
+pub use handler::HandlerBuilder;
 pub use hosts::HostsBuilder;
 pub use listener::ListenerBuilder;
 pub use path::PathBuilder;
