@@ -51,13 +51,13 @@ impl Builder<String> for PathBuilder {
             PathBuilder::Exact { path, sensitive } => Ok({
                 let mut result = String::new();
                 result.push_str("^");
-                if *sensitive {
+                if !*sensitive {
                     result.push_str("(?i:");
                 }
                 result.push_str("(?P<root_uri>");
                 let escaped = regex::escape(path);
                 result.push_str(&escaped);
-                if *sensitive {
+                if !*sensitive {
                     result.push_str(")")
                 }
                 result.push_str(")$");

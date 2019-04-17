@@ -98,6 +98,7 @@ impl Default for Compiler {
         providers.register(Box::new(SysBinding {}));
         providers.register(Box::new(HttpBinding {}));
         providers.register(Box::new(AuthBinding {}));
+        providers.register(Box::new(UrlBinding {}));
         providers
     }
 }

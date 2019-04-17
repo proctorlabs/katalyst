@@ -9,24 +9,26 @@ hosts:
 
 routes:
   - path:
-      type: exact
-      path: "/"
+      type: regex
+      pattern: "^/$"
     downstream:
       host: httpbin
       path: "/ip"
 
   - path:
-      type: regex
-      pattern: "^/test/(?P<cap>.*)$"
+      type: template
+      template: '/test/{{ url.segment("segment") }}/{{ url.all("end") }}'
     methods:
       - get
     downstream:
       host: httpbin
       path: "/get"
       query:
-        regex_cap: '{{ http.matched("cap") }}'
+        segment: '{{ http.matched("segment") }}'
+        end: '{{ http.matched("end") }}'
         method: "{{ http.method() }}"
         ip: "{{ http.ip() }}"
+        q: '{{ http.query_param("test") }}'
       headers:
         header: '{{ http.header("user-agent") }}'
         claim: '{{ auth.claim("KatalystAuthenticator") }}'
@@ -35,8 +37,8 @@ routes:
         url: "https://postman-echo.com/get?thing=something"
 
   - path:
-      type: template
-      template: "/test/{{http.ip()}}/post"
+      type: exact
+      path: "/test/post"
     methods:
       - post
     downstream:

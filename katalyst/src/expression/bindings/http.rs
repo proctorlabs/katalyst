@@ -26,6 +26,21 @@ binding! {
         };
 
         #[args(count=1)]
+        fn query_param(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
+            let req = ctx.request()?;
+            let mut path = String::new();
+            let uri = &req.uri();
+            path.push_str(&uri.scheme_str().unwrap_or("http"));
+            path.push_str("://");
+            path.push_str(&uri.host().unwrap_or("localhost"));
+            path.push_str(&req.uri().to_string());
+            let name = args[0].render(ctx)?;
+            let result = url::Url::parse(&path).map_err(|_| RequestFailure::Internal)?;
+            let res = result.query_pairs().find(|q| q.0 == name);
+            res.map_or_else(|| Err(RequestFailure::Internal), |v| Ok(v.1.to_string()))
+        };
+
+        #[args(count=1)]
         fn header(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
             let req = ctx.request()?;
             let hdr = req.headers().get(args[0].render(ctx)?).ok_or_else(|| RequestFailure::Internal)?;
