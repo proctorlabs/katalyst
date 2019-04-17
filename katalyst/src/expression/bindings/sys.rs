@@ -4,12 +4,12 @@ use crate::prelude::*;
 binding! {
     Sys {
         #[args(count=1)]
-        fn env(ctx: &Context, args: &[ExpressionArg]) -> String {
-            std::env::var_os(args[0].render(ctx))
-            .expect("Environment variable not set!")
-            .to_str()
-            .unwrap_or_default()
-            .to_owned()
+        fn env(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
+            Ok(std::env::var_os(args[0].render(ctx)?)
+                .ok_or_else(|| RequestFailure::Internal)?
+                .to_str()
+                .ok_or_else(|| RequestFailure::Internal)?
+                .to_owned())
         };
     }
 }

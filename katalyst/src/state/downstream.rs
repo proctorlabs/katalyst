@@ -1,4 +1,3 @@
-use crate::error::KatalystError;
 use crate::expression::*;
 use crate::prelude::*;
 use http::header::{HeaderName, HeaderValue};
@@ -23,15 +22,15 @@ impl Downstream {
         &self,
         ctx: &Context,
         lease_str: String,
-    ) -> Result<DownstreamTransformer, KatalystError> {
+    ) -> Result<DownstreamTransformer, RequestFailure> {
         let mut uri = lease_str;
-        uri.push_str(&self.path.render(ctx));
+        uri.push_str(&self.path.render(ctx)?);
         if let Some(query) = &self.query {
             uri.push_str("?");
             for (key, val) in query.iter() {
                 uri.push_str(&key);
                 uri.push_str("=");
-                uri.push_str(&val.render(&ctx));
+                uri.push_str(&val.render(&ctx)?);
                 uri.push_str("&");
             }
             uri.truncate(uri.len() - 1);
@@ -42,14 +41,14 @@ impl Downstream {
         let headers = match &self.headers {
             Some(h) => Some(
                 h.iter()
-                    .map(|(key, val)| (key.to_string(), val.render(ctx)))
-                    .collect(),
+                    .map(|(key, val)| Ok((key.to_string(), val.render(ctx)?)))
+                    .collect::<Result<HashMap<String, String>, RequestFailure>>()?,
             ),
             None => None,
         };
 
         let body = match &self.body {
-            Some(b) => Some(b.render(&ctx)),
+            Some(b) => Some(b.render(&ctx)?),
             None => None,
         };
 

@@ -12,12 +12,12 @@ pub type ExpressionArgs = Vec<Arc<CompiledExpression>>;
 pub type Expression = Vec<Arc<CompiledExpression>>;
 
 impl CompiledExpression for Expression {
-    fn render(&self, state: &Context) -> String {
+    fn render(&self, state: &Context) -> ExpressionResult {
         let mut result = String::new();
         for part in self.iter() {
-            result.push_str(&part.render(state));
+            result.push_str(&part.render(state)?);
         }
-        result
+        Ok(result)
     }
 }
 

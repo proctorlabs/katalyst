@@ -40,7 +40,11 @@ impl Builder<String> for PathBuilder {
                 result.push_str("^");
                 let cmp = compiler.compile_template(Some(template))?;
                 let ctx = Context::default();
-                let rnd = cmp.render(&ctx);
+                let rnd = cmp.render(&ctx).map_err(|_| {
+                    ConfigurationFailure::InvalidExpressionArgs(
+                        "Path template could not be rendered",
+                    )
+                })?;
                 result.push_str(&rnd);
                 result
             }),

@@ -6,8 +6,10 @@ lazy_static! {
     static ref DEF_STRING: String = String::default();
 }
 
+pub type ExpressionResult = Result<String, RequestFailure>;
 pub type ExpressionArg = Arc<CompiledExpression>;
-pub type ExpressionRenderMethod = Arc<Fn(&Context, &[ExpressionArg]) -> String + Send + Sync>;
+pub type ExpressionRenderMethod =
+    Arc<Fn(&Context, &[ExpressionArg]) -> ExpressionResult + Send + Sync>;
 
 #[derive(Clone)]
 pub enum ExpressionResultType {
@@ -31,5 +33,5 @@ pub trait ExpressionBinding: Send + Sync {
 /// This provides the actual value replacement used in the downstream URL template
 pub trait CompiledExpression: Send + Sync + Debug {
     /// Returns the string value that should be used as a replacement for this Placeholder in the pipeline context
-    fn render(&self, ctx: &Context) -> String;
+    fn render(&self, ctx: &Context) -> ExpressionResult;
 }

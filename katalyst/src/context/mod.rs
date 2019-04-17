@@ -1,5 +1,6 @@
 use crate::app::KatalystEngine;
 use crate::authentication::KatalystAuthenticationInfo;
+use crate::prelude::*;
 use crate::state::Route;
 use hyper::{Body, Request, Response};
 use std::collections::HashMap;
@@ -58,6 +59,15 @@ impl Context {
         };
         state.upstream.request = Some(request);
         state
+    }
+
+    pub fn request(&self) -> Result<&Request<Body>, RequestFailure> {
+        let res = self
+            .upstream
+            .request
+            .as_ref()
+            .ok_or_else(|| RequestFailure::Internal)?;
+        Ok(&res)
     }
 
     pub fn lock(self) -> ContextLock {

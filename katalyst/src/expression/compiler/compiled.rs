@@ -11,26 +11,26 @@ pub struct CompiledExpressionNode {
 }
 
 impl CompiledExpression for CompiledExpressionNode {
-    fn render(&self, ctx: &Context) -> String {
+    fn render(&self, ctx: &Context) -> ExpressionResult {
         (self.render_fn)(ctx, &self.args)
     }
 }
 
 impl CompiledExpression for String {
-    fn render(&self, _: &Context) -> String {
-        self.to_string()
+    fn render(&self, _: &Context) -> ExpressionResult {
+        Ok(self.to_string())
     }
 }
 
 impl CompiledExpression for u64 {
-    fn render(&self, _: &Context) -> String {
-        self.to_string()
+    fn render(&self, _: &Context) -> ExpressionResult {
+        Ok(self.to_string())
     }
 }
 
 impl CompiledExpression for bool {
-    fn render(&self, _: &Context) -> String {
-        self.to_string()
+    fn render(&self, _: &Context) -> ExpressionResult {
+        Ok(self.to_string())
     }
 }
 
