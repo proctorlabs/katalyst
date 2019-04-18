@@ -25,6 +25,9 @@ pub enum HandlerBuilder {
         #[serde(default)]
         body: Option<String>,
     },
+    Content {
+        path: String,
+    },
 }
 
 impl Default for HandlerBuilder {
@@ -69,6 +72,7 @@ impl Builder<Handler> for HandlerBuilder {
                     body: providers.compile_template_option(body)?,
                 })
             }
+            HandlerBuilder::Content { path: _ } => Err(ConfigurationFailure::InvalidResource),
         }
     }
 }

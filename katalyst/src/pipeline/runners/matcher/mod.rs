@@ -9,10 +9,7 @@ impl Pipeline for Matcher {
     }
 
     fn prepare_request(&self, mut ctx: Context) -> PipelineResult {
-        let request = ctx
-            .upstream
-            .request
-            .with("Upstream request required before matcher is used")?;
+        let request = ctx.upstream.request()?;
         let config = ctx
             .engine
             .get_state()
@@ -50,6 +47,6 @@ impl Pipeline for Matcher {
                 return Ok(ctx);
             }
         }
-        Err(RequestFailure::NotFound(ctx.lock()))
+        Err(RequestFailure::NotFound)
     }
 }

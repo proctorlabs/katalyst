@@ -5,7 +5,7 @@ use http::StatusCode;
 #[derive(Debug, Fail)]
 pub enum RequestFailure {
     #[fail(display = "Not Found")]
-    NotFound(crate::context::ContextLock),
+    NotFound,
     #[fail(display = "Gateway Timeout")]
     GatewayTimeout,
     #[fail(display = "Forbidden")]
@@ -21,7 +21,7 @@ pub enum RequestFailure {
 impl RequestFailure {
     pub fn status_code(&self) -> StatusCode {
         match *self {
-            RequestFailure::NotFound(_) => StatusCode::NOT_FOUND,
+            RequestFailure::NotFound => StatusCode::NOT_FOUND,
             RequestFailure::GatewayTimeout => StatusCode::GATEWAY_TIMEOUT,
             RequestFailure::Forbidden => StatusCode::FORBIDDEN,
             RequestFailure::Unauthorized => StatusCode::UNAUTHORIZED,

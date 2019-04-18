@@ -17,11 +17,7 @@ impl Pipeline for Builder {
             .engine
             .get_state()
             .context("Failed to get configuration")?;
-        let downstream = &ctx
-            .detail
-            .matched_route
-            .with("Request builder requires route to be matched")?
-            .handler;
+        let downstream = &ctx.detail.route()?.handler;
 
         let balancer_lease = match config.hosts.get(&downstream.host) {
             Some(s) => s
@@ -29,13 +25,11 @@ impl Pipeline for Builder {
                 .lease()
                 .context("Failed to get lease from specified pool")?,
             None => {
-                return Err(RequestFailure::NotFound(ctx.lock()));
+                return Err(RequestFailure::NotFound);
             }
         };
 
-        let transformer = downstream
-            .transformer(&ctx, balancer_lease.to_string())
-            .context("Failed to create request")?;
+        let transformer = downstream.transformer(&ctx, balancer_lease.to_string())?;
         ctx.detail.balancer_lease = Some(balancer_lease);
 
         let request = match ctx.upstream.request {
@@ -43,11 +37,12 @@ impl Pipeline for Builder {
             None => return Err(RequestFailure::Internal),
         };
 
-        let mut client_req = transformer
-            .transform(request)
-            .context("Failed to create request")?;
+        let mut client_req = transformer.transform(request)?;
         ctx.upstream.request = None;
-        forwarding_headers::add_forwarding_headers(&mut client_req.headers_mut(), ctx.remote_addr);
+        forwarding_headers::add_forwarding_headers(
+            &mut client_req.headers_mut(),
+            &ctx.detail.remote_ip,
+        );
         hop_headers::strip_hop_headers(&mut client_req.headers_mut());
         ctx.downstream.request = Some(client_req);
         Ok(ctx)
