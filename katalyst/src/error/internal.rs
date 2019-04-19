@@ -1,4 +1,4 @@
-use crate::state::KatalystState;
+use crate::instance::KatalystState;
 use std::net::AddrParseError;
 use std::sync;
 use std::sync::Arc;

@@ -1,11 +1,11 @@
 use crate::authentication;
 use crate::balancer;
 use crate::config::parsers;
+use crate::instance::KatalystState;
 use crate::locator::{Locatable, Locator};
 use crate::pipeline::PipelineRunner;
 use crate::prelude::*;
 use crate::service::EngineService;
-use crate::state::KatalystState;
 use futures::future::Future;
 use hyper::client::connect::dns::TokioThreadpoolGaiResolver;
 use hyper::client::HttpConnector;

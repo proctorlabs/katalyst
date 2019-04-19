@@ -5,7 +5,7 @@ mod listener;
 mod path;
 mod routes;
 
-pub use crate::state::*;
+pub use crate::instance::*;
 pub use authenticator::AuthenticatorBuilder;
 pub use handler::HandlerBuilder;
 pub use hosts::HostsBuilder;
@@ -15,7 +15,6 @@ pub use routes::RouteBuilder;
 
 use crate::app::KatalystEngine;
 use crate::error::ConfigurationFailure;
-use crate::state::KatalystState;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;

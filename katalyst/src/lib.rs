@@ -41,7 +41,7 @@ mod locator;
 pub mod pipeline;
 pub mod prelude;
 mod service;
-mod state;
+mod instance;
 
 //Expose consumable APIs
 pub use app::Katalyst;

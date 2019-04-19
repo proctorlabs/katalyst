@@ -1,16 +1,14 @@
 mod authentication;
-mod builder;
+mod dispatcher;
 mod logger;
 mod matcher;
-mod sender;
 
 use super::Pipeline;
 use crate::prelude::*;
 use authentication::Authenticator;
-use builder::Builder;
+use dispatcher::Dispatcher;
 use logger::Logger;
 use matcher::Matcher;
-use sender::Sender;
 use std::sync::Arc;
 
 pub fn all() -> Arc<[Arc<Pipeline>]> {
@@ -18,7 +16,6 @@ pub fn all() -> Arc<[Arc<Pipeline>]> {
         Logger::arc(),
         Matcher::arc(),
         Authenticator::arc(),
-        Builder::arc(),
-        Sender::arc(),
+        Dispatcher::arc(),
     ])
 }

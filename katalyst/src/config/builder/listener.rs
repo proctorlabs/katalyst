@@ -1,6 +1,6 @@
 use super::*;
 use crate::app::KatalystEngine;
-use crate::state::Listener;
+use crate::instance::Listener;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 

@@ -2,7 +2,8 @@ use super::Builder;
 use crate::app::KatalystEngine;
 use crate::error::ConfigurationFailure;
 use crate::expression::Compiler;
-use crate::state::Handler;
+use crate::instance::Handler;
+use crate::instance::HostDispatcher;
 use http::Method;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -63,14 +64,14 @@ impl Builder<Handler> for HandlerBuilder {
                     Some(bod) => Some(bod.as_str()),
                     None => None,
                 };
-                Ok(Handler {
+                Ok(Handler::Host(HostDispatcher {
                     host: host.to_owned(),
                     path: providers.compile_template(Some(path.as_str()))?,
                     method,
                     query: providers.compile_template_map(query)?,
                     headers: providers.compile_template_map(headers)?,
                     body: providers.compile_template_option(body)?,
-                })
+                }))
             }
             HandlerBuilder::Content { path: _ } => Err(ConfigurationFailure::InvalidResource),
         }

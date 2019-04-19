@@ -1,7 +1,7 @@
 use crate::app::KatalystEngine;
 use crate::authentication::KatalystAuthenticationInfo;
+use crate::instance::Route;
 use crate::prelude::*;
-use crate::state::Route;
 use hyper::{Body, Request, Response};
 use std::collections::HashMap;
 use std::net::SocketAddr;

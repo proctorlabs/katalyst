@@ -1,5 +1,5 @@
 mod authenticator;
-mod handler;
+pub mod handlers;
 mod hosts;
 mod listener;
 mod route;
@@ -8,7 +8,8 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 pub use authenticator::Authenticator;
-pub use handler::Handler;
+pub use handlers::Handler;
+pub use handlers::HostDispatcher;
 pub use hosts::Hosts;
 pub use listener::Listener;
 pub use route::Route;
