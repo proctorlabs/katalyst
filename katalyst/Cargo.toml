@@ -14,6 +14,8 @@ readme = "../README.md"
 katalyst_macros = { version = "0.1", path = "../katalyst_macros" }
 hyper = "0.12"
 tokio = "0.1"
+tokio-fs = "0.1"
+tokio-io = "0.1"
 failure = "0.1.5"
 futures = "0.1"
 regex = "1.1"

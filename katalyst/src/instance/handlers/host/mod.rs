@@ -1,5 +1,6 @@
 mod dispatcher;
 mod transformers;
+mod util;
 
 use super::*;
 use crate::expression::*;
@@ -8,6 +9,7 @@ use futures::future::*;
 use futures::Future;
 use std::collections::HashMap;
 use transformers::DownstreamTransformer;
+pub use util::*;
 
 #[derive(Debug)]
 pub struct HostDispatcher {
@@ -24,7 +26,7 @@ impl Dispatchable for HostDispatcher {
         Box::new(
             result(self.prepare(ctx))
                 .and_then(HostDispatcher::send)
-                .map(HostDispatcher::clean),
+                .map(HostDispatcher::clean_response),
         )
     }
 }

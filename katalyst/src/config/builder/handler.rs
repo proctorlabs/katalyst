@@ -2,8 +2,7 @@ use super::Builder;
 use crate::app::KatalystEngine;
 use crate::error::ConfigurationFailure;
 use crate::expression::Compiler;
-use crate::instance::Handler;
-use crate::instance::HostDispatcher;
+use crate::instance::handlers::*;
 use http::Method;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -26,8 +25,9 @@ pub enum HandlerBuilder {
         #[serde(default)]
         body: Option<String>,
     },
-    Content {
-        path: String,
+    FileServer {
+        root_path: String,
+        selector: String,
     },
 }
 
@@ -73,7 +73,15 @@ impl Builder<Handler> for HandlerBuilder {
                     body: providers.compile_template_option(body)?,
                 }))
             }
-            HandlerBuilder::Content { path: _ } => Err(ConfigurationFailure::InvalidResource),
+            HandlerBuilder::FileServer {
+                root_path,
+                selector,
+            } => Ok(Handler::FileServer(FileServer {
+                root_path: root_path.to_owned(),
+                selector: engine
+                    .locate::<Compiler>()?
+                    .compile_template(Some(selector))?,
+            })),
         }
     }
 }

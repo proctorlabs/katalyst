@@ -17,6 +17,14 @@ routes:
       path: "/ip"
 
   - path:
+      type: regex
+      pattern: "^/files/(?P<file>.*)$"
+    handler:
+      type: file_server
+      root_path: "../assets/"
+      selector: '{{ http.matched("file") }}'
+
+  - path:
       type: template
       template: '/test/{{ url.segment("segment") }}/{{ url.all("end") }}'
     methods:

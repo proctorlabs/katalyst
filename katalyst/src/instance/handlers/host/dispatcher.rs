@@ -3,8 +3,6 @@ use crate::app::HttpsClient;
 use crate::pipeline::*;
 use futures::future::*;
 use futures::Future;
-use http::header::HeaderValue;
-use http::HeaderMap;
 use std::sync::Arc;
 
 impl HostDispatcher {
@@ -41,16 +39,18 @@ impl HostDispatcher {
     }
 
     pub fn send(mut ctx: Context) -> AsyncPipelineResult {
-        let dsr = match ctx.downstream.request {
-            Some(s) => {
-                ctx.downstream.request = None;
-                s
-            }
+        let dsr = match ctx.downstream.request.take() {
+            Some(s) => s,
             None => {
                 return Box::new(err::<Context, RequestFailure>(RequestFailure::Internal));
             }
         };
-        let client: Arc<HttpsClient> = ctx.engine.locate().unwrap();
+        let client: Arc<HttpsClient> = match ctx.engine.locate() {
+            Ok(c) => c,
+            Err(_) => {
+                return Box::new(err::<Context, RequestFailure>(RequestFailure::Internal));
+            }
+        };
         let res = client.request(dsr);
         Box::new(res.then(|response| match response {
             Ok(r) => {
@@ -64,38 +64,10 @@ impl HostDispatcher {
         }))
     }
 
-    pub fn clean(mut ctx: Context) -> Context {
+    pub fn clean_response(mut ctx: Context) -> Context {
         if let Some(r) = &mut ctx.upstream.response {
             strip_hop_headers(r.headers_mut());
         }
         ctx
-    }
-}
-
-lazy_static! {
-    static ref HOP_HEADERS: Vec<&'static str> = vec![
-        "Connection",
-        "Keep-Alive",
-        "Proxy-Authenticate",
-        "Proxy-Authorization",
-        "Te",
-        "Trailers",
-        "Transfer-Encoding",
-        "Upgrade",
-    ];
-}
-
-pub fn strip_hop_headers(headers: &mut HeaderMap) {
-    for header in HOP_HEADERS.iter() {
-        headers.remove(*header);
-    }
-}
-
-fn add_forwarding_headers(headers: &mut HeaderMap, remote_ip: &str) {
-    headers.remove("X-Forwarded-For");
-    headers.remove("X-Forwarded-Proto");
-    headers.remove("X-Forwarded-Port");
-    if let Ok(header) = HeaderValue::from_str(remote_ip) {
-        headers.append("X-Forwarded-For", header);
     }
 }
