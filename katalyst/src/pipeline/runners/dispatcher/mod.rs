@@ -1,4 +1,3 @@
-use crate::instance::handlers::Dispatchable;
 use crate::pipeline::*;
 use futures::future::*;
 

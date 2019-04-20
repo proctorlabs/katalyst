@@ -37,11 +37,12 @@ pub mod config;
 pub mod context;
 pub mod error;
 pub mod expression;
+mod instance;
 mod locator;
+pub mod modules;
 pub mod pipeline;
 pub mod prelude;
 mod service;
-mod instance;
 
 //Expose consumable APIs
 pub use app::Katalyst;

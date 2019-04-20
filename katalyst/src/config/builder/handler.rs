@@ -1,9 +1,7 @@
 use super::Builder;
 use crate::app::KatalystEngine;
 use crate::error::ConfigurationFailure;
-use crate::expression::Compiler;
-use crate::instance::handlers::*;
-use http::Method;
+use crate::modules::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::string::String;
@@ -44,44 +42,19 @@ impl Default for HandlerBuilder {
     }
 }
 
-impl Builder<Handler> for HandlerBuilder {
-    fn build(&self, engine: Arc<KatalystEngine>) -> Result<Handler, ConfigurationFailure> {
+impl Builder<Arc<ModuleDispatch>> for HandlerBuilder {
+    fn build(
+        &self,
+        engine: Arc<KatalystEngine>,
+    ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
+        let modules: Arc<Modules> = engine.locate()?;
         match self {
-            HandlerBuilder::Host {
-                host,
-                path,
-                method,
-                query,
-                headers,
-                body,
-            } => {
-                let providers = engine.locate::<Compiler>()?;
-                let method = match method {
-                    Some(m) => Some(Method::from_bytes(m.to_uppercase().as_bytes())?),
-                    None => None,
-                };
-                let body = match body {
-                    Some(bod) => Some(bod.as_str()),
-                    None => None,
-                };
-                Ok(Handler::Host(HostDispatcher {
-                    host: host.to_owned(),
-                    path: providers.compile_template(Some(path.as_str()))?,
-                    method,
-                    query: providers.compile_template_map(query)?,
-                    headers: providers.compile_template_map(headers)?,
-                    body: providers.compile_template_option(body)?,
-                }))
-            }
-            HandlerBuilder::FileServer {
-                root_path,
-                selector,
-            } => Ok(Handler::FileServer(FileServer {
-                root_path: root_path.to_owned(),
-                selector: engine
-                    .locate::<Compiler>()?
-                    .compile_template(Some(selector))?,
-            })),
+            HandlerBuilder::Host { .. } => Ok(modules
+                .get("host", ModuleType::RequestHandler)?
+                .build(engine, &ModuleConfig::RequestHandler(self.clone()))?),
+            HandlerBuilder::FileServer { .. } => Ok(modules
+                .get("file_server", ModuleType::RequestHandler)?
+                .build(engine, &ModuleConfig::RequestHandler(self.clone()))?),
         }
     }
 }

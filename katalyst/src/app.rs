@@ -3,6 +3,7 @@ use crate::balancer;
 use crate::config::parsers;
 use crate::instance::KatalystState;
 use crate::locator::{Locatable, Locator};
+use crate::modules::Modules;
 use crate::pipeline::PipelineRunner;
 use crate::prelude::*;
 use crate::service::EngineService;
@@ -41,6 +42,7 @@ impl Default for KatalystEngine {
         locator.register(PipelineRunner::new());
         locator.register(authentication::all());
         locator.register(balancer::all());
+        locator.register(Modules::default());
 
         KatalystEngine {
             state: RwLock::default(),
