@@ -1,6 +1,7 @@
 use super::*;
 use crate::app::KatalystEngine;
 use crate::instance::Route;
+use crate::modules::*;
 use http::Method;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -50,7 +51,7 @@ impl Builder<Route> for RouteBuilder {
 
         let authenticators = match &self.authenticators {
             Some(auths) => {
-                let mut vec_auths: Vec<Authenticator> = vec![];
+                let mut vec_auths: Vec<Arc<ModuleDispatch>> = vec![];
                 for a in auths {
                     vec_auths.push(a.build(engine.clone())?);
                 }

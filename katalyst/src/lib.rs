@@ -31,7 +31,6 @@ extern crate failure;
 
 //Load mods
 mod app;
-pub mod authentication;
 pub mod balancer;
 pub mod config;
 pub mod context;

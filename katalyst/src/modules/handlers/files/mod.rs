@@ -25,7 +25,6 @@ impl Module for FileServerModule {
         engine: Arc<KatalystEngine>,
         config: &ModuleConfig,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
-        println!("Hello 2");
         match config {
             ModuleConfig::RequestHandler(config) => match config {
                 HandlerBuilder::FileServer {

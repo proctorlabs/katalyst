@@ -1,6 +1,8 @@
 use crate::app::HttpsClient;
-use crate::authentication::*;
-use crate::pipeline::*;
+use crate::app::KatalystEngine;
+use crate::config::builder::AuthenticatorBuilder;
+use crate::context::*;
+use crate::modules::*;
 use crate::prelude::*;
 use futures::future::*;
 use futures::stream::Stream;
@@ -11,18 +13,35 @@ use hyper::Request;
 #[derive(Default, Debug)]
 pub struct HttpAuthenticatorBuilder {}
 
-impl KatalystAuthenticatorBuilder for HttpAuthenticatorBuilder {
+impl Module for HttpAuthenticatorBuilder {
     fn name(&self) -> &'static str {
         "http"
     }
 
-    fn build(&self, config: &AuthenticatorBuilder) -> Arc<KatalystAuthenticator> {
-        if let Some(url) = &config.url {
-            return Arc::new(HttpAuthenticator {
-                url: url.to_string(),
-            });
+    fn module_type(&self) -> ModuleType {
+        ModuleType::Authenticator
+    }
+
+    fn build(
+        &self,
+        _: Arc<KatalystEngine>,
+        config: &ModuleConfig,
+    ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
+        match config {
+            ModuleConfig::Authenticator(config) => match config {
+                AuthenticatorBuilder::Http { url } => {
+                    if let Some(url) = &url {
+                        Ok(Arc::new(HttpAuthenticator {
+                            url: url.to_string(),
+                        }))
+                    } else {
+                        Err(ConfigurationFailure::InvalidResource)
+                    }
+                }
+                _ => Err(ConfigurationFailure::InvalidResource),
+            },
+            _ => Err(ConfigurationFailure::InvalidResource),
         }
-        panic!("Invalid config!");
     }
 }
 
@@ -31,8 +50,8 @@ pub struct HttpAuthenticator {
     url: String,
 }
 
-impl KatalystAuthenticator for HttpAuthenticator {
-    fn authenticate(&self, mut ctx: Context) -> AsyncPipelineResult {
+impl ModuleDispatch for HttpAuthenticator {
+    fn dispatch(&self, mut ctx: Context) -> ModuleResult {
         let client: Arc<HttpsClient> = ctx.engine.locate().unwrap();
         let mut request = Request::builder();
         request.uri(&self.url.to_string());

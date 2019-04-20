@@ -1,3 +1,4 @@
+pub mod authentication;
 mod definitions;
 pub mod handlers;
 
@@ -35,6 +36,15 @@ impl Default for Modules {
             .register(Arc::new(handlers::FileServerModule {}))
             .unwrap();
         result.register(Arc::new(handlers::HostModule {})).unwrap();
+        result
+            .register(Arc::new(authentication::AlwaysAuthenticatorBuilder {}))
+            .unwrap();
+        result
+            .register(Arc::new(authentication::NeverAuthenticatorBuilder {}))
+            .unwrap();
+        result
+            .register(Arc::new(authentication::HttpAuthenticatorBuilder {}))
+            .unwrap();
         result
     }
 }

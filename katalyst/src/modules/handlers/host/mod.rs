@@ -41,7 +41,6 @@ impl Module for HostModule {
         engine: Arc<KatalystEngine>,
         config: &ModuleConfig,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
-        println!("Hello");
         match config {
             ModuleConfig::RequestHandler(config) => match config {
                 HandlerBuilder::Host {

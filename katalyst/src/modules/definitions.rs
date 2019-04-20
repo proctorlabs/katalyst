@@ -1,5 +1,5 @@
 use crate::app::KatalystEngine;
-use crate::config::builder::HandlerBuilder;
+use crate::config::builder::*;
 use crate::prelude::*;
 use futures::Future;
 use std::fmt::Debug;
@@ -14,6 +14,7 @@ pub enum ModuleType {
 
 pub enum ModuleConfig {
     RequestHandler(HandlerBuilder),
+    Authenticator(AuthenticatorBuilder),
 }
 
 impl ModuleType {

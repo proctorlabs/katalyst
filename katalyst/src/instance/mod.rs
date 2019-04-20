@@ -1,14 +1,12 @@
-mod authenticator;
 mod hosts;
 mod listener;
 mod route;
 
-use std::collections::HashMap;
-use std::sync::Arc;
-pub use authenticator::Authenticator;
 pub use hosts::Hosts;
 pub use listener::Listener;
 pub use route::Route;
+use std::collections::HashMap;
+use std::sync::Arc;
 
 #[derive(Debug, Default)]
 pub struct KatalystState {

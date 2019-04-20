@@ -43,7 +43,7 @@ routes:
         header: '{{ http.header("user-agent") }}'
         claim: '{{ auth.claim("KatalystAuthenticator") }}'
     authenticators:
-      - backend: http
+      - type: http
         url: "https://postman-echo.com/get?thing=something"
 
   - path:

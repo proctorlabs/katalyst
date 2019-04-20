@@ -1,5 +1,4 @@
 use crate::app::KatalystEngine;
-use crate::authentication::KatalystAuthenticationInfo;
 use crate::instance::Route;
 use crate::prelude::*;
 use hyper::{Body, Request, Response};
@@ -7,6 +6,28 @@ use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Instant;
+
+#[derive(Debug, Default)]
+pub struct KatalystAuthenticationInfo {
+    claims: HashMap<String, Vec<String>>,
+}
+
+impl KatalystAuthenticationInfo {
+    pub fn add_claim(&mut self, claim_type: String, claim_value: String) {
+        if let Some(claims) = self.claims.get_mut(&claim_type) {
+            claims.push(claim_value);
+        } else {
+            self.claims.insert(claim_type, vec![claim_value]);
+        }
+    }
+
+    pub fn get_claim(&self, claim_type: String) -> String {
+        match self.claims.get(&claim_type) {
+            Some(c) => c[0].to_string(),
+            None => String::default(),
+        }
+    }
+}
 
 #[derive(Default, Debug)]
 pub struct RequestResponse {
