@@ -7,9 +7,7 @@ use std::sync::Arc;
 
 pub enum ModuleType {
     Authenticator,
-    Authorizer,
     RequestHandler,
-    Logger,
 }
 
 pub enum ModuleConfig {
@@ -18,12 +16,10 @@ pub enum ModuleConfig {
 }
 
 impl ModuleType {
-    pub fn type_id(&self) -> &'static str {
+    pub(crate) fn type_id(&self) -> &'static str {
         match self {
             ModuleType::Authenticator => "authenticator",
-            ModuleType::Authorizer => "authorizer",
             ModuleType::RequestHandler => "request-handler",
-            ModuleType::Logger => "logger",
         }
     }
 }

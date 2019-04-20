@@ -55,3 +55,26 @@ routes:
       type: host
       host: httpbin
       path: "/post"
+
+  - path:
+      type: exact
+      path: "/test/get-to-post"
+    methods:
+      - get
+    authenticators:
+      - type: whitelist
+        ips:
+          - "127.0.0.2"
+          - "127.0.0.1"
+          - "127.0.0.4"
+    handler:
+      type: host
+      host: httpbin
+      path: "/post"
+      method: post
+      headers:
+        Content-Type: application/json
+      body: |
+        {
+          "remote_address": "{{ http.ip() }}"
+        }

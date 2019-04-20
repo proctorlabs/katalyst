@@ -46,5 +46,8 @@ impl Default for Modules {
             .register(Arc::new(authentication::HttpAuthenticatorBuilder {}))
             .unwrap();
         result
+            .register(Arc::new(authentication::WhitelistBuilder {}))
+            .unwrap();
+        result
     }
 }

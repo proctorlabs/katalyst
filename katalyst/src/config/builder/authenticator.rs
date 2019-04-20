@@ -13,6 +13,7 @@ pub enum AuthenticatorBuilder {
     Always,
     Never,
     Http { url: Option<String> },
+    Whitelist { ips: Vec<String> },
 }
 
 impl Builder<Arc<ModuleDispatch>> for AuthenticatorBuilder {
@@ -30,6 +31,9 @@ impl Builder<Arc<ModuleDispatch>> for AuthenticatorBuilder {
                 .build(engine, &ModuleConfig::Authenticator(self.clone()))?),
             AuthenticatorBuilder::Http { .. } => Ok(modules
                 .get("http", ModuleType::Authenticator)?
+                .build(engine, &ModuleConfig::Authenticator(self.clone()))?),
+            AuthenticatorBuilder::Whitelist { .. } => Ok(modules
+                .get("whitelist", ModuleType::Authenticator)?
                 .build(engine, &ModuleConfig::Authenticator(self.clone()))?),
         }
     }

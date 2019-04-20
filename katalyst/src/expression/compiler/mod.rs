@@ -99,6 +99,7 @@ impl Default for Compiler {
         providers.register(Box::new(HttpBinding {}));
         providers.register(Box::new(AuthBinding {}));
         providers.register(Box::new(UrlBinding {}));
+        providers.register(Box::new(JsonBinding {}));
         providers
     }
 }

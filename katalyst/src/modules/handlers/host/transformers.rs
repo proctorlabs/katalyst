@@ -24,6 +24,9 @@ impl DownstreamTransformer {
         }
 
         if let Some(body_str) = self.body {
+            while parts.headers.contains_key("Content-Length") {
+                parts.headers.remove("Content-Length");
+            }
             body = hyper::Body::from(body_str);
         }
 
