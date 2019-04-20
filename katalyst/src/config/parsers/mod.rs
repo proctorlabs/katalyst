@@ -1,6 +1,5 @@
 use crate::config::builder::KatalystBuilder;
 use crate::prelude::*;
-use serde_yaml;
 use std::ffi::OsStr;
 use std::fs::File;
 use std::io::prelude::*;

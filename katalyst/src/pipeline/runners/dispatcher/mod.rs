@@ -1,5 +1,5 @@
 use crate::pipeline::*;
-use futures::future::*;
+use crate::*;
 
 #[derive(Default)]
 pub struct Dispatcher {}
@@ -10,9 +10,7 @@ impl Pipeline for Dispatcher {
     }
 
     fn prepare_request_future(&self, ctx: Context) -> AsyncPipelineResult {
-        match ctx.detail.route() {
-            Ok(r) => Box::new(r.clone().handler.dispatch(ctx)),
-            Err(e) => Box::new(err(e)),
-        }
+        let r = try_fut!(ctx.detail.route()).clone();
+        Box::new(r.handler.dispatch(ctx))
     }
 }

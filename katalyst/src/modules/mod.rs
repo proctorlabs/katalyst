@@ -17,8 +17,8 @@ impl Modules {
         Ok(())
     }
 
-    pub fn get(&self, name: &str, module_type: ModuleType) -> Result<Arc<Module>, KatalystError> {
-        let key = format!("{id}-{mtype}", id = name, mtype = module_type.type_id());
+    pub fn get(&self, name: &str, module_type: &str) -> Result<Arc<Module>, KatalystError> {
+        let key = format!("{id}-{mtype}", id = name, mtype = module_type);
         Ok(self
             .modules
             .get(&key)

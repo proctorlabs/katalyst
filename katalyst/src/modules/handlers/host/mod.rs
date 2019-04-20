@@ -3,7 +3,6 @@ mod transformers;
 mod util;
 
 use crate::app::KatalystEngine;
-use crate::config::builder::HandlerBuilder;
 use crate::expression::*;
 use crate::modules::*;
 use crate::prelude::*;
@@ -13,6 +12,23 @@ use http::Method;
 use std::collections::HashMap;
 use transformers::DownstreamTransformer;
 pub use util::*;
+
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+struct HostConfig {
+    host: String,
+    path: String,
+    #[serde(default)]
+    method: Option<String>,
+    #[serde(default)]
+    query: Option<HashMap<String, String>>,
+    #[serde(default)]
+    headers: Option<HashMap<String, String>>,
+    #[serde(default)]
+    body: Option<String>,
+}
 
 #[derive(Debug)]
 pub struct HostDispatcher {
@@ -39,40 +55,30 @@ impl Module for HostModule {
     fn build(
         &self,
         engine: Arc<KatalystEngine>,
-        config: &ModuleConfig,
+        config: &ModuleConfigLoader,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
-        match config {
-            ModuleConfig::RequestHandler(config) => match config {
-                HandlerBuilder::Host {
-                    host,
-                    path,
-                    method,
-                    query,
-                    headers,
-                    body,
-                } => {
-                    let providers = engine.locate::<Compiler>()?;
-                    let method = match method {
-                        Some(m) => Some(Method::from_bytes(m.to_uppercase().as_bytes())?),
-                        None => None,
-                    };
-                    let body = match body {
-                        Some(bod) => Some(bod.as_str()),
-                        None => None,
-                    };
-                    Ok(Arc::new(HostDispatcher {
-                        host: host.to_owned(),
-                        path: providers.compile_template(Some(path.as_str()))?,
-                        method,
-                        query: providers.compile_template_map(query)?,
-                        headers: providers.compile_template_map(headers)?,
-                        body: providers.compile_template_option(body)?,
-                    }))
-                }
-                _ => Err(ConfigurationFailure::InvalidResource),
-            },
-            _ => Err(ConfigurationFailure::InvalidResource),
-        }
+        let c: HostConfig = config.load()?;
+        let providers = engine.locate::<Compiler>()?;
+        let method = match c.method {
+            Some(m) => Some(Method::from_bytes(m.to_uppercase().as_bytes())?),
+            None => None,
+        };
+        let temp;
+        let body = match c.body {
+            Some(bod) => {
+                temp = bod;
+                Some(temp.as_str())
+            }
+            None => None,
+        };
+        Ok(Arc::new(HostDispatcher {
+            host: c.host.to_owned(),
+            path: providers.compile_template(Some(c.path.as_str()))?,
+            method,
+            query: providers.compile_template_map(&c.query)?,
+            headers: providers.compile_template_map(&c.headers)?,
+            body: providers.compile_template_option(body)?,
+        }))
     }
 }
 

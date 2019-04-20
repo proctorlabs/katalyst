@@ -1,9 +1,15 @@
 use crate::app::KatalystEngine;
-use crate::config::builder::AuthenticatorBuilder;
 use crate::context::*;
 use crate::modules::*;
 use crate::prelude::*;
 use futures::future::*;
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+struct WhitelistConfig {
+    ips: Vec<String>,
+}
 
 #[derive(Default, Debug)]
 pub struct WhitelistBuilder {}
@@ -20,17 +26,10 @@ impl Module for WhitelistBuilder {
     fn build(
         &self,
         _: Arc<KatalystEngine>,
-        config: &ModuleConfig,
+        config: &ModuleConfigLoader,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
-        match config {
-            ModuleConfig::Authenticator(config) => match config {
-                AuthenticatorBuilder::Whitelist { ips } => {
-                    Ok(Arc::new(Whitelist { ips: ips.to_vec() }))
-                }
-                _ => Err(ConfigurationFailure::InvalidResource),
-            },
-            _ => Err(ConfigurationFailure::InvalidResource),
-        }
+        let c: WhitelistConfig = config.load()?;
+        Ok(Arc::new(Whitelist { ips: c.ips }))
     }
 }
 

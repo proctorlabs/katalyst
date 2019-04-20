@@ -1,15 +1,13 @@
-mod authenticator;
-mod handler;
 mod hosts;
 mod listener;
+mod module;
 mod path;
 mod routes;
 
 pub use crate::instance::*;
-pub use authenticator::AuthenticatorBuilder;
-pub use handler::HandlerBuilder;
 pub use hosts::HostsBuilder;
 pub use listener::ListenerBuilder;
+pub use module::ModuleBuilder;
 pub use path::PathBuilder;
 pub use routes::RouteBuilder;
 

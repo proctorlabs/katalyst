@@ -1,4 +1,5 @@
 use crate::pipeline::*;
+use crate::*;
 use futures::future::*;
 
 #[derive(Default)]
@@ -10,12 +11,7 @@ impl Pipeline for Authenticator {
     }
 
     fn prepare_request_future(&self, ctx: Context) -> AsyncPipelineResult {
-        let route = match &ctx.detail.matched_route {
-            Some(s) => s,
-            None => {
-                return Box::new(err(RequestFailure::Internal));
-            }
-        };
+        let route = try_fut!(ctx.detail.route());
         match &route.authenticators {
             Some(state_authenticators) => {
                 let authenticators = state_authenticators.clone();

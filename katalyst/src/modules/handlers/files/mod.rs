@@ -1,12 +1,21 @@
 use crate::app::KatalystEngine;
-use crate::config::builder::HandlerBuilder;
 use crate::expression::*;
 use crate::modules::*;
 use crate::prelude::*;
+use crate::*;
 use futures::future::*;
 use http::header::HeaderValue;
 use hyper::{Body, Response};
 use std::path::PathBuf;
+
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+struct FileServerConfig {
+    root_path: String,
+    selector: String,
+}
 
 #[derive(Debug)]
 pub struct FileServerModule {}
@@ -23,23 +32,15 @@ impl Module for FileServerModule {
     fn build(
         &self,
         engine: Arc<KatalystEngine>,
-        config: &ModuleConfig,
+        config: &ModuleConfigLoader,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
-        match config {
-            ModuleConfig::RequestHandler(config) => match config {
-                HandlerBuilder::FileServer {
-                    root_path,
-                    selector,
-                } => Ok(Arc::new(FileServerDispatcher {
-                    root_path: root_path.to_owned(),
-                    selector: engine
-                        .locate::<Compiler>()?
-                        .compile_template(Some(selector))?,
-                })),
-                _ => Err(ConfigurationFailure::InvalidResource),
-            },
-            _ => Err(ConfigurationFailure::InvalidResource),
-        }
+        let c: FileServerConfig = config.load()?;
+        Ok(Arc::new(FileServerDispatcher {
+            root_path: c.root_path,
+            selector: engine
+                .locate::<Compiler>()?
+                .compile_template(Some(&c.selector))?,
+        }))
     }
 }
 
@@ -51,14 +52,10 @@ pub struct FileServerDispatcher {
 
 impl ModuleDispatch for FileServerDispatcher {
     fn dispatch(&self, ctx: Context) -> ModuleResult {
-        let path = self.selector.render(&ctx);
-        if let Ok(path) = path {
-            let mut full_path = PathBuf::from(&self.root_path);
-            full_path.push(&path);
-            send_file(ctx, full_path)
-        } else {
-            Box::new(err::<Context, RequestFailure>(RequestFailure::Internal))
-        }
+        let path = try_fut!(self.selector.render(&ctx));
+        let mut full_path = PathBuf::from(&self.root_path);
+        full_path.push(&path);
+        send_file(ctx, full_path)
     }
 }
 

@@ -2,7 +2,7 @@
 
 The Katalyst roadmap: milestones and goals
 
-## Completed Milestones
+## Completed Features
 
 - To downstream URL: Headers, Remote IP
 - Proxy forwarding headers
@@ -16,22 +16,21 @@ The Katalyst roadmap: milestones and goals
 - Proper status code/error handling in pipeline
 - Host grouping in configuration
 - Load balancing
-
-## Alpha Milestones
-
-- Modular authentication: API Completed, needs implementations for HTTP and secure sessions
-- Modular authorization: Needs to be able to reject requests based off authenticator claims
-- Register signals from OS
 - Ability to modify downstream headers
 - Cleaner upstream path definitions
+- Continuous integration completed
+- Authentication modules
+- Module system
+
+## In progress
+
+- Authentication modules: basic, login
+- Authorization modules
+- Register signals from OS
 - Server SSL/TLS termination
 - Health checks
 - Caching implementation (local, redis, etc.)
-- Continuous integration completed
 - Usable documentation
-
-## Later Milestones
-
 - INotify for config file changes
 - Customizable pipeline for request processing
 - External API hooks built into standard pipeline

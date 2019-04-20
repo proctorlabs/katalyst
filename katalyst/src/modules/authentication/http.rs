@@ -1,6 +1,5 @@
 use crate::app::HttpsClient;
 use crate::app::KatalystEngine;
-use crate::config::builder::AuthenticatorBuilder;
 use crate::context::*;
 use crate::modules::*;
 use crate::prelude::*;
@@ -9,6 +8,13 @@ use futures::stream::Stream;
 use futures::Future;
 use hyper::body::Body;
 use hyper::Request;
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+struct HttpConfig {
+    url: String,
+}
 
 #[derive(Default, Debug)]
 pub struct HttpAuthenticatorBuilder {}
@@ -25,23 +31,10 @@ impl Module for HttpAuthenticatorBuilder {
     fn build(
         &self,
         _: Arc<KatalystEngine>,
-        config: &ModuleConfig,
+        config: &ModuleConfigLoader,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
-        match config {
-            ModuleConfig::Authenticator(config) => match config {
-                AuthenticatorBuilder::Http { url } => {
-                    if let Some(url) = &url {
-                        Ok(Arc::new(HttpAuthenticator {
-                            url: url.to_string(),
-                        }))
-                    } else {
-                        Err(ConfigurationFailure::InvalidResource)
-                    }
-                }
-                _ => Err(ConfigurationFailure::InvalidResource),
-            },
-            _ => Err(ConfigurationFailure::InvalidResource),
-        }
+        let c: HttpConfig = config.load()?;
+        Ok(Arc::new(HttpAuthenticator { url: c.url }))
     }
 }
 

@@ -1,5 +1,4 @@
 use crate::app::KatalystEngine;
-use crate::config::builder::*;
 use crate::prelude::*;
 use futures::Future;
 use std::fmt::Debug;
@@ -10,24 +9,49 @@ pub enum ModuleType {
     RequestHandler,
 }
 
-pub enum ModuleConfig {
-    RequestHandler(HandlerBuilder),
-    Authenticator(AuthenticatorBuilder),
-}
-
 impl ModuleType {
-    pub(crate) fn type_id(&self) -> &'static str {
+    pub fn type_id(&self) -> &'static str {
         match self {
-            ModuleType::Authenticator => "authenticator",
-            ModuleType::RequestHandler => "request-handler",
+            ModuleType::Authenticator => AuthenticatorModule::KEY,
+            ModuleType::RequestHandler => HandlerModule::KEY,
         }
     }
+}
+
+#[derive(Default, Clone, Debug)]
+pub struct AuthenticatorModule {}
+impl TypeId for AuthenticatorModule {
+    const KEY: &'static str = "authenticator";
+}
+
+#[derive(Default, Clone, Debug)]
+pub struct HandlerModule {}
+impl TypeId for HandlerModule {
+    const KEY: &'static str = "request-handler";
+}
+
+pub trait TypeId {
+    const KEY: &'static str;
 }
 
 pub type ModuleResult = Box<Future<Item = Context, Error = RequestFailure> + Send>;
 
 pub trait ModuleDispatch: Send + Sync + Debug {
     fn dispatch(&self, ctx: Context) -> ModuleResult;
+}
+
+pub struct ModuleConfigLoader {
+    pub(crate) raw: serde_json::Value,
+}
+
+impl ModuleConfigLoader {
+    pub fn load<T>(&self) -> Result<T, ConfigurationFailure>
+    where
+        T: for<'de> serde::Deserialize<'de>,
+    {
+        let c: T = serde_json::from_value(self.raw.clone())?;
+        Ok(c)
+    }
 }
 
 pub trait Module: Send + Sync + Debug {
@@ -38,7 +62,7 @@ pub trait Module: Send + Sync + Debug {
     fn build(
         &self,
         engine: Arc<KatalystEngine>,
-        config: &ModuleConfig,
+        config: &ModuleConfigLoader,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure>;
 }
 

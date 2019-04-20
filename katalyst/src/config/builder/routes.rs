@@ -14,11 +14,11 @@ pub struct RouteBuilder {
     path: PathBuilder,
     #[serde(default)]
     children: Option<Vec<RouteBuilder>>,
-    handler: HandlerBuilder,
+    handler: ModuleBuilder<HandlerModule>,
     #[serde(default)]
     methods: Option<Vec<String>>,
     #[serde(default)]
-    authenticators: Option<Vec<AuthenticatorBuilder>>,
+    authenticators: Option<Vec<ModuleBuilder<AuthenticatorModule>>>,
 }
 
 impl Builder<Route> for RouteBuilder {

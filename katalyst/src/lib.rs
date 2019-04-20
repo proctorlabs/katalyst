@@ -41,6 +41,8 @@ mod locator;
 pub mod modules;
 pub mod pipeline;
 pub mod prelude;
+#[macro_use]
+pub mod macros;
 mod service;
 
 //Expose consumable APIs

@@ -1,5 +1,4 @@
 use crate::app::KatalystEngine;
-use crate::config::builder::AuthenticatorBuilder;
 use crate::context::*;
 use crate::modules::*;
 use crate::prelude::*;
@@ -20,15 +19,9 @@ impl Module for NeverAuthenticatorBuilder {
     fn build(
         &self,
         _: Arc<KatalystEngine>,
-        config: &ModuleConfig,
+        _: &ModuleConfigLoader,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
-        match config {
-            ModuleConfig::Authenticator(config) => match config {
-                AuthenticatorBuilder::Never => Ok(Arc::new(NeverAuthenticator {})),
-                _ => Err(ConfigurationFailure::InvalidResource),
-            },
-            _ => Err(ConfigurationFailure::InvalidResource),
-        }
+        Ok(Arc::new(NeverAuthenticator {}))
     }
 }
 
