@@ -38,10 +38,10 @@ routes:
         end: '{{ http.matched("end") }}'
         method: "{{ http.method() }}"
         ip: "{{ http.ip() }}"
-        q: '{{ http.query_param("test") }}'
+        encoded: '{{ encode.base64("test") }}'
+        decoded: '{{ decode.base64("dGVzdA==") }}'
       headers:
         header: '{{ http.header("user-agent") }}'
-        claim: '{{ auth.claim("KatalystAuthenticator") }}'
     authenticators:
       - type: http
         url: "https://postman-echo.com/get?thing=something"

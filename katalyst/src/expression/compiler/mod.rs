@@ -100,6 +100,8 @@ impl Default for Compiler {
         providers.register(Box::new(AuthBinding {}));
         providers.register(Box::new(UrlBinding {}));
         providers.register(Box::new(JsonBinding {}));
+        providers.register(Box::new(EncodeBinding {}));
+        providers.register(Box::new(DecodeBinding {}));
         providers
     }
 }

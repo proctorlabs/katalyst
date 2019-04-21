@@ -43,4 +43,3 @@ The Katalyst roadmap: milestones and goals
 - Rate limiting
 - Service discovery
 - Websockets
-- API for modifying routes after start
