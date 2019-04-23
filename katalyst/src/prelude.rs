@@ -1,6 +1,7 @@
 use std::any::Any;
 use std::sync::Arc;
 
+pub use crate::app::KatalystEngine;
 pub use crate::context::Context;
 pub use crate::error::*;
 pub use crate::expression::*;
