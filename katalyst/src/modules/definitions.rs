@@ -34,6 +34,7 @@ pub trait TypeId {
     const KEY: &'static str;
 }
 
+pub type ModuleResultSync = Result<Context, RequestFailure>;
 pub type ModuleResult = Box<Future<Item = Context, Error = RequestFailure> + Send>;
 
 pub trait ModuleDispatch: Send + Sync + Debug {

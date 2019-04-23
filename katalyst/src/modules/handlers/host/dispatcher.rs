@@ -1,12 +1,12 @@
 use super::*;
 use crate::app::HttpsClient;
-use crate::pipeline::*;
+use crate::prelude::*;
 use futures::future::*;
 use futures::Future;
 use std::sync::Arc;
 
 impl HostDispatcher {
-    pub fn prepare(&self, mut ctx: Context) -> PipelineResult {
+    pub fn prepare(&self, mut ctx: Context) -> ModuleResultSync {
         let config = ctx
             .engine
             .get_state()
@@ -38,7 +38,7 @@ impl HostDispatcher {
         Ok(ctx)
     }
 
-    pub fn send(mut ctx: Context) -> AsyncPipelineResult {
+    pub fn send(mut ctx: Context) -> ModuleResult {
         let dsr = match ctx.downstream.request.take() {
             Some(s) => s,
             None => {

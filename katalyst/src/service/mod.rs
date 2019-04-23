@@ -7,8 +7,7 @@ use std::net::SocketAddr;
 
 use crate::app::*;
 use crate::error::*;
-use crate::pipeline::HyperResult;
-use crate::pipeline::PipelineRunner;
+use crate::pipeline::{run, HyperResult};
 use std::sync::Arc;
 
 pub trait EngineService {
@@ -22,10 +21,9 @@ impl EngineService for Arc<KatalystEngine> {
         let server = Server::bind(&addr)
             .serve(make_service_fn(move |conn: &AddrStream| {
                 let engine = engine.clone();
-                let pipeline: Arc<PipelineRunner> = engine.locate().unwrap();
                 let remote_addr = conn.remote_addr();
                 service_fn(move |req: Request<Body>| -> HyperResult {
-                    pipeline.run(remote_addr, req, engine.clone())
+                    run(remote_addr, req, engine.clone())
                 })
             }))
             .map_err(|e| eprintln!("server error: {}", e));

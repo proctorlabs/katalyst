@@ -3,7 +3,6 @@ use crate::config::parsers;
 use crate::instance::KatalystState;
 use crate::locator::{Locatable, Locator};
 use crate::modules::Modules;
-use crate::pipeline::PipelineRunner;
 use crate::prelude::*;
 use crate::service::EngineService;
 use futures::future::Future;
@@ -38,7 +37,6 @@ impl Default for KatalystEngine {
 
         locator.register(Compiler::default());
         locator.register::<HttpsClient>(builder.build(HttpsConnector::from((http_connector, tls))));
-        locator.register(PipelineRunner::new());
         locator.register(balancer::all());
         locator.register(Modules::default());
 
