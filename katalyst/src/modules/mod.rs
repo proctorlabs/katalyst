@@ -1,6 +1,7 @@
 pub mod authentication;
 mod definitions;
 pub mod handlers;
+pub mod plugins;
 
 use crate::prelude::*;
 pub use definitions::*;

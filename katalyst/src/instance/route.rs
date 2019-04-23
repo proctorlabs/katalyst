@@ -9,6 +9,8 @@ pub struct Route {
     pub pattern: Regex,
     pub children: Option<Vec<Arc<Route>>>,
     pub handler: Arc<ModuleDispatch>,
+    pub plugins: Option<Vec<Arc<ModuleDispatch>>>,
+    pub authorizers: Option<Vec<Arc<ModuleDispatch>>>,
     pub methods: Option<HashSet<Method>>,
     pub authenticators: Option<Vec<Arc<ModuleDispatch>>>,
 }

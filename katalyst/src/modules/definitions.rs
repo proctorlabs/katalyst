@@ -6,7 +6,9 @@ use std::sync::Arc;
 
 pub enum ModuleType {
     Authenticator,
+    Authorizer,
     RequestHandler,
+    Plugin,
 }
 
 impl ModuleType {
@@ -14,6 +16,8 @@ impl ModuleType {
         match self {
             ModuleType::Authenticator => AuthenticatorModule::KEY,
             ModuleType::RequestHandler => HandlerModule::KEY,
+            ModuleType::Plugin => PluginModule::KEY,
+            ModuleType::Authorizer => AuthorizerModule::KEY,
         }
     }
 }
@@ -25,9 +29,21 @@ impl TypeId for AuthenticatorModule {
 }
 
 #[derive(Default, Clone, Debug)]
+pub struct AuthorizerModule {}
+impl TypeId for AuthorizerModule {
+    const KEY: &'static str = "authorizer";
+}
+
+#[derive(Default, Clone, Debug)]
 pub struct HandlerModule {}
 impl TypeId for HandlerModule {
     const KEY: &'static str = "request-handler";
+}
+
+#[derive(Default, Clone, Debug)]
+pub struct PluginModule {}
+impl TypeId for PluginModule {
+    const KEY: &'static str = "plugin";
 }
 
 pub trait TypeId {

@@ -18,6 +18,10 @@ pub struct RouteBuilder {
     #[serde(default)]
     methods: Option<Vec<String>>,
     #[serde(default)]
+    plugins: Option<Vec<ModuleBuilder<PluginModule>>>,
+    #[serde(default)]
+    authorizers: Option<Vec<ModuleBuilder<AuthorizerModule>>>,
+    #[serde(default)]
     authenticators: Option<Vec<ModuleBuilder<AuthenticatorModule>>>,
 }
 
@@ -49,6 +53,28 @@ impl Builder<Route> for RouteBuilder {
             None => None,
         };
 
+        let plugins = match &self.plugins {
+            Some(plugins) => {
+                let mut vec_plugins: Vec<Arc<ModuleDispatch>> = vec![];
+                for p in plugins {
+                    vec_plugins.push(p.build(engine.clone())?);
+                }
+                Some(vec_plugins)
+            }
+            None => None,
+        };
+
+        let authorizers = match &self.authorizers {
+            Some(auths) => {
+                let mut vec_auths: Vec<Arc<ModuleDispatch>> = vec![];
+                for a in auths {
+                    vec_auths.push(a.build(engine.clone())?);
+                }
+                Some(vec_auths)
+            }
+            None => None,
+        };
+
         let authenticators = match &self.authenticators {
             Some(auths) => {
                 let mut vec_auths: Vec<Arc<ModuleDispatch>> = vec![];
@@ -64,6 +90,8 @@ impl Builder<Route> for RouteBuilder {
             pattern: Regex::new(&self.path.build(engine)?)?,
             children: routes,
             handler,
+            plugins,
+            authorizers,
             methods,
             authenticators,
         })

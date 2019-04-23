@@ -7,7 +7,7 @@ pub fn authenticate(ctx: Context) -> ModuleResult {
     match &route.authenticators {
         Some(state_authenticators) => {
             let authenticators = state_authenticators.clone();
-            let mut result: ModuleResult = Box::new(ok(ctx));
+            let mut result: ModuleResult = ok!(ctx);
             for a in authenticators.iter() {
                 result = Box::new(result.and_then({
                     let r = a.clone();
@@ -16,6 +16,18 @@ pub fn authenticate(ctx: Context) -> ModuleResult {
             }
             result
         }
-        None => Box::new(ok(ctx)),
+        None => ok!(ctx),
     }
+}
+
+pub fn authorize(ctx: Context) -> ModuleResult {
+    let route = try_fut!(ctx.detail.route()).clone();
+    let mut result: ModuleResult = ok!(ctx);
+    if let Some(authorizers) = &route.authorizers {
+        for auth in authorizers.iter() {
+            let a = auth.clone();
+            result = Box::new(result.and_then(move |ctx| a.dispatch(ctx)));
+        }
+    }
+    result
 }
