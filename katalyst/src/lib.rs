@@ -4,8 +4,8 @@ appliance through Docker or it can be used as a library.
 
 # Features
 
-Katalyst is still an experimental work in progress. Please see the [Roadmap](ROADMAP.md)
-to see expected features.
+Katalyst is still an experimental work in progress. Please see the [Features](FEATURES.md)
+list to see expected features.
 
 Current features include:
 
@@ -29,7 +29,6 @@ extern crate lazy_static;
 #[macro_use]
 extern crate failure;
 
-//Load mods
 mod app;
 pub mod balancer;
 pub mod config;
@@ -39,11 +38,11 @@ pub mod expression;
 mod instance;
 mod locator;
 pub mod modules;
-pub mod pipeline;
+mod pipeline;
 pub mod prelude;
 #[macro_use]
 pub mod macros;
 mod service;
 
-//Expose consumable APIs
 pub use app::Katalyst;
+pub use app::KatalystEngine;

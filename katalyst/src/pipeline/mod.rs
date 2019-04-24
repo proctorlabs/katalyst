@@ -14,7 +14,7 @@ use std::sync::Arc;
 
 pub(crate) use mapper::HyperResult;
 
-pub fn run(
+pub(crate) fn run(
     remote_addr: SocketAddr,
     request: Request<Body>,
     engine: Arc<KatalystEngine>,

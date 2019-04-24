@@ -21,8 +21,8 @@ appliance through Docker or it can be used as a library.
 
 ## Features
 
-Katalyst is still an experimental work in progress. Please see the [Roadmap](ROADMAP.md)
-to see expected features.
+Katalyst is still an experimental work in progress. Please see the [Features](FEATURES.md)
+list to see expected features.
 
 Current features include:
 

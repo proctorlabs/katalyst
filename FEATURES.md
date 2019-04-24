@@ -1,0 +1,54 @@
+# Feature Roadmap
+
+- [ ] Usable documentation (in progress)
+- [x] YAML/JSON Configuration
+- [x] To downstream URL: Headers, Remote IP
+- [x] Reverse proxy features
+    - [x] Proxy forwarding headers (X-Forward-For, etc.)
+    - [x] Strip hop-to-hop headers
+- [x] Benchmarking suite through docker compose
+- [x] Appliance mode
+    - [x] Specify configuration file on argv
+    - [x] Specify configuration file with env
+- [x] Post-error and post-success pipeline hooks working
+- [x] SSL/TLS Client
+- [x] Proper status code/error handling in pipeline
+- [x] Custom configuration using expressions
+    - [x] Parse expressions in templates with syn
+    - [x] Extensible binding system for registering custom expression resolvers
+    - [x] Bindings for: Environment, Claims, Path matches, Remote IP, Query, Method, Encodings, etc..
+    - [x] Bindings for: Parsing incoming JSON request (when path has JSON enabled)
+- [x] Host grouping in configuration
+- [x] Load balancing (Round Robin, Least Connection, Random)
+- [x] Ability to modify downstream headers
+- [x] Cleaner upstream path definitions
+    - [x] Expression path builder
+    - [x] Regex path builder
+    - [x] Exact match path builder
+    - [ ] Custom path builder support
+- [x] Continuous integration
+- [x] Extensible module system
+- [x] Module support
+    - [x] Authentication modules
+    - [x] Authorization modules
+    - [x] Plugin modules
+    - [x] Handler modules
+- [ ] Authentication modules: Login, Basic, HTTP
+- [ ] Authorization modules: Claim verifier
+- [ ] Load Python modules
+- [ ] Register signals from OS *(Appliance)*
+- [ ] Server TLS termination *(Note: You can use a reverse proxy to accomplish this for the time being)*
+- [ ] Health checks
+- [ ] Caching modules: In-Memory, Redis
+- [ ] INotify for config file changes
+- [x] Customizable pipeline for request processing
+- [x] Support for custom bindings
+- [x] JSON Binding
+- [x] Custom bindings
+- [ ] Request aggregation and chaining module
+- [ ] Request tracking module
+- [ ] QoS module
+- [ ] Circuit breaker module
+- [ ] Rate limiting module
+- [ ] Service discovery module support
+- [ ] Websockets support
