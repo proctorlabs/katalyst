@@ -2,6 +2,8 @@
 
 - [ ] Usable documentation (in progress)
 - [x] YAML/JSON Configuration
+    - [ ] Load from multiple configuration files
+    - [ ] Global configuration options
 - [x] To downstream URL: Headers, Remote IP
 - [x] Reverse proxy features
     - [x] Proxy forwarding headers (X-Forward-For, etc.)
