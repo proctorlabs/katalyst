@@ -1,7 +1,11 @@
+mod data;
+
 use crate::app::KatalystEngine;
 use crate::instance::Route;
 use crate::prelude::*;
+use data::ContextData;
 use hyper::{Body, Request, Response};
+use std::any::Any;
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -58,6 +62,7 @@ pub struct Context {
     pub detail: Detail,
     pub timestamps: Timestamps,
     pub engine: Arc<KatalystEngine>,
+    data: ContextData,
 }
 
 #[derive(Debug)]
@@ -83,22 +88,32 @@ impl Default for Context {
                 completed: None,
             },
             engine: Arc::default(),
+            data: ContextData::default(),
         }
     }
 }
 
 impl Context {
+    pub fn get_extension_data<T: Any + Send + Sync>(&self) -> Result<Arc<T>, RequestFailure> {
+        self.data.get().ok_or_else(|| RequestFailure::Internal)
+    }
+
+    pub fn set_extension_data<T: Any + Send + Sync>(&mut self, data: T) {
+        self.data.set(data)
+    }
+
     pub fn new(
         request: Request<Body>,
         engine: Arc<KatalystEngine>,
         remote_addr: SocketAddr,
     ) -> Self {
-        let mut path = String::new();
         let uri = request.uri();
-        path.push_str(&uri.scheme_str().unwrap_or("http"));
-        path.push_str("://");
-        path.push_str(&uri.host().unwrap_or("localhost"));
-        path.push_str(&uri.to_string());
+        let path = format!(
+            "{scheme}://{host}{path}",
+            scheme = &uri.scheme_str().unwrap_or("http"),
+            host = &uri.host().unwrap_or("localhost"),
+            path = &uri
+        );
         Context {
             upstream: RequestResponse {
                 request: Some(request),
@@ -118,6 +133,7 @@ impl Context {
                 completed: None,
             },
             engine,
+            data: ContextData::default(),
         }
     }
 

@@ -49,6 +49,7 @@ impl Default for Modules {
         result
             .register(Arc::new(authentication::WhitelistBuilder {}))
             .unwrap();
+        result.register(Arc::new(plugins::JsonPlugin {})).unwrap();
         result
     }
 }

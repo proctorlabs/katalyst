@@ -51,9 +51,13 @@ routes:
       path: "/test/post"
     methods:
       - post
+    plugins:
+      - type: json
     handler:
       type: host
       host: httpbin
+      headers:
+        Capped: '{{ json.value("body") }}'
       path: "/post"
 
   - path:
