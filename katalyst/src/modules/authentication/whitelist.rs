@@ -41,9 +41,9 @@ pub struct Whitelist {
 impl ModuleDispatch for Whitelist {
     fn dispatch(&self, ctx: Context) -> ModuleResult {
         if self.ips.contains(&ctx.detail.remote_ip) {
-            Box::new(ok::<Context, RequestFailure>(ctx))
+            Box::new(ok(ctx))
         } else {
-            Box::new(err::<Context, RequestFailure>(RequestFailure::Unauthorized))
+            Box::new(err(ctx.fail(RequestFailure::Unauthorized)))
         }
     }
 }

@@ -3,7 +3,7 @@ use crate::*;
 use futures::future::*;
 
 pub fn authenticate(ctx: Context) -> ModuleResult {
-    let route = try_fut!(ctx.detail.route());
+    let route = try_fut!(ctx, ctx.detail.route());
     match &route.authenticators {
         Some(state_authenticators) => {
             let authenticators = state_authenticators.clone();
@@ -21,7 +21,7 @@ pub fn authenticate(ctx: Context) -> ModuleResult {
 }
 
 pub fn authorize(ctx: Context) -> ModuleResult {
-    let route = try_fut!(ctx.detail.route()).clone();
+    let route = try_fut!(ctx, ctx.detail.route()).clone();
     let mut result: ModuleResult = ok!(ctx);
     if let Some(authorizers) = &route.authorizers {
         for auth in authorizers.iter() {

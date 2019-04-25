@@ -65,9 +65,9 @@ impl ModuleDispatch for HttpAuthenticator {
                 let mut auth = KatalystAuthenticationInfo::default();
                 auth.add_claim("KatalystAuthenticator".to_string(), "http".to_string());
                 ctx.detail.authentication = Some(auth);
-                ok::<Context, RequestFailure>(ctx)
+                ok(ctx)
             }
-            Err(_) => err::<Context, RequestFailure>(RequestFailure::Forbidden),
+            Err(_) => err(ctx.fail(RequestFailure::Forbidden)),
         }))
     }
 }

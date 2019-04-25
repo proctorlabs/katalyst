@@ -30,7 +30,7 @@ pub struct KatalystBuilder {
 }
 
 impl KatalystBuilder {
-    pub fn build(self, engine: Arc<KatalystEngine>) -> Result<KatalystState, ConfigurationFailure> {
+    pub fn build(self, engine: Arc<KatalystEngine>) -> Result<Instance, ConfigurationFailure> {
         //build routes...
         let mut all_routes = vec![];
         for route in self.routes.iter() {
@@ -38,7 +38,7 @@ impl KatalystBuilder {
         }
 
         //final result
-        Ok(KatalystState {
+        Ok(Instance {
             hosts: self.hosts.build(engine.clone())?,
             routes: all_routes,
             listener: self.listener.build(engine.clone())?,

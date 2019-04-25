@@ -50,8 +50,22 @@ pub trait TypeId {
     const KEY: &'static str;
 }
 
-pub type ModuleResultSync = Result<Context, RequestFailure>;
-pub type ModuleResult = Box<Future<Item = Context, Error = RequestFailure> + Send>;
+pub struct ModuleError {
+    pub error: RequestFailure,
+    pub context: Context,
+}
+
+impl Context {
+    pub fn fail(self, error: RequestFailure) -> ModuleError {
+        ModuleError {
+            error,
+            context: self,
+        }
+    }
+}
+
+pub type ModuleResultSync = Result<Context, ModuleError>;
+pub type ModuleResult = Box<Future<Item = Context, Error = ModuleError> + Send>;
 
 pub trait ModuleDispatch: Send + Sync + Debug {
     fn dispatch(&self, ctx: Context) -> ModuleResult;

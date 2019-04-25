@@ -34,7 +34,6 @@ impl ContextData {
 
     pub fn set<T: Any + Send + Sync>(&mut self, item: T) {
         let id = TypeId::of::<T>();
-        println!("id: {:?}", id);
         self.store.insert(id, Box::new(Container::new(item)));
     }
 }

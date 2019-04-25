@@ -9,7 +9,7 @@ pub fn map_result_to_hyper(res: ModuleResultSync) -> HyperResult {
         Ok(ctx) => ok::<Response<Body>, Error>(ctx.upstream.response.unwrap_or_default()),
         Err(e) => ok::<Response<Body>, Error>({
             let mut resp = Response::default();
-            *resp.status_mut() = e.status_code();
+            *resp.status_mut() = e.error.status_code();
             resp
         }),
     })

@@ -29,7 +29,7 @@ impl Module for NeverAuthenticatorBuilder {
 pub struct NeverAuthenticator {}
 
 impl ModuleDispatch for NeverAuthenticator {
-    fn dispatch(&self, _: Context) -> ModuleResult {
-        Box::new(err::<Context, RequestFailure>(RequestFailure::Unauthorized))
+    fn dispatch(&self, ctx: Context) -> ModuleResult {
+        Box::new(err(ctx.fail(RequestFailure::Unauthorized)))
     }
 }

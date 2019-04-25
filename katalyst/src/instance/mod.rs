@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 #[derive(Debug, Default)]
-pub struct KatalystState {
+pub struct Instance {
     pub hosts: HashMap<String, Hosts>,
     pub routes: Vec<Arc<Route>>,
     pub listener: Listener,

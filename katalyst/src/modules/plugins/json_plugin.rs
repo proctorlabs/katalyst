@@ -29,7 +29,10 @@ impl Module for JsonPlugin {
 
 impl ModuleDispatch for JsonPlugin {
     fn dispatch(&self, mut ctx: Context) -> ModuleResult {
-        let req = try_fut!(ctx.upstream.request.take().ok_or(RequestFailure::Internal));
+        let req = try_fut!(
+            ctx,
+            ctx.upstream.request.take().ok_or(RequestFailure::Internal)
+        );
         let (parts, body) = req.into_parts();
         if let Some(header) = parts.headers.get("Content-Type") {
             if header != "application/json" {
@@ -44,9 +47,7 @@ impl ModuleDispatch for JsonPlugin {
                         })
                         .then(|res| match res {
                             Ok((Ok(data), body)) => {
-                                println!("{}", data);
                                 ctx.set_extension_data(data);
-
                                 ctx.upstream.request =
                                     Some(Request::from_parts(parts, hyper::Body::from(body)));
                                 Ok(ctx)

@@ -1,4 +1,4 @@
-use crate::instance::KatalystState;
+use crate::instance::Instance;
 use std::net::AddrParseError;
 use std::sync;
 use std::sync::Arc;
@@ -17,14 +17,14 @@ pub enum KatalystError {
     FeatureUnavailable,
 }
 
-impl From<sync::PoisonError<sync::RwLockWriteGuard<'_, Arc<KatalystState>>>> for KatalystError {
-    fn from(_: sync::PoisonError<sync::RwLockWriteGuard<Arc<KatalystState>>>) -> Self {
+impl From<sync::PoisonError<sync::RwLockWriteGuard<'_, Arc<Instance>>>> for KatalystError {
+    fn from(_: sync::PoisonError<sync::RwLockWriteGuard<Arc<Instance>>>) -> Self {
         KatalystError::StateUpdateFailure
     }
 }
 
-impl From<sync::PoisonError<sync::RwLockReadGuard<'_, Arc<KatalystState>>>> for KatalystError {
-    fn from(_: sync::PoisonError<sync::RwLockReadGuard<Arc<KatalystState>>>) -> Self {
+impl From<sync::PoisonError<sync::RwLockReadGuard<'_, Arc<Instance>>>> for KatalystError {
+    fn from(_: sync::PoisonError<sync::RwLockReadGuard<Arc<Instance>>>) -> Self {
         KatalystError::StateUnavailable
     }
 }

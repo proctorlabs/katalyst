@@ -52,7 +52,7 @@ pub struct FileServerDispatcher {
 
 impl ModuleDispatch for FileServerDispatcher {
     fn dispatch(&self, ctx: Context) -> ModuleResult {
-        let path = try_fut!(self.selector.render(&ctx));
+        let path = try_fut!(ctx, self.selector.render(&ctx));
         let mut full_path = PathBuf::from(&self.root_path);
         full_path.push(&path);
         send_file(ctx, full_path)
@@ -82,8 +82,8 @@ fn send_file(mut ctx: Context, file: PathBuf) -> ModuleResult {
             let hdr_val = HeaderValue::from_str(mime).unwrap();
             hdrs.append("Content-Type", hdr_val);
             ctx.upstream.response = Some(r);
-            ok::<Context, RequestFailure>(ctx)
+            ok(ctx)
         }
-        Err(_) => err::<Context, RequestFailure>(RequestFailure::NotFound),
+        Err(_) => err(ctx.fail(RequestFailure::NotFound)),
     }))
 }

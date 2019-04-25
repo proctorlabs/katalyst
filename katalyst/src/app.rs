@@ -1,6 +1,6 @@
 use crate::balancer;
 use crate::config::parsers;
-use crate::instance::KatalystState;
+use crate::instance::Instance;
 use crate::locator::{Locatable, Locator};
 use crate::modules::Modules;
 use crate::prelude::*;
@@ -18,7 +18,7 @@ use tokio::runtime::Runtime;
 /// The Katalyst Engine
 #[derive(Debug)]
 pub struct KatalystEngine {
-    state: RwLock<Arc<KatalystState>>,
+    state: RwLock<Arc<Instance>>,
     locator: Locator,
     pub rt: RwLock<Runtime>,
 }
@@ -50,7 +50,7 @@ impl Default for KatalystEngine {
 
 impl KatalystEngine {
     /// Update the running configuration of the API Gateway.
-    pub fn update_state(&self, new_state: KatalystState) -> Result<(), KatalystError> {
+    pub fn update_state(&self, new_state: Instance) -> Result<(), KatalystError> {
         let mut state = self.state.write()?;
         *state = Arc::new(new_state);
         Ok(())
@@ -64,7 +64,7 @@ impl KatalystEngine {
     }
 
     /// Get a copy of the currently running API Gateway configuration.
-    pub fn get_state(&self) -> Result<Arc<KatalystState>, KatalystError> {
+    pub fn get_state(&self) -> Result<Arc<Instance>, KatalystError> {
         let state = self.state.read()?;
         Ok(state.clone())
     }
