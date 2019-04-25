@@ -4,6 +4,7 @@
 - [x] YAML/JSON Configuration
     - [ ] Load from multiple configuration files
     - [ ] Global configuration options
+- [ ] Builder style configuration syntax
 - [x] To downstream URL: Headers, Remote IP
 - [x] Reverse proxy features
     - [x] Proxy forwarding headers (X-Forward-For, etc.)
@@ -35,13 +36,16 @@
     - [x] Authorization modules
     - [x] Plugin modules
     - [x] Handler modules
+    - [ ] Caching modules
 - [ ] Authentication modules: Login, Basic, HTTP
 - [ ] Authorization modules: Claim verifier
 - [ ] Load Python modules
 - [ ] Register signals from OS *(Appliance)*
 - [ ] Server TLS termination *(Note: You can use a reverse proxy to accomplish this for the time being)*
 - [ ] Health checks
-- [ ] Caching modules: In-Memory, Redis
+- [ ] Caching module: In-Memory
+- [ ] Caching module: Redis
+- [ ] Caching module: Disk
 - [ ] INotify for config file changes
 - [x] Customizable pipeline for request processing
 - [x] Support for custom bindings
