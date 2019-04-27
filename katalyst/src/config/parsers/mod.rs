@@ -9,11 +9,10 @@ pub fn parse_file(file_path: &str) -> Result<KatalystBuilder, ConfigurationFailu
     let path = Path::new(file_path);
     let contents = load_file(path)?;
 
-    match path.extension().and_then(OsStr::to_str) {
-        Some("yml") | Some("yaml") => Ok(serde_yaml::from_str(&contents)?),
-        Some("json") | Some("js") => Ok(serde_json::from_str(&contents)?),
-        _ => Ok(serde_yaml::from_str(&contents)?),
-    }
+    Ok(Parser::from_str(
+        &contents,
+        Format::ext(path.extension().and_then(OsStr::to_str)),
+    )?)
 }
 
 fn load_file(path: &Path) -> Result<String, ConfigurationFailure> {

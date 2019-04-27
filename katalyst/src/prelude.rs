@@ -7,6 +7,7 @@ pub use crate::error::*;
 pub use crate::expression::*;
 pub use crate::locator::Locatable;
 pub use crate::modules::*;
+pub(crate) use crate::parser::*;
 pub(crate) use crate::*;
 #[allow(unused_imports)]
 pub(crate) use failure::ResultExt;

@@ -7,7 +7,7 @@ use std::marker::PhantomData;
 use std::string::String;
 use std::sync::Arc;
 
-#[derive(Clone, Debug, Serialize, Deserialize, Default)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct ModuleBuilder<T: TypeId> {
     #[serde(skip)]
@@ -15,7 +15,17 @@ pub struct ModuleBuilder<T: TypeId> {
     #[serde(rename = "type")]
     pub module: String,
     #[serde(flatten)]
-    pub config: serde_json::Value,
+    pub config: serde_value::Value,
+}
+
+impl<T: TypeId> Default for ModuleBuilder<T> {
+    fn default() -> Self {
+        ModuleBuilder {
+            __module_type: PhantomData::default(),
+            module: String::default(),
+            config: serde_value::Value::Unit,
+        }
+    }
 }
 
 impl<T> ModuleBuilder<T>

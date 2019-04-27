@@ -42,6 +42,7 @@ mod pipeline;
 pub mod prelude;
 #[macro_use]
 pub mod macros;
+pub(crate) mod parser;
 mod service;
 
 pub use app::Katalyst;

@@ -52,12 +52,12 @@ routes:
     methods:
       - post
     plugins:
-      - type: json
+      - type: parse-content
     handler:
       type: host
       host: httpbin
       headers:
-        Capped: '{{ json.value("body") }}'
+        Capped: '{{ de.val("body") }}'
       path: "/post"
 
   - path:

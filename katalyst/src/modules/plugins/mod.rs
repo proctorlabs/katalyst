@@ -1,3 +1,3 @@
-mod json_plugin;
+mod content_plugin;
 
-pub use json_plugin::JsonPlugin;
+pub use content_plugin::ContentPlugin;
