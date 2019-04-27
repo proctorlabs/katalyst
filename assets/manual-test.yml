@@ -57,7 +57,7 @@ routes:
       type: host
       host: httpbin
       headers:
-        Capped: '{{ de.val("body") }}'
+        Capped: '{{ content.val("body") }}'
       path: "/post"
 
   - path:
