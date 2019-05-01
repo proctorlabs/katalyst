@@ -15,7 +15,7 @@ pub struct ModuleBuilder<T: TypeId> {
     #[serde(rename = "type")]
     pub module: String,
     #[serde(flatten)]
-    pub config: serde_value::Value,
+    pub config: unstructured::Document,
 }
 
 impl<T: TypeId> Default for ModuleBuilder<T> {
@@ -23,7 +23,7 @@ impl<T: TypeId> Default for ModuleBuilder<T> {
         ModuleBuilder {
             __module_type: PhantomData::default(),
             module: String::default(),
-            config: serde_value::Value::Unit,
+            config: unstructured::Document::Unit,
         }
     }
 }

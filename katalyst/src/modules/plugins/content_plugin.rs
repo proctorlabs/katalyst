@@ -4,7 +4,7 @@ use crate::prelude::*;
 use futures::future::*;
 use futures::stream::Stream;
 use hyper::Request;
-use serde_value::Value;
+use unstructured::Document;
 
 #[derive(Debug)]
 pub struct ContentPlugin {}
@@ -48,7 +48,7 @@ impl ModuleDispatch for ContentPlugin {
             _ => Box::new(
                 body.concat2()
                     .and_then(|body| {
-                        let data = Parser::from_slice::<Value>(&body, format);
+                        let data = Parser::from_slice::<Document>(&body, format);
                         Ok((data, body))
                     })
                     .then(|res| match res {

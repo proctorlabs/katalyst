@@ -72,7 +72,7 @@ pub trait ModuleDispatch: Send + Sync + Debug {
 }
 
 pub struct ModuleConfigLoader {
-    pub(crate) raw: serde_value::Value,
+    pub(crate) raw: unstructured::Document,
 }
 
 impl ModuleConfigLoader {
@@ -80,7 +80,7 @@ impl ModuleConfigLoader {
     where
         T: for<'de> serde::Deserialize<'de>,
     {
-        let c: T = self.raw.clone().deserialize_into().map_err(|e| {
+        let c: T = self.raw.clone().try_into().map_err(|e| {
             ConfigurationFailure::ConfigNotParseable(format!(
                 "Could not parse module configuration: {}",
                 e
