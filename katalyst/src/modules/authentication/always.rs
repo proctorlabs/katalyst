@@ -1,4 +1,4 @@
-use crate::app::KatalystEngine;
+use crate::app::Katalyst;
 use crate::context::*;
 use crate::modules::*;
 use crate::prelude::*;
@@ -18,7 +18,7 @@ impl Module for AlwaysAuthenticatorBuilder {
 
     fn build(
         &self,
-        _: Arc<KatalystEngine>,
+        _: Arc<Katalyst>,
         _: &ModuleConfigLoader,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
         Ok(Arc::new(AlwaysAuthenticator {}))

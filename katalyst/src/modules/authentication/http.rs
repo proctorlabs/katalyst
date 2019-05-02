@@ -1,5 +1,4 @@
-use crate::app::HttpsClient;
-use crate::app::KatalystEngine;
+use crate::app::Katalyst;
 use crate::context::*;
 use crate::modules::*;
 use crate::prelude::*;
@@ -30,7 +29,7 @@ impl Module for HttpAuthenticatorBuilder {
 
     fn build(
         &self,
-        _: Arc<KatalystEngine>,
+        _: Arc<Katalyst>,
         config: &ModuleConfigLoader,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
         let c: HttpConfig = config.load()?;
@@ -45,7 +44,7 @@ pub struct HttpAuthenticator {
 
 impl ModuleDispatch for HttpAuthenticator {
     fn dispatch(&self, mut ctx: Context) -> ModuleResult {
-        let client: Arc<HttpsClient> = ctx.engine.locate().unwrap();
+        let client = ctx.engine.get_client();
         let mut request = Request::builder();
         request.uri(&self.url.to_string());
         let res = client.request(request.body(Body::empty()).unwrap());

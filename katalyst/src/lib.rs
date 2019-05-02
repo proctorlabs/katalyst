@@ -36,14 +36,11 @@ pub mod context;
 pub mod error;
 pub mod expression;
 mod instance;
-mod locator;
 pub mod modules;
 mod pipeline;
 pub mod prelude;
 #[macro_use]
 pub mod macros;
 pub(crate) mod parser;
-mod service;
 
 pub use app::Katalyst;
-pub use app::KatalystEngine;

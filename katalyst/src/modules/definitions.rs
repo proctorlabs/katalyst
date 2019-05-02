@@ -1,4 +1,4 @@
-use crate::app::KatalystEngine;
+use crate::app::Katalyst;
 use crate::prelude::*;
 use futures::Future;
 use std::fmt::Debug;
@@ -97,7 +97,7 @@ pub trait Module: Send + Sync + Debug {
 
     fn build(
         &self,
-        engine: Arc<KatalystEngine>,
+        engine: Arc<Katalyst>,
         config: &ModuleConfigLoader,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure>;
 }

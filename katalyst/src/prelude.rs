@@ -1,11 +1,10 @@
 use std::any::Any;
 use std::sync::Arc;
 
-pub use crate::app::KatalystEngine;
+pub use crate::app::Katalyst;
 pub use crate::context::Context;
 pub use crate::error::*;
 pub use crate::expression::*;
-pub use crate::locator::Locatable;
 pub use crate::modules::*;
 pub(crate) use crate::parser::*;
 pub(crate) use crate::*;

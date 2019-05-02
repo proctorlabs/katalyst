@@ -1,5 +1,5 @@
 use super::*;
-use crate::app::KatalystEngine;
+use crate::app::Katalyst;
 use crate::error::ConfigurationFailure;
 use crate::modules::*;
 use serde::{Deserialize, Serialize};
@@ -41,16 +41,12 @@ impl<T> Builder<Arc<ModuleDispatch>> for ModuleBuilder<T>
 where
     T: TypeId,
 {
-    fn build(
-        &self,
-        engine: Arc<KatalystEngine>,
-    ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
-        let modules: Arc<Modules> = engine.locate()?;
+    fn build(&self, engine: Arc<Katalyst>) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
         let loader = ModuleConfigLoader {
             raw: self.config.clone(),
         };
-        Ok(modules
-            .get(&self.module, self.module_type())?
+        Ok(engine
+            .get_module(&self.module, self.module_type())?
             .build(engine, &loader)?)
     }
 }

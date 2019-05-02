@@ -1,6 +1,6 @@
 mod data;
 
-use crate::app::KatalystEngine;
+use crate::app::Katalyst;
 use crate::instance::Route;
 use crate::prelude::*;
 use data::ContextData;
@@ -61,7 +61,7 @@ pub struct Context {
     pub downstream: RequestResponse,
     pub detail: Detail,
     pub timestamps: Timestamps,
-    pub engine: Arc<KatalystEngine>,
+    pub engine: Arc<Katalyst>,
     data: ContextData,
 }
 
@@ -102,11 +102,7 @@ impl Context {
         self.data.set(data)
     }
 
-    pub fn new(
-        request: Request<Body>,
-        engine: Arc<KatalystEngine>,
-        remote_addr: SocketAddr,
-    ) -> Self {
+    pub fn new(request: Request<Body>, engine: Arc<Katalyst>, remote_addr: SocketAddr) -> Self {
         let uri = request.uri();
         let path = format!(
             "{scheme}://{host}{path}",

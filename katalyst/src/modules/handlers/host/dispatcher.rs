@@ -1,9 +1,7 @@
 use super::*;
-use crate::app::HttpsClient;
 use crate::prelude::*;
 use futures::future::*;
 use futures::Future;
-use std::sync::Arc;
 
 impl HostDispatcher {
     pub fn prepare(&self, mut ctx: Context) -> ModuleResultSync {
@@ -42,12 +40,7 @@ impl HostDispatcher {
                 return err!(ctx, RequestFailure::Internal);
             }
         };
-        let client: Arc<HttpsClient> = match ctx.engine.locate() {
-            Ok(c) => c,
-            Err(_) => {
-                return err!(ctx, RequestFailure::Internal);
-            }
-        };
+        let client = ctx.engine.get_client();
         let res = client.request(dsr);
         Box::new(res.then(|response| match response {
             Ok(r) => {

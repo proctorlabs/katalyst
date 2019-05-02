@@ -1,5 +1,5 @@
 use super::*;
-use crate::app::KatalystEngine;
+use crate::app::Katalyst;
 use crate::instance::Listener;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -11,7 +11,7 @@ pub struct ListenerBuilder {
 }
 
 impl Builder<Listener> for ListenerBuilder {
-    fn build(&self, _: Arc<KatalystEngine>) -> Result<Listener, ConfigurationFailure> {
+    fn build(&self, _: Arc<Katalyst>) -> Result<Listener, ConfigurationFailure> {
         Ok(Listener {
             interface: self.interface.to_owned(),
         })

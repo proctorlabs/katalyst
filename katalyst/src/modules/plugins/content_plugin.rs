@@ -1,4 +1,4 @@
-use crate::app::KatalystEngine;
+use crate::app::Katalyst;
 use crate::modules::*;
 use crate::prelude::*;
 use futures::future::*;
@@ -20,7 +20,7 @@ impl Module for ContentPlugin {
 
     fn build(
         &self,
-        _: Arc<KatalystEngine>,
+        _: Arc<Katalyst>,
         _: &ModuleConfigLoader,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
         Ok(Arc::new(ContentPlugin {}))

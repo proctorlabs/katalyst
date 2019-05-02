@@ -1,4 +1,4 @@
-use crate::app::KatalystEngine;
+use crate::app::Katalyst;
 use crate::context::*;
 use crate::modules::*;
 use crate::prelude::*;
@@ -25,7 +25,7 @@ impl Module for WhitelistBuilder {
 
     fn build(
         &self,
-        _: Arc<KatalystEngine>,
+        _: Arc<Katalyst>,
         config: &ModuleConfigLoader,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
         let c: WhitelistConfig = config.load()?;

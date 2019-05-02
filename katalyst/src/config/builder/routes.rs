@@ -1,5 +1,5 @@
 use super::*;
-use crate::app::KatalystEngine;
+use crate::app::Katalyst;
 use crate::instance::Route;
 use crate::modules::*;
 use http::Method;
@@ -26,7 +26,7 @@ pub struct RouteBuilder {
 }
 
 impl Builder<Route> for RouteBuilder {
-    fn build(&self, engine: Arc<KatalystEngine>) -> Result<Route, ConfigurationFailure> {
+    fn build(&self, engine: Arc<Katalyst>) -> Result<Route, ConfigurationFailure> {
         let routebuilders: &Option<Vec<RouteBuilder>> = &self.children;
         let routes = match routebuilders {
             Some(b) => {

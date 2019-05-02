@@ -1,6 +1,5 @@
 #![allow(clippy::implicit_hasher)]
 use super::*;
-use crate::balancer::BalancerDirectory;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::string::String;
@@ -19,11 +18,8 @@ fn default_balancer() -> String {
 }
 
 impl Builder<HashMap<String, Hosts>> for HashMap<String, HostsBuilder> {
-    fn build(
-        &self,
-        engine: Arc<KatalystEngine>,
-    ) -> Result<HashMap<String, Hosts>, ConfigurationFailure> {
-        let balancers = engine.locate::<BalancerDirectory>()?;
+    fn build(&self, engine: Arc<Katalyst>) -> Result<HashMap<String, Hosts>, ConfigurationFailure> {
+        let balancers = engine.get_balancers();
         Ok(self
             .iter()
             .map(|v| {

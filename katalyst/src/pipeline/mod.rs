@@ -4,7 +4,7 @@ mod logger;
 mod mapper;
 mod matcher;
 
-use crate::app::KatalystEngine;
+use crate::app::Katalyst;
 use crate::prelude::*;
 use futures::Future;
 use hyper::{Body, Request};
@@ -17,7 +17,7 @@ pub(crate) use mapper::HyperResult;
 pub(crate) fn run(
     remote_addr: SocketAddr,
     request: Request<Body>,
-    engine: Arc<KatalystEngine>,
+    engine: Arc<Katalyst>,
 ) -> HyperResult {
     Box::new(
         ok!(Context::new(request, engine, remote_addr))

@@ -11,11 +11,6 @@ CARGO_MAKE_WORKSPACE_SKIP_MEMBERS = "katalyst_macros"
 
 [tasks.test]
 
-[tasks.setup]
-description = "Setup local development environment"
-command = "./util/scripts/setup.sh"
-workspace = false
-
 [tasks.readme]
 description = "Regenerate the README.md from the doc notes in lib.rs"
 install_crate = "cargo-readme"

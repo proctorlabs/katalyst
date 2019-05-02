@@ -2,7 +2,7 @@ mod dispatcher;
 mod transformers;
 mod util;
 
-use crate::app::KatalystEngine;
+use crate::app::Katalyst;
 use crate::expression::*;
 use crate::modules::*;
 use crate::prelude::*;
@@ -54,11 +54,11 @@ impl Module for HostModule {
 
     fn build(
         &self,
-        engine: Arc<KatalystEngine>,
+        engine: Arc<Katalyst>,
         config: &ModuleConfigLoader,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
         let c: HostConfig = config.load()?;
-        let providers = engine.locate::<Compiler>()?;
+        let providers = engine.get_compiler();
         let method = match c.method {
             Some(m) => Some(Method::from_bytes(m.to_uppercase().as_bytes())?),
             None => None,

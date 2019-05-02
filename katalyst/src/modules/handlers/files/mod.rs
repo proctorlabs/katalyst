@@ -1,4 +1,4 @@
-use crate::app::KatalystEngine;
+use crate::app::Katalyst;
 use crate::expression::*;
 use crate::modules::*;
 use crate::prelude::*;
@@ -31,15 +31,13 @@ impl Module for FileServerModule {
 
     fn build(
         &self,
-        engine: Arc<KatalystEngine>,
+        engine: Arc<Katalyst>,
         config: &ModuleConfigLoader,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
         let c: FileServerConfig = config.load()?;
         Ok(Arc::new(FileServerDispatcher {
             root_path: c.root_path,
-            selector: engine
-                .locate::<Compiler>()?
-                .compile_template(Some(&c.selector))?,
+            selector: engine.get_compiler().compile_template(Some(&c.selector))?,
         }))
     }
 }
