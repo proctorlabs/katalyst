@@ -1,3 +1,7 @@
+/*!
+Katalyst error types
+*/
+
 mod config;
 mod internal;
 mod request;

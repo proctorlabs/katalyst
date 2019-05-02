@@ -5,7 +5,9 @@ pub fn matcher(mut ctx: Context) -> ModuleResultSync {
     let request = try_req!(ctx, ctx.upstream.request());
     let config = try_req!(
         ctx,
-        ctx.engine.get_state().map_err(|_| RequestFailure::Internal)
+        ctx.engine
+            .get_instance()
+            .map_err(|_| RequestFailure::Internal)
     );
     for route in config.routes.iter() {
         let method_match = match &route.methods {

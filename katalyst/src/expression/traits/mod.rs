@@ -1,12 +1,14 @@
 use crate::prelude::*;
 use std::fmt::Debug;
 use std::sync::Arc;
+use unstructured::Document;
 
 lazy_static! {
     static ref DEF_STRING: String = String::default();
 }
 
-pub type ExpressionResult = Result<String, RequestFailure>;
+pub type RenderResult = Result<String, RequestFailure>;
+pub type ExpressionResult = Result<Document, RequestFailure>;
 pub type ExpressionArg = Arc<CompiledExpression>;
 pub type ExpressionRenderMethod =
     Arc<Fn(&Context, &[ExpressionArg]) -> ExpressionResult + Send + Sync>;
@@ -30,8 +32,14 @@ pub trait ExpressionBinding: Send + Sync {
     ) -> Result<ExpressionRenderMethod, ConfigurationFailure>;
 }
 
-/// This provides the actual value replacement used in the downstream URL template
+/// This is the trait that must be implemented by any expression that can be compiled from config
 pub trait CompiledExpression: Send + Sync + Debug {
-    /// Returns the string value that should be used as a replacement for this Placeholder in the pipeline context
-    fn render(&self, ctx: &Context) -> ExpressionResult;
+    /// Render processes the compiled expression and returns a string rendering of the contents regardless of underlying types
+    fn render(&self, ctx: &Context) -> RenderResult;
+
+    /// Get the direct result of evaluating the expression
+    fn result(&self, ctx: &Context) -> ExpressionResult;
+
+    /// Return a document shell indicating the type
+    fn result_type(&self) -> Document;
 }

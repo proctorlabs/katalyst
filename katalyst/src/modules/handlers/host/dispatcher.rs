@@ -7,7 +7,9 @@ impl HostDispatcher {
     pub fn prepare(&self, mut ctx: Context) -> ModuleResultSync {
         let config = try_req!(
             ctx,
-            ctx.engine.get_state().map_err(|_| RequestFailure::Internal)
+            ctx.engine
+                .get_instance()
+                .map_err(|_| RequestFailure::Internal)
         );
 
         let balancer_lease = match config.hosts.get(&self.host) {

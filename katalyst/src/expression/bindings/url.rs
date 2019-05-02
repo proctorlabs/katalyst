@@ -9,7 +9,7 @@ binding! {
             result.push_str(r"(?P<");
             result.push_str(&args[0].render(ctx)?);
             result.push_str(r">[^/]+)");
-            Ok(result)
+            Ok(result.into())
         };
 
         #[args(count=1)]
@@ -18,7 +18,7 @@ binding! {
             result.push_str(r"(?P<");
             result.push_str(&args[0].render(ctx)?);
             result.push_str(r">.*)");
-            Ok(result)
+            Ok(result.into())
         };
     }
 }

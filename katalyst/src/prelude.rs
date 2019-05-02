@@ -1,3 +1,7 @@
+/*!
+This module provides a "prelude" useful for extending Katalyst functionality
+*/
+
 use std::any::Any;
 use std::sync::Arc;
 

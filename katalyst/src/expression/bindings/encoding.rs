@@ -7,7 +7,7 @@ binding! {
     Encode {
         fn base64(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
             let to_encode = args[0].render(ctx)?;
-            Ok(encode(&to_encode))
+            Ok(encode(&to_encode).into())
         };
     }
 }
@@ -20,7 +20,7 @@ binding! {
                 .map_err(|_|RequestFailure::Internal)?
                     .as_slice())
                 .map_err(|_|RequestFailure::Internal)?
-                    .to_string())
+                    .to_string().into())
         };
     }
 }

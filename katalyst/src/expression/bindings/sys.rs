@@ -9,7 +9,7 @@ binding! {
                 .ok_or_else(|| RequestFailure::Internal)?
                 .to_str()
                 .ok_or_else(|| RequestFailure::Internal)?
-                .to_owned())
+                .into())
         };
     }
 }

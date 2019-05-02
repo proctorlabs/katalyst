@@ -6,7 +6,7 @@ binding! {
         #[args(count=1)]
         fn claim(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
             if let Some(auth_info) = &ctx.detail.authentication {
-                Ok(auth_info.get_claim(args[0].render(&ctx)?))
+                Ok(auth_info.get_claim(args[0].render(&ctx)?).into())
             } else {
                 Err(RequestFailure::Internal)
             }

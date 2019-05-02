@@ -5,7 +5,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 
-pub fn parse_file(file_path: &str) -> Result<KatalystBuilder, ConfigurationFailure> {
+pub(crate) fn parse_file(file_path: &str) -> Result<KatalystBuilder, ConfigurationFailure> {
     let path = Path::new(file_path);
     let contents = load_file(path)?;
 

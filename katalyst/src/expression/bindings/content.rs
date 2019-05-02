@@ -15,7 +15,7 @@ binding! {
                 _ => Err(RequestFailure::Internal)
             }?;
             match res {
-                Document::String(s) => Ok(s.to_owned()),
+                Document::String(s) => Ok(s.to_owned().into()),
                 _ => Err(RequestFailure::Internal)
             }
         };

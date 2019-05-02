@@ -1,3 +1,7 @@
+/*!
+Instance provides details for the current running state of Katalyst.
+*/
+
 mod hosts;
 mod listener;
 mod route;

@@ -17,6 +17,8 @@ Current features include:
 * Flexible templating for value replacement in downstream requests
 */
 
+//#![warn(missing_docs)]
+
 #[macro_use]
 extern crate katalyst_macros;
 
@@ -29,18 +31,19 @@ extern crate lazy_static;
 #[macro_use]
 extern crate failure;
 
+#[macro_use]
+mod macros;
 mod app;
+mod instance;
+pub(crate) mod parser;
+mod pipeline;
+
 pub mod balancer;
 pub mod config;
 pub mod context;
 pub mod error;
 pub mod expression;
-mod instance;
 pub mod modules;
-mod pipeline;
 pub mod prelude;
-#[macro_use]
-pub mod macros;
-pub(crate) mod parser;
 
 pub use app::Katalyst;

@@ -20,8 +20,9 @@ use tokio::runtime::Runtime;
 
 pub type HttpsClient = Client<HttpsConnector<HttpConnector<TokioThreadpoolGaiResolver>>, Body>;
 
+/// This is the core structure for the API Gateway.
 pub struct Katalyst {
-    state: RwLock<Arc<Instance>>,
+    instance: RwLock<Arc<Instance>>,
     client: Arc<HttpsClient>,
     balancers: Arc<balancer::BalancerDirectory>,
     compiler: Arc<Compiler>,
@@ -31,7 +32,7 @@ pub struct Katalyst {
 
 impl std::fmt::Debug for Katalyst {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Katalyst {{ instance: {:?} }}", self.state)
+        write!(f, "Katalyst {{ instance: {:?} }}", self.instance)
     }
 }
 
@@ -45,7 +46,7 @@ impl Default for Katalyst {
             .add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
 
         Katalyst {
-            state: RwLock::default(),
+            instance: RwLock::default(),
             client: Arc::new(builder.build(HttpsConnector::from((http_connector, tls)))),
             balancers: Arc::new(balancer::all()),
             compiler: Arc::new(Compiler::default()),
@@ -69,7 +70,7 @@ impl ArcKatalystImpl for Arc<Katalyst> {
     /// Update the Katalyst instance with the configuration from the specified file.
     fn load(&self, config_file: &str) -> Result<(), KatalystError> {
         let config = parsers::parse_file(config_file)?;
-        self.update_state(config.build(self.clone())?)?;
+        self.update_instance(config.build(self.clone())?)?;
         Ok(())
     }
 
@@ -83,7 +84,7 @@ impl ArcKatalystImpl for Arc<Katalyst> {
 
     fn run_service(&mut self) -> Result<(), KatalystError> {
         let engine = self.clone();
-        let addr: SocketAddr = self.get_state()?.listener.interface.parse()?;
+        let addr: SocketAddr = self.get_instance()?.listener.interface.parse()?;
         let server = Server::bind(&addr)
             .serve(make_service_fn(move |conn: &AddrStream| {
                 let engine = engine.clone();
@@ -101,31 +102,39 @@ impl ArcKatalystImpl for Arc<Katalyst> {
 
 impl Katalyst {
     /// Update the running configuration of the API Gateway.
-    pub fn update_state(&self, new_state: Instance) -> Result<(), KatalystError> {
-        let mut state = self.state.write()?;
-        *state = Arc::new(new_state);
+    pub fn update_instance(&self, new_instance: Instance) -> Result<(), KatalystError> {
+        let mut instance = self.instance.write()?;
+        *instance = Arc::new(new_instance);
         Ok(())
     }
 
-    pub fn get_balancers(&self) -> Arc<balancer::BalancerDirectory> {
+    /// Get a copy of the currently running API Gateway configuration.
+    pub fn get_instance(&self) -> Result<Arc<Instance>, KatalystError> {
+        let instance = self.instance.read()?;
+        Ok(instance.clone())
+    }
+
+    #[inline]
+    pub(crate) fn get_balancers(&self) -> Arc<balancer::BalancerDirectory> {
         self.balancers.clone()
     }
 
-    pub fn get_client(&self) -> Arc<HttpsClient> {
+    #[inline]
+    pub(crate) fn get_client(&self) -> Arc<HttpsClient> {
         self.client.clone()
     }
 
-    pub fn get_compiler(&self) -> Arc<Compiler> {
+    #[inline]
+    pub(crate) fn get_compiler(&self) -> Arc<Compiler> {
         self.compiler.clone()
     }
 
-    /// Get a copy of the currently running API Gateway configuration.
-    pub fn get_state(&self) -> Result<Arc<Instance>, KatalystError> {
-        let state = self.state.read()?;
-        Ok(state.clone())
-    }
-
-    pub fn get_module(&self, name: &str, module_type: &str) -> Result<Arc<Module>, KatalystError> {
+    #[inline]
+    pub(crate) fn get_module(
+        &self,
+        name: &str,
+        module_type: &str,
+    ) -> Result<Arc<Module>, KatalystError> {
         self.modules.get(name, module_type)
     }
 
