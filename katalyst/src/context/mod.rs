@@ -65,11 +65,6 @@ pub struct Context {
     data: ContextData,
 }
 
-#[derive(Debug)]
-pub struct ContextLock {
-    pub detail: Detail,
-}
-
 impl Default for Context {
     fn default() -> Self {
         Context {
@@ -130,12 +125,6 @@ impl Context {
             },
             engine,
             data: ContextData::default(),
-        }
-    }
-
-    pub fn lock(self) -> ContextLock {
-        ContextLock {
-            detail: self.detail,
         }
     }
 }

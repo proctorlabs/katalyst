@@ -3,7 +3,6 @@ use std::net::AddrParseError;
 use std::sync;
 use std::sync::Arc;
 
-// TODO: Doc
 /// KatalystError
 #[derive(Debug, Fail)]
 pub enum KatalystError {

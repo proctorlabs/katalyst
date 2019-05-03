@@ -1,7 +1,7 @@
 use failure::Context;
 use http::StatusCode;
 
-/// KatalystError
+/// RequestFailure
 #[derive(Debug, Fail)]
 pub enum RequestFailure {
     #[fail(display = "Not Found")]
