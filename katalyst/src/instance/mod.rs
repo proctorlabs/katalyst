@@ -3,12 +3,12 @@ Instance provides details for the current running state of Katalyst.
 */
 
 mod hosts;
-mod listener;
 mod route;
+mod service;
 
 pub use hosts::Hosts;
-pub use listener::Listener;
 pub use route::Route;
+pub use service::Service;
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -16,5 +16,5 @@ use std::sync::Arc;
 pub struct Instance {
     pub hosts: HashMap<String, Hosts>,
     pub routes: Vec<Arc<Route>>,
-    pub listener: Listener,
+    pub service: Service,
 }

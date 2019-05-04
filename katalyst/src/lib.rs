@@ -39,7 +39,6 @@ pub(crate) mod parser;
 mod pipeline;
 
 pub mod balancer;
-pub mod cache;
 pub mod config;
 pub mod context;
 pub mod error;

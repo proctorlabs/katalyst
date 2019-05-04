@@ -5,7 +5,6 @@ mod util;
 use crate::app::Katalyst;
 use crate::expression::*;
 use crate::modules::*;
-use crate::prelude::*;
 use futures::future::*;
 use futures::Future;
 use http::Method;
@@ -48,16 +47,19 @@ impl Module for HostModule {
         "host"
     }
 
-    fn module_type(&self) -> ModuleType {
-        ModuleType::RequestHandler
+    fn supported_hooks(&self) -> Vec<ModuleType> {
+        vec![ModuleType::RequestHandler]
     }
 
-    fn build(
+    fn build_hook(
         &self,
+        _: ModuleType,
         engine: Arc<Katalyst>,
-        config: &ModuleConfigLoader,
+        config: &unstructured::Document,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
-        let c: HostConfig = config.load()?;
+        let c: HostConfig = config.clone().try_into().map_err(|_| {
+            ConfigurationFailure::ConfigNotParseable("Host module configuration failed".into())
+        })?;
         let providers = engine.get_compiler();
         let method = match c.method {
             Some(m) => Some(Method::from_bytes(m.to_uppercase().as_bytes())?),

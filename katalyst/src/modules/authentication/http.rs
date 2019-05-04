@@ -1,7 +1,6 @@
 use crate::app::Katalyst;
 use crate::context::*;
 use crate::modules::*;
-use crate::prelude::*;
 use futures::future::*;
 use futures::stream::Stream;
 use futures::Future;
@@ -23,16 +22,19 @@ impl Module for HttpAuthenticatorBuilder {
         "http"
     }
 
-    fn module_type(&self) -> ModuleType {
-        ModuleType::Authenticator
+    fn supported_hooks(&self) -> Vec<ModuleType> {
+        vec![ModuleType::Authenticator]
     }
 
-    fn build(
+    fn build_hook(
         &self,
+        _: ModuleType,
         _: Arc<Katalyst>,
-        config: &ModuleConfigLoader,
+        config: &unstructured::Document,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
-        let c: HttpConfig = config.load()?;
+        let c: HttpConfig = config.clone().try_into().map_err(|_| {
+            ConfigurationFailure::ConfigNotParseable("Host module configuration failed".into())
+        })?;
         Ok(Arc::new(HttpAuthenticator { url: c.url }))
     }
 }

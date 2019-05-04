@@ -1,6 +1,5 @@
 use crate::app::Katalyst;
 use crate::modules::*;
-use crate::prelude::*;
 use futures::future::*;
 use futures::stream::Stream;
 use hyper::Request;
@@ -14,14 +13,15 @@ impl Module for ContentPlugin {
         "parse-content"
     }
 
-    fn module_type(&self) -> ModuleType {
-        ModuleType::Plugin
+    fn supported_hooks(&self) -> Vec<ModuleType> {
+        vec![ModuleType::Plugin]
     }
 
-    fn build(
+    fn build_hook(
         &self,
+        _: ModuleType,
         _: Arc<Katalyst>,
-        _: &ModuleConfigLoader,
+        _: &unstructured::Document,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
         Ok(Arc::new(ContentPlugin {}))
     }

@@ -9,16 +9,16 @@ use std::sync::Arc;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct ModuleBuilder<T: TypeId> {
+pub struct ModuleBuilder<T: PhantomModuleData> {
     #[serde(skip)]
-    pub __module_type: PhantomData<T>,
+    __module_type: PhantomData<T>,
     #[serde(rename = "type")]
     pub module: String,
     #[serde(flatten)]
     pub config: unstructured::Document,
 }
 
-impl<T: TypeId> Default for ModuleBuilder<T> {
+impl<T: PhantomModuleData> Default for ModuleBuilder<T> {
     fn default() -> Self {
         ModuleBuilder {
             __module_type: PhantomData::default(),
@@ -30,23 +30,24 @@ impl<T: TypeId> Default for ModuleBuilder<T> {
 
 impl<T> ModuleBuilder<T>
 where
-    T: TypeId,
+    T: PhantomModuleData,
 {
-    pub fn module_type(&self) -> &'static str {
-        T::KEY
+    pub fn module_type(&self) -> ModuleType {
+        T::MODULE_TYPE
     }
 }
 
 impl<T> Builder<Arc<ModuleDispatch>> for ModuleBuilder<T>
 where
-    T: TypeId,
+    T: PhantomModuleData,
 {
     fn build(&self, engine: Arc<Katalyst>) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
-        let loader = ModuleConfigLoader {
-            raw: self.config.clone(),
-        };
+        let module = engine.get_module(&self.module)?;
+        if !module.supported_hooks().contains(&self.module_type()) {
+            return Err(ConfigurationFailure::InvalidResource);
+        }
         Ok(engine
-            .get_module(&self.module, self.module_type())?
-            .build(engine, &loader)?)
+            .get_module(&self.module)?
+            .build_hook(self.module_type(), engine, &self.config)?)
     }
 }

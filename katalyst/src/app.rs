@@ -84,7 +84,7 @@ impl ArcKatalystImpl for Arc<Katalyst> {
 
     fn run_service(&mut self) -> Result<(), KatalystError> {
         let engine = self.clone();
-        let addr: SocketAddr = self.get_instance()?.listener.interface.parse()?;
+        let addr: SocketAddr = self.get_instance()?.service.interface;
         let server = Server::bind(&addr)
             .serve(make_service_fn(move |conn: &AddrStream| {
                 let engine = engine.clone();
@@ -130,12 +130,8 @@ impl Katalyst {
     }
 
     #[inline]
-    pub(crate) fn get_module(
-        &self,
-        name: &str,
-        module_type: &str,
-    ) -> Result<Arc<Module>, KatalystError> {
-        self.modules.get(name, module_type)
+    pub(crate) fn get_module(&self, name: &str) -> Result<Arc<Module>, KatalystError> {
+        self.modules.get(name)
     }
 
     pub fn spawn<F: Future<Item = (), Error = ()> + Send + 'static>(

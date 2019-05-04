@@ -1,4 +1,4 @@
-listener:
+service:
   interface: "0.0.0.0:8000"
 
 hosts:

@@ -1,15 +1,15 @@
 mod hosts;
-mod listener;
 mod module;
 mod path;
 mod routes;
+mod service;
 
 pub use crate::instance::*;
 pub use hosts::HostsBuilder;
-pub use listener::ListenerBuilder;
 pub use module::ModuleBuilder;
 pub use path::PathBuilder;
 pub use routes::RouteBuilder;
+pub use service::ServiceBuilder;
 
 use crate::app::Katalyst;
 use crate::error::ConfigurationFailure;
@@ -26,7 +26,7 @@ pub trait Builder<T> {
 pub struct KatalystBuilder {
     hosts: HashMap<String, HostsBuilder>,
     routes: Vec<RouteBuilder>,
-    listener: ListenerBuilder,
+    service: ServiceBuilder,
 }
 
 impl KatalystBuilder {
@@ -41,7 +41,7 @@ impl KatalystBuilder {
         Ok(Instance {
             hosts: self.hosts.build(engine.clone())?,
             routes: all_routes,
-            listener: self.listener.build(engine.clone())?,
+            service: self.service.build(engine.clone())?,
         })
     }
 }

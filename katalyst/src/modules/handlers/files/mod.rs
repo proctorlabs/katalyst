@@ -1,7 +1,6 @@
 use crate::app::Katalyst;
 use crate::expression::*;
 use crate::modules::*;
-use crate::prelude::*;
 use crate::*;
 use futures::future::*;
 use http::header::HeaderValue;
@@ -25,16 +24,19 @@ impl Module for FileServerModule {
         "file_server"
     }
 
-    fn module_type(&self) -> ModuleType {
-        ModuleType::RequestHandler
+    fn supported_hooks(&self) -> Vec<ModuleType> {
+        vec![ModuleType::RequestHandler]
     }
 
-    fn build(
+    fn build_hook(
         &self,
+        _: ModuleType,
         engine: Arc<Katalyst>,
-        config: &ModuleConfigLoader,
+        config: &unstructured::Document,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
-        let c: FileServerConfig = config.load()?;
+        let c: FileServerConfig = config.clone().try_into().map_err(|_| {
+            ConfigurationFailure::ConfigNotParseable("Host module configuration failed".into())
+        })?;
         Ok(Arc::new(FileServerDispatcher {
             root_path: c.root_path,
             selector: engine.get_compiler().compile_template(Some(&c.selector))?,

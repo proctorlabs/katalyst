@@ -3,7 +3,7 @@ use futures::future::*;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct MemoryCache {
     cache: HashMap<String, Arc<Vec<u8>>>,
 }

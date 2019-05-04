@@ -1,7 +1,6 @@
 use crate::app::Katalyst;
 use crate::context::*;
 use crate::modules::*;
-use crate::prelude::*;
 use futures::future::*;
 
 #[derive(Default, Debug)]
@@ -12,14 +11,15 @@ impl Module for AlwaysAuthenticatorBuilder {
         "always"
     }
 
-    fn module_type(&self) -> ModuleType {
-        ModuleType::Authenticator
+    fn supported_hooks(&self) -> Vec<ModuleType> {
+        vec![ModuleType::Authenticator]
     }
 
-    fn build(
+    fn build_hook(
         &self,
+        _: ModuleType,
         _: Arc<Katalyst>,
-        _: &ModuleConfigLoader,
+        _: &unstructured::Document,
     ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
         Ok(Arc::new(AlwaysAuthenticator {}))
     }
