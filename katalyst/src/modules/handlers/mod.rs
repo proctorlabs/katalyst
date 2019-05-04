@@ -7,6 +7,17 @@ pub use host::HostModule;
 
 #[derive(Default, Clone, Debug)]
 pub struct HandlerModule {}
-impl PhantomModuleData for HandlerModule {
+
+impl ModuleProvider for HandlerModule {
     const MODULE_TYPE: ModuleType = ModuleType::RequestHandler;
+
+    type ModuleImplType = Arc<ModuleDispatch>;
+
+    fn build(
+        module: Arc<Module>,
+        instance: Arc<Katalyst>,
+        doc: &unstructured::Document,
+    ) -> Result<Self::ModuleImplType, ConfigurationFailure> {
+        module.build_hook(Self::MODULE_TYPE, instance, doc)
+    }
 }

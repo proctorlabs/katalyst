@@ -18,22 +18,30 @@ pub use errors::*;
 pub use handlers::HandlerModule;
 pub use plugins::PluginModule;
 
-pub trait PhantomModuleData {
+pub trait ModuleProvider {
     const MODULE_TYPE: ModuleType;
+
+    type ModuleImplType;
+
+    fn build(
+        _: Arc<Module>,
+        _: Arc<Katalyst>,
+        _: &unstructured::Document,
+    ) -> Result<Self::ModuleImplType, ConfigurationFailure>;
 }
 
 pub trait ModuleDispatch: Send + Sync + Debug {
     fn dispatch(&self, ctx: Context) -> ModuleResult;
 }
 
+#[derive(Debug)]
 pub struct Modules {
     modules: HashMap<String, Arc<Module>>,
 }
 
 impl Modules {
-    pub fn register(&mut self, module: Arc<Module>) -> Result<(), KatalystError> {
+    pub fn register(&mut self, module: Arc<Module>) {
         self.modules.insert(module.name().to_string(), module);
-        Ok(())
     }
 
     pub fn get(&self, name: &str) -> Result<Arc<Module>, KatalystError> {
@@ -53,7 +61,7 @@ macro_rules! register_modules {
                     modules: HashMap::default(),
                 };
                 $(
-                    result.register(Arc::new($toreg)).unwrap();
+                    result.register(Arc::new($toreg));
                 )*
                 result
             }

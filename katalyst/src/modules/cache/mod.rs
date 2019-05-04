@@ -8,8 +8,19 @@ pub use memory::MemoryCacheBuilder;
 
 #[derive(Default, Clone, Debug)]
 pub struct CacheModule {}
-impl PhantomModuleData for CacheModule {
+
+impl ModuleProvider for CacheModule {
     const MODULE_TYPE: ModuleType = ModuleType::Cache;
+
+    type ModuleImplType = Arc<CacheProvider>;
+
+    fn build(
+        module: Arc<Module>,
+        instance: Arc<Katalyst>,
+        doc: &unstructured::Document,
+    ) -> Result<Self::ModuleImplType, ConfigurationFailure> {
+        module.build_cache(Self::MODULE_TYPE, instance, doc)
+    }
 }
 
 pub trait CacheProvider: Send + Sync + Debug {
