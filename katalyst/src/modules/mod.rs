@@ -17,6 +17,7 @@ pub use definitions::*;
 pub use errors::*;
 pub use handlers::HandlerModule;
 pub use plugins::PluginModule;
+pub use cache::CacheModule;
 
 pub trait ModuleProvider {
     const MODULE_TYPE: ModuleType;
