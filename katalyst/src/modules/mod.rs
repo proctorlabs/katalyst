@@ -18,20 +18,13 @@ pub use errors::*;
 pub use handlers::HandlerModule;
 pub use plugins::PluginModule;
 
-mod sealed {
-    pub trait ModuleMethodImpl {}
-}
-
 pub trait PhantomModuleData {
     const MODULE_TYPE: ModuleType;
-    type ModuleImpl: sealed::ModuleMethodImpl + Send + Sync + Debug + Sized;
 }
 
 pub trait ModuleDispatch: Send + Sync + Debug {
     fn dispatch(&self, ctx: Context) -> ModuleResult;
 }
-impl sealed::ModuleMethodImpl for Arc<ModuleDispatch> {}
-impl sealed::ModuleMethodImpl for Arc<cache::CacheProvider> {}
 
 pub struct Modules {
     modules: HashMap<String, Arc<Module>>,
@@ -75,5 +68,6 @@ register_modules! {
     authentication::NeverAuthenticatorBuilder{};
     authentication::HttpAuthenticatorBuilder{};
     authentication::WhitelistBuilder{};
-    plugins::ContentPlugin{}
+    plugins::ContentPlugin{};
+    cache::MemoryCacheBuilder {}
 }

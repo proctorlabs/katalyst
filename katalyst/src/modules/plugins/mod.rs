@@ -7,5 +7,4 @@ pub use content_plugin::ContentPlugin;
 pub struct PluginModule {}
 impl PhantomModuleData for PluginModule {
     const MODULE_TYPE: ModuleType = ModuleType::Plugin;
-    type ModuleImpl = Arc<ModuleDispatch>;
 }

@@ -4,11 +4,12 @@ use crate::modules::*;
 use futures::Future;
 use std::sync::Arc;
 
+pub use memory::MemoryCacheBuilder;
+
 #[derive(Default, Clone, Debug)]
 pub struct CacheModule {}
 impl PhantomModuleData for CacheModule {
     const MODULE_TYPE: ModuleType = ModuleType::Cache;
-    type ModuleImpl = Arc<CacheProvider>;
 }
 
 pub trait CacheProvider: Send + Sync + Debug {

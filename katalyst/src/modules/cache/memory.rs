@@ -4,6 +4,28 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 #[derive(Default, Debug)]
+pub struct MemoryCacheBuilder {}
+
+impl Module for MemoryCacheBuilder {
+    fn name(&self) -> &'static str {
+        "memory_cache"
+    }
+
+    fn supported_hooks(&self) -> Vec<ModuleType> {
+        vec![ModuleType::Cache]
+    }
+
+    fn build_cache(
+        &self,
+        _: ModuleType,
+        _: Arc<Katalyst>,
+        _: &unstructured::Document,
+    ) -> Result<Arc<CacheProvider>, ConfigurationFailure> {
+        Ok(Arc::new(MemoryCache::default()))
+    }
+}
+
+#[derive(Default, Debug)]
 pub struct MemoryCache {
     cache: HashMap<String, Arc<Vec<u8>>>,
 }

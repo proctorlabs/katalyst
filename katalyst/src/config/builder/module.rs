@@ -46,8 +46,6 @@ where
         if !module.supported_hooks().contains(&self.module_type()) {
             return Err(ConfigurationFailure::InvalidResource);
         }
-        Ok(engine
-            .get_module(&self.module)?
-            .build_hook(self.module_type(), engine, &self.config)?)
+        Ok(module.build_hook(self.module_type(), engine, &self.config)?)
     }
 }

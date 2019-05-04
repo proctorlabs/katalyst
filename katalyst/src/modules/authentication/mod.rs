@@ -13,5 +13,4 @@ pub use whitelist::WhitelistBuilder;
 pub struct AuthenticatorModule {}
 impl PhantomModuleData for AuthenticatorModule {
     const MODULE_TYPE: ModuleType = ModuleType::Authenticator;
-    type ModuleImpl = Arc<ModuleDispatch>;
 }

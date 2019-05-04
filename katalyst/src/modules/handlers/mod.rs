@@ -9,5 +9,4 @@ pub use host::HostModule;
 pub struct HandlerModule {}
 impl PhantomModuleData for HandlerModule {
     const MODULE_TYPE: ModuleType = ModuleType::RequestHandler;
-    type ModuleImpl = Arc<ModuleDispatch>;
 }

@@ -23,8 +23,19 @@ pub trait Module: Send + Sync + Debug {
 
     fn build_hook(
         &self,
-        module_type: ModuleType,
-        engine: Arc<Katalyst>,
-        config: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure>;
+        _: ModuleType,
+        _: Arc<Katalyst>,
+        _: &unstructured::Document,
+    ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
+        Err(ConfigurationFailure::InvalidResource)
+    }
+
+    fn build_cache(
+        &self,
+        _: ModuleType,
+        _: Arc<Katalyst>,
+        _: &unstructured::Document,
+    ) -> Result<Arc<CacheProvider>, ConfigurationFailure> {
+        Err(ConfigurationFailure::InvalidResource)
+    }
 }

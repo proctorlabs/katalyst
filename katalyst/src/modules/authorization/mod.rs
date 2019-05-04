@@ -4,5 +4,4 @@ use crate::modules::*;
 pub struct AuthorizerModule {}
 impl PhantomModuleData for AuthorizerModule {
     const MODULE_TYPE: ModuleType = ModuleType::Authorizer;
-    type ModuleImpl = Arc<ModuleDispatch>;
 }
