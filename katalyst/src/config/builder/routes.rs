@@ -20,6 +20,8 @@ pub struct RouteBuilder {
     #[serde(default)]
     plugins: Option<Vec<ModuleBuilder<PluginModule>>>,
     #[serde(default)]
+    cache: Option<ModuleBuilder<CacheHandler>>,
+    #[serde(default)]
     authorizers: Option<Vec<ModuleBuilder<AuthorizerModule>>>,
     #[serde(default)]
     authenticators: Option<Vec<ModuleBuilder<AuthenticatorModule>>>,
@@ -86,12 +88,18 @@ impl Builder<Route> for RouteBuilder {
             None => None,
         };
 
+        let cache: Option<Arc<ModuleDispatch>> = match &self.cache {
+            Some(c) => Some(c.build(engine.clone())?),
+            None => None,
+        };
+
         Ok(Route {
             pattern: Regex::new(&self.path.build(engine)?)?,
             children: routes,
             handler,
             plugins,
             authorizers,
+            cache,
             methods,
             authenticators,
         })

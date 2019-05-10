@@ -13,7 +13,7 @@ impl Module for MemoryCacheBuilder {
     }
 
     fn supported_hooks(&self) -> Vec<ModuleType> {
-        vec![ModuleType::Cache]
+        vec![ModuleType::CacheProvider]
     }
 
     fn build_cache(
@@ -33,8 +33,7 @@ pub struct MemoryCache {
 
 impl CacheProvider for MemoryCache {
     fn get_key(&self, key: &str) -> Box<Future<Item = Arc<Vec<u8>>, Error = KatalystError> + Send> {
-        Box::new(match self.cache.read()
-        {
+        Box::new(match self.cache.read() {
             Ok(read) => match read.get(key) {
                 Some(r) => ok(r.clone()),
                 None => err(KatalystError::StateUnavailable),
@@ -43,10 +42,14 @@ impl CacheProvider for MemoryCache {
         })
     }
 
-    fn set_key(&self, key: &str, val: Vec<u8>) -> Box<Future<Item = (), Error = KatalystError> + Send> {
+    fn set_key(
+        &self,
+        key: &str,
+        val: Vec<u8>,
+    ) -> Box<Future<Item = (), Error = KatalystError> + Send> {
         let mut cache = match self.cache.write() {
             Ok(s) => s,
-            Err(_) => {return Box::new(err(KatalystError::StateUnavailable))}
+            Err(_) => return Box::new(err(KatalystError::StateUnavailable)),
         };
         cache.insert(key.to_owned(), Arc::new(val));
         Box::new(ok(()))

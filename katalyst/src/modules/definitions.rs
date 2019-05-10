@@ -10,7 +10,8 @@ pub enum ModuleType {
     Authorizer,
     RequestHandler,
     Plugin,
-    Cache,
+    CacheProvider,
+    CacheHandler,
 }
 
 pub type ModuleResultSync = Result<Context, ModuleError>;

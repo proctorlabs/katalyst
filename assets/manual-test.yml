@@ -17,6 +17,8 @@ routes:
       type: host
       host: httpbin
       path: "/ip"
+    cache:
+      type: cache_response
 
   - path:
       type: regex

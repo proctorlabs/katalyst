@@ -12,12 +12,11 @@ pub mod handlers;
 pub mod plugins;
 pub use authentication::AuthenticatorModule;
 pub use authorization::AuthorizerModule;
-pub use cache::CacheProvider;
+pub use cache::{CacheHandler, CacheModule, CacheProvider};
 pub use definitions::*;
 pub use errors::*;
 pub use handlers::HandlerModule;
 pub use plugins::PluginModule;
-pub use cache::CacheModule;
 
 pub trait ModuleProvider {
     const MODULE_TYPE: ModuleType;
@@ -78,5 +77,6 @@ register_modules! {
     authentication::HttpAuthenticatorBuilder{};
     authentication::WhitelistBuilder{};
     plugins::ContentPlugin{};
-    cache::MemoryCacheBuilder {}
+    cache::DefaultCacheHandler{};
+    cache::MemoryCacheBuilder{}
 }

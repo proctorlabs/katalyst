@@ -1,9 +1,9 @@
 use super::*;
 use crate::app::Katalyst;
 use crate::instance::Service;
+use crate::modules::*;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use crate::modules::*;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
