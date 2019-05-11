@@ -1,10 +1,12 @@
 mod data;
+mod requests;
 
 use crate::app::Katalyst;
 use crate::instance::Route;
 use crate::prelude::*;
 use data::ContextData;
-use hyper::{Body, Request, Response};
+use hyper::{Body, Request};
+pub use requests::*;
 use std::any::Any;
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -33,12 +35,6 @@ impl KatalystAuthenticationInfo {
     }
 }
 
-#[derive(Default, Debug)]
-pub struct RequestResponse {
-    pub request: Option<Request<Body>>,
-    pub response: Option<Response<Body>>,
-}
-
 #[derive(Debug)]
 pub struct Detail {
     pub remote_ip: String,
@@ -57,8 +53,8 @@ pub struct Timestamps {
 
 #[derive(Debug)]
 pub struct Context {
-    pub upstream: RequestResponse,
-    pub downstream: RequestResponse,
+    pub request: RequestContainer,
+    pub response: ResponseContainer,
     pub detail: Detail,
     pub timestamps: Timestamps,
     pub engine: Arc<Katalyst>,
@@ -68,8 +64,8 @@ pub struct Context {
 impl Default for Context {
     fn default() -> Self {
         Context {
-            upstream: RequestResponse::default(),
-            downstream: RequestResponse::default(),
+            request: RequestContainer::Empty,
+            response: ResponseContainer::Empty,
             detail: Detail {
                 remote_ip: String::default(),
                 url: url::Url::parse("http://localhost/").unwrap(),
@@ -106,11 +102,8 @@ impl Context {
             path = &uri
         );
         Context {
-            upstream: RequestResponse {
-                request: Some(request),
-                response: None,
-            },
-            downstream: RequestResponse::default(),
+            request: RequestContainer::new(request),
+            response: ResponseContainer::Empty,
             detail: Detail {
                 remote_ip: remote_addr.ip().to_string(),
                 url: url::Url::parse(&path).unwrap(),
@@ -134,21 +127,5 @@ impl Detail {
         self.matched_route
             .as_ref()
             .ok_or_else(|| RequestFailure::Internal)
-    }
-}
-
-impl RequestResponse {
-    pub fn request(&self) -> Result<&Request<Body>, RequestFailure> {
-        Ok(self
-            .request
-            .as_ref()
-            .ok_or_else(|| RequestFailure::Internal)?)
-    }
-
-    pub fn response(&self) -> Result<&Response<Body>, RequestFailure> {
-        Ok(self
-            .response
-            .as_ref()
-            .ok_or_else(|| RequestFailure::Internal)?)
     }
 }

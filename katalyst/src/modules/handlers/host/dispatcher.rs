@@ -1,4 +1,5 @@
 use super::*;
+use crate::context::*;
 use futures::future::*;
 use futures::Future;
 
@@ -21,31 +22,25 @@ impl HostDispatcher {
         let transformer = try_req!(ctx, self.transformer(&ctx, balancer_lease.to_string()));
         ctx.detail.balancer_lease = Some(balancer_lease);
 
-        let request = match ctx.upstream.request.take() {
-            Some(req) => req,
-            None => return Err(ctx.fail(RequestFailure::Internal)),
-        };
+        let request = ctx.request.take();
+        ctx.request = RequestContainer::Empty;
 
         let mut client_req = try_req!(ctx, transformer.transform(request));
-        ctx.upstream.request = None;
+        ctx.request = RequestContainer::Empty;
         add_forwarding_headers(&mut client_req.headers_mut(), &ctx.detail.remote_ip);
         strip_hop_headers(&mut client_req.headers_mut());
-        ctx.downstream.request = Some(client_req);
+        ctx.request = RequestContainer::new(client_req);
         Ok(ctx)
     }
 
     pub fn send(mut ctx: Context) -> ModuleResult {
-        let dsr = match ctx.downstream.request.take() {
-            Some(s) => s,
-            None => {
-                return err!(ctx, RequestFailure::Internal);
-            }
-        };
+        let dsr = ctx.request.take();
+        ctx.request = RequestContainer::Empty;
         let client = ctx.engine.get_client();
         let res = client.request(dsr);
         Box::new(res.then(|response| match response {
             Ok(r) => {
-                ctx.upstream.response = Some(r);
+                ctx.response = ResponseContainer::new(r);
                 ok(ctx)
             }
             Err(e) => {
@@ -56,8 +51,8 @@ impl HostDispatcher {
     }
 
     pub fn clean_response(mut ctx: Context) -> Context {
-        if let Some(r) = &mut ctx.upstream.response {
-            strip_hop_headers(r.headers_mut());
+        if let ResponseContainer::Raw { data } = &mut ctx.response {
+            strip_hop_headers(data.headers_mut());
         }
         ctx
     }

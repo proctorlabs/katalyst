@@ -6,7 +6,7 @@ binding! {
     Http {
         #[args(count=0)]
         fn method(ctx: &Context, _: &[ExpressionArg]) -> ExpressionResult {
-            Ok(ctx.upstream.request()?.method().as_str().into())
+            Ok(ctx.request.raw().method().as_str().into())
         };
 
         #[args(count=0)]
@@ -16,13 +16,12 @@ binding! {
 
         #[args(count=0)]
         fn path(ctx: &Context, _: &[ExpressionArg]) -> ExpressionResult {
-            Ok(ctx.upstream.request()?.uri().path().into())
+            Ok(ctx.detail.url.path().into())
         };
 
         #[args(count=0)]
         fn query(ctx: &Context, _: &[ExpressionArg]) -> ExpressionResult {
-            let req = ctx.upstream.request()?;
-            Ok(req.uri().query().unwrap_or_default().into())
+            Ok(ctx.detail.url.query().unwrap_or_default().into())
         };
 
         #[args(count=1)]
@@ -34,8 +33,7 @@ binding! {
 
         #[args(count=1)]
         fn header(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
-            let req = ctx.upstream.request()?;
-            let hdr = req.headers().get(args[0].render(ctx)?).ok_or_else(|| RequestFailure::Internal)?;
+            let hdr = ctx.request.raw().headers().get(args[0].render(ctx)?).ok_or_else(|| RequestFailure::Internal)?;
             Ok(hdr.to_str().map_err(|_| RequestFailure::Internal)?.into())
         };
 

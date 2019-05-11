@@ -1,4 +1,5 @@
 use crate::app::Katalyst;
+use crate::context::*;
 use crate::expression::*;
 use crate::modules::*;
 use crate::*;
@@ -81,7 +82,7 @@ fn send_file(mut ctx: Context, file: PathBuf) -> ModuleResult {
             let hdrs = r.headers_mut();
             let hdr_val = HeaderValue::from_str(mime).unwrap();
             hdrs.append("Content-Type", hdr_val);
-            ctx.upstream.response = Some(r);
+            ctx.response = ResponseContainer::new(r);
             ok(ctx)
         }
         Err(_) => err(ctx.fail(RequestFailure::NotFound)),

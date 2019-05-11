@@ -1,4 +1,5 @@
 use crate::app::Katalyst;
+use crate::context::*;
 use crate::modules::*;
 use futures::future::*;
 use futures::stream::Stream;
@@ -29,10 +30,8 @@ impl Module for ContentPlugin {
 
 impl ModuleDispatch for ContentPlugin {
     fn dispatch(&self, mut ctx: Context) -> ModuleResult {
-        let req = try_fut!(
-            ctx,
-            ctx.upstream.request.take().ok_or(RequestFailure::Internal)
-        );
+        let req = ctx.request.take();
+        ctx.request = RequestContainer::Empty;
         let (parts, body) = req.into_parts();
         let format = Format::content_type(
             parts
@@ -42,7 +41,7 @@ impl ModuleDispatch for ContentPlugin {
         );
         match format {
             Format::Default => {
-                ctx.upstream.request = Some(Request::from_parts(parts, body));
+                ctx.request = RequestContainer::new(Request::from_parts(parts, body));
                 ok!(ctx)
             }
             _ => Box::new(
@@ -54,8 +53,10 @@ impl ModuleDispatch for ContentPlugin {
                     .then(|res| match res {
                         Ok((Ok(data), body)) => {
                             ctx.set_extension_data(data);
-                            ctx.upstream.request =
-                                Some(Request::from_parts(parts, hyper::Body::from(body)));
+                            ctx.request = RequestContainer::new(Request::from_parts(
+                                parts,
+                                hyper::Body::from(body),
+                            ));
                             Ok(ctx)
                         }
                         _ => Ok(ctx),

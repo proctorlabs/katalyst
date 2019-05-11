@@ -2,7 +2,7 @@ use crate::pipeline::*;
 use crate::prelude::*;
 
 pub fn matcher(mut ctx: Context) -> ModuleResultSync {
-    let request = try_req!(ctx, ctx.upstream.request());
+    let request = ctx.request.raw();
     let config = try_req!(
         ctx,
         ctx.engine

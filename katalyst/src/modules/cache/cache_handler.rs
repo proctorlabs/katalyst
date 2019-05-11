@@ -1,4 +1,5 @@
 use super::*;
+use crate::context::ResponseContainer;
 use hyper::{Body, Response};
 use std::sync::Arc;
 
@@ -45,7 +46,7 @@ impl ModuleDispatch for DefaultCacheHandler {
                         let mut resp = Response::default();
                         *resp.status_mut() = http::status::StatusCode::OK;
                         *resp.body_mut() = Body::from(content);
-                        ctx.upstream.response = Some(resp);
+                        ctx.response = ResponseContainer::new(resp);
                         ok!(ctx)
                     }
                     Err(_) => ok!(ctx),
