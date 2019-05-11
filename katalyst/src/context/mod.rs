@@ -57,7 +57,7 @@ pub struct Context {
     pub response: ResponseContainer,
     pub detail: Detail,
     pub timestamps: Timestamps,
-    pub engine: Arc<Katalyst>,
+    pub katalyst: Arc<Katalyst>,
     data: ContextData,
 }
 
@@ -78,7 +78,7 @@ impl Default for Context {
                 started: Instant::now(),
                 completed: None,
             },
-            engine: Arc::default(),
+            katalyst: Arc::default(),
             data: ContextData::default(),
         }
     }
@@ -93,7 +93,7 @@ impl Context {
         self.data.set(data)
     }
 
-    pub fn new(request: Request<Body>, engine: Arc<Katalyst>, remote_addr: SocketAddr) -> Self {
+    pub fn new(request: Request<Body>, katalyst: Arc<Katalyst>, remote_addr: SocketAddr) -> Self {
         let uri = request.uri();
         let path = format!(
             "{scheme}://{host}{path}",
@@ -116,7 +116,7 @@ impl Context {
                 started: Instant::now(),
                 completed: None,
             },
-            engine,
+            katalyst,
             data: ContextData::default(),
         }
     }

@@ -46,7 +46,7 @@ pub struct HttpAuthenticator {
 
 impl ModuleDispatch for HttpAuthenticator {
     fn dispatch(&self, mut ctx: Context) -> ModuleResult {
-        let client = ctx.engine.get_client();
+        let client = ctx.katalyst.get_client();
         let mut request = Request::builder();
         request.uri(&self.url.to_string());
         let res = client.request(request.body(Body::empty()).unwrap());

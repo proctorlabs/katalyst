@@ -7,7 +7,7 @@ impl HostDispatcher {
     pub fn prepare(&self, mut ctx: Context) -> ModuleResultSync {
         let config = try_req!(
             ctx,
-            ctx.engine
+            ctx.katalyst
                 .get_instance()
                 .map_err(|_| RequestFailure::Internal)
         );
@@ -36,7 +36,7 @@ impl HostDispatcher {
     pub fn send(mut ctx: Context) -> ModuleResult {
         let dsr = ctx.request.take();
         ctx.request = RequestContainer::Empty;
-        let client = ctx.engine.get_client();
+        let client = ctx.katalyst.get_client();
         let res = client.request(dsr);
         Box::new(res.then(|response| match response {
             Ok(r) => {

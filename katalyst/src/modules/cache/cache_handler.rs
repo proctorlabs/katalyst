@@ -29,7 +29,7 @@ impl ModuleDispatch for DefaultCacheHandler {
     fn dispatch(&self, mut ctx: Context) -> ModuleResult {
         let instance = try_fut!(
             ctx,
-            ctx.engine
+            ctx.katalyst
                 .get_instance()
                 .map_err(|_| RequestFailure::Internal)
         );

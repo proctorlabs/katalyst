@@ -5,7 +5,7 @@ pub fn matcher(mut ctx: Context) -> ModuleResultSync {
     let request = ctx.request.raw();
     let config = try_req!(
         ctx,
-        ctx.engine
+        ctx.katalyst
             .get_instance()
             .map_err(|_| RequestFailure::Internal)
     );
