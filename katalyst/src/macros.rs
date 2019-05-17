@@ -35,17 +35,18 @@ macro_rules! err {
         Box::new(futures::future::err::<Context, ModuleError>($c.fail($e)))
     };
 }
-#[cfg(test)]
-mod test {
-    #[test]
-    fn derive_test() {
-        #[derive(ExpressionBinding)]
-        enum ThingBinding {
-            One,
-            Two,
-        };
-        ThingBinding::One.test();
-        ThingBinding::Two.test();
-    }
 
-}
+// #[cfg(test)]
+// mod test {
+//     #[test]
+//     fn derive_test() {
+//         #[derive(ExpressionBinding)]
+//         enum ThingBinding {
+//             One,
+//             Two,
+//         };
+//         ThingBinding::One.test();
+//         ThingBinding::Two.test();
+//     }
+
+// }
