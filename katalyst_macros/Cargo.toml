@@ -1,13 +1,13 @@
 [package]
 name = "katalyst_macros"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Phil Proctor <philliptproctor@gmail.com>"]
 edition = "2018"
 
 [dependencies]
 proc-macro2 = "0.4"
-quote = "0.6.3"
-syn = { version = "0.15.22", features = ["derive", "parsing", "full"] }
+quote = "0.6"
+syn = { version = "0.15", features = ["derive", "parsing", "full"] }
 
 [lib]
 name = "katalyst_macros"

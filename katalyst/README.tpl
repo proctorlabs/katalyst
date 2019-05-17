@@ -10,7 +10,8 @@
 
 # Katalyst API Gateway
 
-**THIS IS NOT READY FOR USE! This is currently experimental**
+Please note: Katalyst is still in the early stages and their are likely many things currently broken with this package.
+Use with caution!
 
 ## Documentation
 
