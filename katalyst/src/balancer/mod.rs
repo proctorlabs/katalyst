@@ -14,20 +14,20 @@ mod least_connection;
 mod random;
 mod round_robin;
 
-use crate::error::KatalystError;
+use crate::error::GatewayError;
 use crate::prelude::*;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::sync::Arc;
 
 /// Result for acquiring a new load balancer lease.
-pub type BalancerLease = Result<Arc<String>, KatalystError>;
+pub type BalancerLease = Result<Arc<String>, GatewayError>;
 
 /// Directory of all currently registered load balancer builders.
 pub type BalancerDirectory = HashMap<&'static str, Arc<KatalystBalancerBuilder>>;
 
 /// Result of building a new load balancer
-pub type BalancerBuilderResult = Result<Arc<KatalystBalancer>, KatalystError>;
+pub type BalancerBuilderResult = Result<Arc<KatalystBalancer>, GatewayError>;
 
 pub trait KatalystBalancerBuilder: Send + Sync + Debug {
     fn name(&self) -> &'static str;

@@ -23,7 +23,7 @@ impl Module for ContentPlugin {
         _: ModuleType,
         _: Arc<Katalyst>,
         _: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
+    ) -> Result<Arc<ModuleDispatch>, GatewayError> {
         Ok(Arc::new(ContentPlugin {}))
     }
 }

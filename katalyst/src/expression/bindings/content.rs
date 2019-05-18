@@ -11,12 +11,12 @@ binding! {
             let key = Document::String(key);
             let val: Arc<Document> = ctx.get_extension_data()?;
             let res = match val.as_ref() {
-                Document::Map(map) => Ok(map.get(&key).ok_or(RequestFailure::Internal)?),
-                _ => Err(RequestFailure::Internal)
+                Document::Map(map) => Ok(map.get(&key).ok_or(GatewayError::InternalServerError)?),
+                _ => Err(GatewayError::InternalServerError)
             }?;
             match res {
                 Document::String(s) => Ok(s.to_owned().into()),
-                _ => Err(RequestFailure::Internal)
+                _ => Err(GatewayError::InternalServerError)
             }
         };
     }

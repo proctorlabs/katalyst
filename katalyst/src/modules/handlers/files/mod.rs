@@ -34,9 +34,9 @@ impl Module for FileServerModule {
         _: ModuleType,
         engine: Arc<Katalyst>,
         config: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
+    ) -> Result<Arc<ModuleDispatch>, GatewayError> {
         let c: FileServerConfig = config.clone().try_into().map_err(|_| {
-            ConfigurationFailure::ConfigNotParseable("Host module configuration failed".into())
+            GatewayError::ConfigNotParseable("Host module configuration failed".into())
         })?;
         Ok(Arc::new(FileServerDispatcher {
             root_path: c.root_path,
@@ -85,6 +85,6 @@ fn send_file(mut ctx: Context, file: PathBuf) -> ModuleResult {
             ctx.response = ResponseContainer::new(r);
             ok(ctx)
         }
-        Err(_) => err(ctx.fail(RequestFailure::NotFound)),
+        Err(_) => err(ctx.fail(GatewayError::NotFound)),
     }))
 }

@@ -8,7 +8,7 @@ binding! {
             if let Some(auth_info) = &ctx.detail.authentication {
                 Ok(auth_info.get_claim(args[0].render(&ctx)?).into())
             } else {
-                Err(RequestFailure::Internal)
+                Err(GatewayError::InternalServerError)
             }
         };
     }

@@ -27,9 +27,9 @@ impl Module for WhitelistBuilder {
         _: ModuleType,
         _: Arc<Katalyst>,
         config: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
+    ) -> Result<Arc<ModuleDispatch>, GatewayError> {
         let c: WhitelistConfig = config.clone().try_into().map_err(|_| {
-            ConfigurationFailure::ConfigNotParseable("Host module configuration failed".into())
+            GatewayError::ConfigNotParseable("Host module configuration failed".into())
         })?;
         Ok(Arc::new(Whitelist { ips: c.ips }))
     }
@@ -45,7 +45,7 @@ impl ModuleDispatch for Whitelist {
         if self.ips.contains(&ctx.detail.remote_ip) {
             Box::new(ok(ctx))
         } else {
-            Box::new(err(ctx.fail(RequestFailure::Unauthorized)))
+            Box::new(err(ctx.fail(GatewayError::Unauthorized)))
         }
     }
 }

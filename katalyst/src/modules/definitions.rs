@@ -27,8 +27,8 @@ pub trait Module: Send + Sync + Debug {
         _: ModuleType,
         _: Arc<Katalyst>,
         _: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
-        Err(ConfigurationFailure::InvalidResource)
+    ) -> Result<Arc<ModuleDispatch>, GatewayError> {
+        Err(GatewayError::InvalidResource)
     }
 
     fn build_cache(
@@ -36,7 +36,7 @@ pub trait Module: Send + Sync + Debug {
         _: ModuleType,
         _: Arc<Katalyst>,
         _: &unstructured::Document,
-    ) -> Result<Arc<CacheProvider>, ConfigurationFailure> {
-        Err(ConfigurationFailure::InvalidResource)
+    ) -> Result<Arc<CacheProvider>, GatewayError> {
+        Err(GatewayError::InvalidResource)
     }
 }

@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 
 //TODO: Finish this
-pub fn impl_derive_expression_binding(ast: &syn::DeriveInput) -> TokenStream {
+pub fn impl_derive_expression_binding(_ast: &syn::DeriveInput) -> TokenStream {
     unimplemented!()
     // let name = &ast.ident;
 
@@ -18,9 +18,9 @@ pub fn impl_derive_expression_binding(ast: &syn::DeriveInput) -> TokenStream {
     //             #name
     //         }
 
-    //         fn make_fn(&self, name: &str, args: &[ExpressionArg]) -> Result<ExpressionRenderMethod, ConfigurationFailure> {
+    //         fn make_fn(&self, name: &str, args: &[ExpressionArg]) -> Result<ExpressionRenderMethod, GatewayError> {
     //             match name {
-    //                 _ => Err(ConfigurationFailure::ExpressionItemNotFound(#name.to_string()))
+    //                 _ => Err(GatewayError::ExpressionItemNotFound(#name.to_string()))
     //             }
     //         }
     //     }

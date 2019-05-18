@@ -1,12 +1,12 @@
 use crate::prelude::*;
 
 pub struct ModuleError {
-    pub error: RequestFailure,
+    pub error: GatewayError,
     pub context: Context,
 }
 
 impl Context {
-    pub fn fail(self, error: RequestFailure) -> ModuleError {
+    pub fn fail(self, error: GatewayError) -> ModuleError {
         ModuleError {
             error,
             context: self,

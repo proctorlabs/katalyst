@@ -7,7 +7,7 @@ pub fn matcher(mut ctx: Context) -> ModuleResultSync {
         ctx,
         ctx.katalyst
             .get_instance()
-            .map_err(|_| RequestFailure::Internal)
+            .map_err(|_| GatewayError::InternalServerError)
     );
     for route in config.routes.iter() {
         let method_match = match &route.methods {
@@ -25,16 +25,23 @@ pub fn matcher(mut ctx: Context) -> ModuleResultSync {
                 route
                     .pattern
                     .captures(path)
-                    .ok_or_else(|| RequestFailure::Internal)
+                    .ok_or_else(|| GatewayError::InternalServerError)
             );
             for name_option in route.pattern.capture_names() {
                 if name_option.is_some() {
-                    let name = try_req!(ctx, name_option.ok_or_else(|| RequestFailure::Internal));
+                    let name = try_req!(
+                        ctx,
+                        name_option.ok_or_else(|| GatewayError::InternalServerError)
+                    );
                     cap_map.insert(
                         name.to_string(),
-                        try_req!(ctx, caps.name(name).ok_or_else(|| RequestFailure::Internal))
-                            .as_str()
-                            .to_string(),
+                        try_req!(
+                            ctx,
+                            caps.name(name)
+                                .ok_or_else(|| GatewayError::InternalServerError)
+                        )
+                        .as_str()
+                        .to_string(),
                     );
                 }
             }
@@ -44,5 +51,5 @@ pub fn matcher(mut ctx: Context) -> ModuleResultSync {
             return Ok(ctx);
         }
     }
-    Err(ctx.fail(RequestFailure::NotFound))
+    Err(ctx.fail(GatewayError::NotFound))
 }

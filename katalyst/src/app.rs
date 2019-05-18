@@ -58,17 +58,17 @@ impl Default for Katalyst {
 
 pub trait ArcKatalystImpl {
     /// Update the Katalyst instance with the configuration from the specified file.
-    fn load(&self, config_file: &str) -> Result<(), KatalystError>;
+    fn load(&self, config_file: &str) -> Result<(), GatewayError>;
 
     /// Run the Katalyst instance. This thread will block and run the async runtime.
-    fn run(&mut self) -> Result<(), KatalystError>;
+    fn run(&mut self) -> Result<(), GatewayError>;
 
-    fn run_service(&mut self) -> Result<(), KatalystError>;
+    fn run_service(&mut self) -> Result<(), GatewayError>;
 }
 
 impl ArcKatalystImpl for Arc<Katalyst> {
     /// Update the Katalyst instance with the configuration from the specified file.
-    fn load(&self, config_file: &str) -> Result<(), KatalystError> {
+    fn load(&self, config_file: &str) -> Result<(), GatewayError> {
         let config = parsers::parse_file(config_file)?;
         self.update_instance(config.build(self.clone())?)?;
         Ok(())
@@ -76,13 +76,13 @@ impl ArcKatalystImpl for Arc<Katalyst> {
 
     /// Run the Katalyst instance. This thread will block and run the async runtime.
     #[inline]
-    fn run(&mut self) -> Result<(), KatalystError> {
+    fn run(&mut self) -> Result<(), GatewayError> {
         self.run_service()?;
         self.wait()?;
         Ok(())
     }
 
-    fn run_service(&mut self) -> Result<(), KatalystError> {
+    fn run_service(&mut self) -> Result<(), GatewayError> {
         let engine = self.clone();
         let addr: SocketAddr = self.get_instance()?.service.interface;
         let server = Server::bind(&addr)
@@ -102,14 +102,14 @@ impl ArcKatalystImpl for Arc<Katalyst> {
 
 impl Katalyst {
     /// Update the running configuration of the API Gateway.
-    pub fn update_instance(&self, new_instance: Instance) -> Result<(), KatalystError> {
+    pub fn update_instance(&self, new_instance: Instance) -> Result<(), GatewayError> {
         let mut instance = self.instance.write()?;
         *instance = Arc::new(new_instance);
         Ok(())
     }
 
     /// Get a copy of the currently running API Gateway configuration.
-    pub fn get_instance(&self) -> Result<Arc<Instance>, KatalystError> {
+    pub fn get_instance(&self) -> Result<Arc<Instance>, GatewayError> {
         let instance = self.instance.read()?;
         Ok(instance.clone())
     }
@@ -130,28 +130,28 @@ impl Katalyst {
     }
 
     #[inline]
-    pub(crate) fn get_module(&self, name: &str) -> Result<Arc<Module>, KatalystError> {
+    pub(crate) fn get_module(&self, name: &str) -> Result<Arc<Module>, GatewayError> {
         self.modules.get(name)
     }
 
     pub fn spawn<F: Future<Item = (), Error = ()> + Send + 'static>(
         &self,
         fut: F,
-    ) -> Result<(), KatalystError> {
+    ) -> Result<(), GatewayError> {
         let mut rt = self.rt.write().unwrap();
         rt.spawn(fut);
         Ok(())
     }
 
-    pub fn wait(&self) -> Result<(), KatalystError> {
+    pub fn wait(&self) -> Result<(), GatewayError> {
         let mut rt = self.rt.write().unwrap();
-        rt.block_on(futures::empty::<(), KatalystError>())?;
+        rt.block_on(futures::empty::<(), GatewayError>())?;
         Ok(())
     }
 
     /// This is a convenience method to start an instance of Katalyst from a configuration file.
     /// This will load the configuration from the specified file and run the gateway.
-    pub fn start(config_file: &str) -> Result<Arc<Katalyst>, KatalystError> {
+    pub fn start(config_file: &str) -> Result<Arc<Katalyst>, GatewayError> {
         let mut app = Arc::new(Katalyst::default());
         app.load(config_file)?;
         app.run()?;

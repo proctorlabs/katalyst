@@ -18,7 +18,7 @@ fn default_balancer() -> String {
 }
 
 impl Builder<HashMap<String, Hosts>> for HashMap<String, HostsBuilder> {
-    fn build(&self, engine: Arc<Katalyst>) -> Result<HashMap<String, Hosts>, ConfigurationFailure> {
+    fn build(&self, engine: Arc<Katalyst>) -> Result<HashMap<String, Hosts>, GatewayError> {
         let balancers = engine.get_balancers();
         Ok(self
             .iter()

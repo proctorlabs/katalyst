@@ -75,14 +75,14 @@ impl fmt::Debug for DynamicNode {
 }
 
 impl DynamicNode {
-    pub fn build(raw: &str) -> std::result::Result<DynamicNode, ConfigurationFailure> {
+    pub fn build(raw: &str) -> std::result::Result<DynamicNode, GatewayError> {
         Ok(syn::parse_str(raw)?)
     }
 
     pub fn compile(
         &self,
         directory: &BuilderDirectory,
-    ) -> std::result::Result<Arc<CompiledExpression>, ConfigurationFailure> {
+    ) -> std::result::Result<Arc<CompiledExpression>, GatewayError> {
         match self {
             DynamicNode::Method(node) => {
                 let method_name = node.ident.to_string();
@@ -101,7 +101,7 @@ impl DynamicNode {
                             result: ExpressionResultType::Text,
                         }))
                     }
-                    None => Err(ConfigurationFailure::ExpressionItemNotFound(
+                    None => Err(GatewayError::ExpressionItemNotFound(
                         method_name.to_string(),
                     )),
                 }

@@ -16,7 +16,7 @@ pub fn binding(input: TokenStream) -> TokenStream {
     binding::binding_impl(ast)
 }
 
-#[proc_macro_derive(ExpressionBinding)]
+#[proc_macro_derive(ExpressionBinding, attributes(method))]
 pub fn expression_binding_derive(input: TokenStream) -> TokenStream {
     let ast = syn::parse(input).unwrap();
     binding_derive::impl_derive_expression_binding(&ast)

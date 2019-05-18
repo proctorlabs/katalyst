@@ -12,7 +12,7 @@ impl ModuleProvider for AuthorizerModule {
         module: Arc<Module>,
         instance: Arc<Katalyst>,
         doc: &unstructured::Document,
-    ) -> Result<Self::ModuleImplType, ConfigurationFailure> {
+    ) -> Result<Self::ModuleImplType, GatewayError> {
         module.build_hook(Self::MODULE_TYPE, instance, doc)
     }
 }

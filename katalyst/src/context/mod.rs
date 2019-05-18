@@ -85,8 +85,10 @@ impl Default for Context {
 }
 
 impl Context {
-    pub fn get_extension_data<T: Any + Send + Sync>(&self) -> Result<Arc<T>, RequestFailure> {
-        self.data.get().ok_or_else(|| RequestFailure::Internal)
+    pub fn get_extension_data<T: Any + Send + Sync>(&self) -> Result<Arc<T>, GatewayError> {
+        self.data
+            .get()
+            .ok_or_else(|| GatewayError::InternalServerError)
     }
 
     pub fn set_extension_data<T: Any + Send + Sync>(&mut self, data: T) {
@@ -123,9 +125,9 @@ impl Context {
 }
 
 impl Detail {
-    pub fn route(&self) -> Result<&Arc<Route>, RequestFailure> {
+    pub fn route(&self) -> Result<&Arc<Route>, GatewayError> {
         self.matched_route
             .as_ref()
-            .ok_or_else(|| RequestFailure::Internal)
+            .ok_or_else(|| GatewayError::InternalServerError)
     }
 }

@@ -29,7 +29,7 @@ extern crate log;
 extern crate lazy_static;
 
 #[macro_use]
-extern crate failure;
+extern crate derive_more;
 
 #[macro_use]
 mod macros;

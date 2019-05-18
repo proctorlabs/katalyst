@@ -31,9 +31,9 @@ impl Module for HttpAuthenticatorBuilder {
         _: ModuleType,
         _: Arc<Katalyst>,
         config: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
+    ) -> Result<Arc<ModuleDispatch>, GatewayError> {
         let c: HttpConfig = config.clone().try_into().map_err(|_| {
-            ConfigurationFailure::ConfigNotParseable("Host module configuration failed".into())
+            GatewayError::ConfigNotParseable("Host module configuration failed".into())
         })?;
         Ok(Arc::new(HttpAuthenticator { url: c.url }))
     }
@@ -68,7 +68,7 @@ impl ModuleDispatch for HttpAuthenticator {
                 ctx.detail.authentication = Some(auth);
                 ok(ctx)
             }
-            Err(_) => err(ctx.fail(RequestFailure::Forbidden)),
+            Err(_) => err(ctx.fail(GatewayError::Forbidden)),
         }))
     }
 }

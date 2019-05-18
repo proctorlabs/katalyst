@@ -5,7 +5,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 
-pub(crate) fn parse_file(file_path: &str) -> Result<KatalystBuilder, ConfigurationFailure> {
+pub(crate) fn parse_file(file_path: &str) -> Result<KatalystBuilder, GatewayError> {
     let path = Path::new(file_path);
     let contents = load_file(path)?;
 
@@ -15,7 +15,7 @@ pub(crate) fn parse_file(file_path: &str) -> Result<KatalystBuilder, Configurati
     )?)
 }
 
-fn load_file(path: &Path) -> Result<String, ConfigurationFailure> {
+fn load_file(path: &Path) -> Result<String, GatewayError> {
     info!("Loading file from: {}", path.canonicalize()?.display());
 
     let mut file = File::open(path)?;

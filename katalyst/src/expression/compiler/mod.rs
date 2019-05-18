@@ -32,7 +32,7 @@ impl Compiler {
     pub fn compile_template_map(
         &self,
         template: &Option<HashMap<String, String>>,
-    ) -> Result<Option<HashMap<String, Expression>>, ConfigurationFailure> {
+    ) -> Result<Option<HashMap<String, Expression>>, GatewayError> {
         match template {
             Some(m) => Ok(Some({
                 let mut result = HashMap::<String, Expression>::new();
@@ -48,17 +48,14 @@ impl Compiler {
     pub fn compile_template_option(
         &self,
         template: Option<&str>,
-    ) -> Result<Option<Expression>, ConfigurationFailure> {
+    ) -> Result<Option<Expression>, GatewayError> {
         match template {
             Some(_) => Ok(Some(self.compile_template(template)?)),
             None => Ok(None),
         }
     }
 
-    pub fn compile_template(
-        &self,
-        raw_str: Option<&str>,
-    ) -> Result<Expression, ConfigurationFailure> {
+    pub fn compile_template(&self, raw_str: Option<&str>) -> Result<Expression, GatewayError> {
         if let Some(raw) = raw_str {
             let mut results: Expression = vec![];
             let mut last_segment_index = 0;
@@ -66,7 +63,7 @@ impl Compiler {
                 for cap in TEMPLATE_FINDER.captures_iter(raw) {
                     let (mtch, expr) = (
                         cap.get(0)
-                            .ok_or_else(|| ConfigurationFailure::ElementExpected("Capture"))?,
+                            .ok_or_else(|| GatewayError::ElementExpected("Capture"))?,
                         &cap[1],
                     );
                     if mtch.start() > last_segment_index {
@@ -87,7 +84,7 @@ impl Compiler {
             }
             Ok(results)
         } else {
-            Err(ConfigurationFailure::ElementExpected("template"))
+            Err(GatewayError::ElementExpected("template"))
         }
     }
 }

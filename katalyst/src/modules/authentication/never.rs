@@ -20,7 +20,7 @@ impl Module for NeverAuthenticatorBuilder {
         _: ModuleType,
         _: Arc<Katalyst>,
         _: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
+    ) -> Result<Arc<ModuleDispatch>, GatewayError> {
         Ok(Arc::new(NeverAuthenticator {}))
     }
 }
@@ -30,6 +30,6 @@ pub struct NeverAuthenticator {}
 
 impl ModuleDispatch for NeverAuthenticator {
     fn dispatch(&self, ctx: Context) -> ModuleResult {
-        Box::new(err(ctx.fail(RequestFailure::Unauthorized)))
+        Box::new(err(ctx.fail(GatewayError::Unauthorized)))
     }
 }

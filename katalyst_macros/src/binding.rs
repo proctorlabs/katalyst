@@ -80,7 +80,7 @@ pub fn binding_impl(bindings: BindingTokens) -> TokenStream {
                         if vals.ident == "count" {
                             checks.push(quote! {
                                 if args.len() != #res {
-                                    Err(ConfigurationFailure::InvalidExpressionArgs("Incorrect argument count"))?;
+                                    Err(GatewayError::InvalidExpressionArgs("Incorrect argument count"))?;
                                 }
                             });
                         }
@@ -107,10 +107,10 @@ pub fn binding_impl(bindings: BindingTokens) -> TokenStream {
                 #id_string
             }
 
-            fn make_fn(&self, name: &str, args: &[ExpressionArg]) -> Result<ExpressionRenderMethod, ConfigurationFailure> {
+            fn make_fn(&self, name: &str, args: &[ExpressionArg]) -> Result<ExpressionRenderMethod, GatewayError> {
                 match name {
                     #(#match_options)*
-                    _ => Err(ConfigurationFailure::ExpressionItemNotFound(#id_string.to_string()))
+                    _ => Err(GatewayError::ExpressionItemNotFound(#id_string.to_string()))
                 }
             }
         }

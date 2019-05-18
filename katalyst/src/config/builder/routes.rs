@@ -28,7 +28,7 @@ pub struct RouteBuilder {
 }
 
 impl Builder<Route> for RouteBuilder {
-    fn build(&self, engine: Arc<Katalyst>) -> Result<Route, ConfigurationFailure> {
+    fn build(&self, engine: Arc<Katalyst>) -> Result<Route, GatewayError> {
         let routebuilders: &Option<Vec<RouteBuilder>> = &self.children;
         let routes = match routebuilders {
             Some(b) => {

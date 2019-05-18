@@ -31,7 +31,7 @@ impl Default for PathBuilder {
 }
 
 impl Builder<String> for PathBuilder {
-    fn build(&self, e: Arc<Katalyst>) -> Result<String, ConfigurationFailure> {
+    fn build(&self, e: Arc<Katalyst>) -> Result<String, GatewayError> {
         match self {
             PathBuilder::Regex { pattern } => Ok(pattern.to_string()),
             PathBuilder::Template { template } => Ok({
@@ -41,9 +41,7 @@ impl Builder<String> for PathBuilder {
                 let cmp = compiler.compile_template(Some(template))?;
                 let ctx = Context::default();
                 let rnd = cmp.render(&ctx).map_err(|_| {
-                    ConfigurationFailure::InvalidExpressionArgs(
-                        "Path template could not be rendered",
-                    )
+                    GatewayError::InvalidExpressionArgs("Path template could not be rendered")
                 })?;
                 result.push_str(&rnd);
                 result

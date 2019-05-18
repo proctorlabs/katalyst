@@ -56,9 +56,9 @@ impl Module for HostModule {
         _: ModuleType,
         engine: Arc<Katalyst>,
         config: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
+    ) -> Result<Arc<ModuleDispatch>, GatewayError> {
         let c: HostConfig = config.clone().try_into().map_err(|_| {
-            ConfigurationFailure::ConfigNotParseable("Host module configuration failed".into())
+            GatewayError::ConfigNotParseable("Host module configuration failed".into())
         })?;
         let providers = engine.get_compiler();
         let method = match c.method {
@@ -99,7 +99,7 @@ impl HostDispatcher {
         &self,
         ctx: &Context,
         lease_str: String,
-    ) -> Result<DownstreamTransformer, RequestFailure> {
+    ) -> Result<DownstreamTransformer, GatewayError> {
         let mut uri = lease_str;
         uri.push_str(&self.path.render(ctx)?);
         if let Some(query) = &self.query {
@@ -119,7 +119,7 @@ impl HostDispatcher {
             Some(h) => Some(
                 h.iter()
                     .map(|(key, val)| Ok((key.to_string(), val.render(ctx)?)))
-                    .collect::<Result<HashMap<String, String>, RequestFailure>>()?,
+                    .collect::<Result<HashMap<String, String>, GatewayError>>()?,
             ),
             None => None,
         };

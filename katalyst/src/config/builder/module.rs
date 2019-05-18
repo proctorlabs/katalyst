@@ -1,6 +1,6 @@
 use super::*;
 use crate::app::Katalyst;
-use crate::error::ConfigurationFailure;
+use crate::error::GatewayError;
 use crate::modules::*;
 use serde::{Deserialize, Serialize};
 use std::marker::PhantomData;
@@ -32,10 +32,10 @@ impl<T: ModuleProvider> Builder<T::ModuleImplType> for ModuleBuilder<T>
 where
     T: ModuleProvider,
 {
-    fn build(&self, engine: Arc<Katalyst>) -> Result<T::ModuleImplType, ConfigurationFailure> {
+    fn build(&self, engine: Arc<Katalyst>) -> Result<T::ModuleImplType, GatewayError> {
         let module = engine.get_module(&self.module)?;
         if !module.supported_hooks().contains(&T::MODULE_TYPE) {
-            return Err(ConfigurationFailure::InvalidResource);
+            return Err(GatewayError::InvalidResource);
         }
         Ok(T::build(module, engine, &self.config)?)
     }

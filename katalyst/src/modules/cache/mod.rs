@@ -20,7 +20,7 @@ impl ModuleProvider for CacheModule {
         module: Arc<Module>,
         instance: Arc<Katalyst>,
         doc: &unstructured::Document,
-    ) -> Result<Self::ModuleImplType, ConfigurationFailure> {
+    ) -> Result<Self::ModuleImplType, GatewayError> {
         module.build_cache(Self::MODULE_TYPE, instance, doc)
     }
 }
@@ -37,19 +37,19 @@ impl ModuleProvider for CacheHandler {
         module: Arc<Module>,
         instance: Arc<Katalyst>,
         doc: &unstructured::Document,
-    ) -> Result<Self::ModuleImplType, ConfigurationFailure> {
+    ) -> Result<Self::ModuleImplType, GatewayError> {
         module.build_hook(Self::MODULE_TYPE, instance, doc)
     }
 }
 
 pub trait CacheProvider: Send + Sync + Debug {
-    fn get_key(&self, key: &str) -> Box<Future<Item = Arc<Vec<u8>>, Error = KatalystError> + Send>;
+    fn get_key(&self, key: &str) -> Box<Future<Item = Arc<Vec<u8>>, Error = GatewayError> + Send>;
 
     fn set_key(
         &self,
         key: &str,
         val: Vec<u8>,
-    ) -> Box<Future<Item = (), Error = KatalystError> + Send>;
+    ) -> Box<Future<Item = (), Error = GatewayError> + Send>;
 }
 
 pub fn default_cache() -> Arc<CacheProvider> {

@@ -13,11 +13,12 @@ pub struct ServiceBuilder {
 }
 
 impl Builder<Service> for ServiceBuilder {
-    fn build(&self, instance: Arc<Katalyst>) -> Result<Service, ConfigurationFailure> {
+    fn build(&self, instance: Arc<Katalyst>) -> Result<Service, GatewayError> {
         Ok(Service {
-            interface: self.interface.parse().map_err(|_| {
-                ConfigurationFailure::InvalidAddress("Service listener address is invalid")
-            })?,
+            interface: self
+                .interface
+                .parse()
+                .map_err(|_| GatewayError::InvalidAddress("Service listener address is invalid"))?,
             cache: self.cache.build(instance.clone())?,
         })
     }

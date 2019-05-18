@@ -9,13 +9,18 @@ impl HostDispatcher {
             ctx,
             ctx.katalyst
                 .get_instance()
-                .map_err(|_| RequestFailure::Internal)
+                .map_err(|_| GatewayError::InternalServerError)
         );
 
         let balancer_lease = match config.hosts.get(&self.host) {
-            Some(s) => try_req!(ctx, s.servers.lease().map_err(|_| RequestFailure::Internal)),
+            Some(s) => try_req!(
+                ctx,
+                s.servers
+                    .lease()
+                    .map_err(|_| GatewayError::InternalServerError)
+            ),
             None => {
-                return Err(ctx.fail(RequestFailure::NotFound));
+                return Err(ctx.fail(GatewayError::NotFound));
             }
         };
 
@@ -45,7 +50,7 @@ impl HostDispatcher {
             }
             Err(e) => {
                 warn!("Could not send upstream request! Caused by: {:?}", e);
-                err(ctx.fail(RequestFailure::GatewayTimeout))
+                err(ctx.fail(GatewayError::GatewayTimeout))
             }
         }))
     }

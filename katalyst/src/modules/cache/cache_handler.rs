@@ -20,7 +20,7 @@ impl Module for DefaultCacheHandler {
         _: ModuleType,
         _: Arc<Katalyst>,
         _: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>, ConfigurationFailure> {
+    ) -> Result<Arc<ModuleDispatch>, GatewayError> {
         Ok(Arc::new(DefaultCacheHandler {}))
     }
 }
@@ -31,7 +31,7 @@ impl ModuleDispatch for DefaultCacheHandler {
             ctx,
             ctx.katalyst
                 .get_instance()
-                .map_err(|_| RequestFailure::Internal)
+                .map_err(|_| GatewayError::InternalServerError)
         );
         Box::new(
             instance

@@ -28,13 +28,13 @@ binding! {
         fn query_param(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
             let name = args[0].render(ctx)?;
             let res = ctx.detail.url.query_pairs().find(|q| q.0 == name);
-            res.map_or_else(|| Err(RequestFailure::Internal), |v| Ok(v.1.to_string().into()))
+            res.map_or_else(|| Err(GatewayError::InternalServerError), |v| Ok(v.1.to_string().into()))
         };
 
         #[args(count=1)]
         fn header(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
-            let hdr = ctx.request.raw().headers().get(args[0].render(ctx)?).ok_or_else(|| RequestFailure::Internal)?;
-            Ok(hdr.to_str().map_err(|_| RequestFailure::Internal)?.into())
+            let hdr = ctx.request.raw().headers().get(args[0].render(ctx)?).ok_or_else(|| GatewayError::InternalServerError)?;
+            Ok(hdr.to_str().map_err(|_| GatewayError::InternalServerError)?.into())
         };
 
         #[args(count=1)]
@@ -42,13 +42,13 @@ binding! {
             let value = args[0].render(ctx)?;
             match &ctx.detail.captures {
                 Some(caps) => Ok({
-                    let res = caps.get(&value).ok_or_else(|| RequestFailure::Internal)?;
+                    let res = caps.get(&value).ok_or_else(|| GatewayError::InternalServerError)?;
                     String::from_str(res)
-                        .map_err(|_| RequestFailure::Internal)?
+                        .map_err(|_| GatewayError::InternalServerError)?
                         .to_string()
                 }.into()),
 
-                None => Err(RequestFailure::Internal),
+                None => Err(GatewayError::InternalServerError),
             }
         };
     }
