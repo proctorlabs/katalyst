@@ -15,7 +15,7 @@ pub struct DownstreamTransformer {
 }
 
 impl DownstreamTransformer {
-    pub fn transform(self, req: Request<Body>) -> Result<Request<Body>, GatewayError> {
+    pub fn transform(self, req: Request<Body>) -> Result<Request<Body>> {
         let (mut parts, mut body) = req.into_parts();
         parts.uri = self.uri.parse()?;
 

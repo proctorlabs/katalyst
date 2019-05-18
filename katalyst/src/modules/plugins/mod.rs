@@ -15,7 +15,7 @@ impl ModuleProvider for PluginModule {
         module: Arc<Module>,
         instance: Arc<Katalyst>,
         doc: &unstructured::Document,
-    ) -> Result<Self::ModuleImplType, GatewayError> {
+    ) -> Result<Self::ModuleImplType> {
         module.build_hook(Self::MODULE_TYPE, instance, doc)
     }
 }

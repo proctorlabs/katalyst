@@ -21,7 +21,7 @@ impl Module for MemoryCacheBuilder {
         _: ModuleType,
         _: Arc<Katalyst>,
         _: &unstructured::Document,
-    ) -> Result<Arc<CacheProvider>, GatewayError> {
+    ) -> Result<Arc<CacheProvider>> {
         Ok(Arc::new(MemoryCache::default()))
     }
 }

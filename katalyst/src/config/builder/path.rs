@@ -31,7 +31,7 @@ impl Default for PathBuilder {
 }
 
 impl Builder<String> for PathBuilder {
-    fn build(&self, e: Arc<Katalyst>) -> Result<String, GatewayError> {
+    fn build(&self, e: Arc<Katalyst>) -> Result<String> {
         match self {
             PathBuilder::Regex { pattern } => Ok(pattern.to_string()),
             PathBuilder::Template { template } => Ok({

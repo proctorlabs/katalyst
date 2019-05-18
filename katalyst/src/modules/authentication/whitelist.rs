@@ -27,7 +27,7 @@ impl Module for WhitelistBuilder {
         _: ModuleType,
         _: Arc<Katalyst>,
         config: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>, GatewayError> {
+    ) -> Result<Arc<ModuleDispatch>> {
         let c: WhitelistConfig = config.clone().try_into().map_err(|_| {
             GatewayError::ConfigNotParseable("Host module configuration failed".into())
         })?;

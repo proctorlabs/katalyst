@@ -47,6 +47,8 @@ pub enum GatewayError {
 
 impl std::error::Error for GatewayError {}
 
+pub type Result<T> = std::result::Result<T, GatewayError>;
+
 impl GatewayError {
     pub fn status_code(&self) -> StatusCode {
         match *self {

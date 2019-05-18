@@ -85,7 +85,7 @@ impl Default for Context {
 }
 
 impl Context {
-    pub fn get_extension_data<T: Any + Send + Sync>(&self) -> Result<Arc<T>, GatewayError> {
+    pub fn get_extension_data<T: Any + Send + Sync>(&self) -> Result<Arc<T>> {
         self.data
             .get()
             .ok_or_else(|| GatewayError::InternalServerError)
@@ -125,7 +125,7 @@ impl Context {
 }
 
 impl Detail {
-    pub fn route(&self) -> Result<&Arc<Route>, GatewayError> {
+    pub fn route(&self) -> Result<&Arc<Route>> {
         self.matched_route
             .as_ref()
             .ok_or_else(|| GatewayError::InternalServerError)

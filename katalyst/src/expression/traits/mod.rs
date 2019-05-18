@@ -7,8 +7,8 @@ lazy_static! {
     static ref DEF_STRING: String = String::default();
 }
 
-pub type RenderResult = Result<String, GatewayError>;
-pub type ExpressionResult = Result<Document, GatewayError>;
+pub type RenderResult = Result<String>;
+pub type ExpressionResult = Result<Document>;
 pub type ExpressionArg = Arc<CompiledExpression>;
 pub type ExpressionRenderMethod =
     Arc<Fn(&Context, &[ExpressionArg]) -> ExpressionResult + Send + Sync>;
@@ -25,11 +25,7 @@ pub trait ExpressionBinding: Send + Sync {
     /// The identifier in this template to locate that this provider should be used
     fn identifier(&self) -> &'static str;
     /// This returns the render function for this expression
-    fn make_fn(
-        &self,
-        name: &str,
-        args: &[ExpressionArg],
-    ) -> Result<ExpressionRenderMethod, GatewayError>;
+    fn make_fn(&self, name: &str, args: &[ExpressionArg]) -> Result<ExpressionRenderMethod>;
 }
 
 /// This is the trait that must be implemented by any expression that can be compiled from config

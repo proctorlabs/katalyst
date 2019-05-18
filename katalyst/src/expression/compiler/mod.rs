@@ -32,7 +32,7 @@ impl Compiler {
     pub fn compile_template_map(
         &self,
         template: &Option<HashMap<String, String>>,
-    ) -> Result<Option<HashMap<String, Expression>>, GatewayError> {
+    ) -> Result<Option<HashMap<String, Expression>>> {
         match template {
             Some(m) => Ok(Some({
                 let mut result = HashMap::<String, Expression>::new();
@@ -45,17 +45,14 @@ impl Compiler {
         }
     }
 
-    pub fn compile_template_option(
-        &self,
-        template: Option<&str>,
-    ) -> Result<Option<Expression>, GatewayError> {
+    pub fn compile_template_option(&self, template: Option<&str>) -> Result<Option<Expression>> {
         match template {
             Some(_) => Ok(Some(self.compile_template(template)?)),
             None => Ok(None),
         }
     }
 
-    pub fn compile_template(&self, raw_str: Option<&str>) -> Result<Expression, GatewayError> {
+    pub fn compile_template(&self, raw_str: Option<&str>) -> Result<Expression> {
         if let Some(raw) = raw_str {
             let mut results: Expression = vec![];
             let mut last_segment_index = 0;

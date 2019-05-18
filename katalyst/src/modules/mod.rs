@@ -27,7 +27,7 @@ pub trait ModuleProvider {
         _: Arc<Module>,
         _: Arc<Katalyst>,
         _: &unstructured::Document,
-    ) -> Result<Self::ModuleImplType, GatewayError>;
+    ) -> Result<Self::ModuleImplType>;
 }
 
 pub trait ModuleDispatch: Send + Sync + Debug {
@@ -44,7 +44,7 @@ impl Modules {
         self.modules.insert(module.name().to_string(), module);
     }
 
-    pub fn get(&self, name: &str) -> Result<Arc<Module>, GatewayError> {
+    pub fn get(&self, name: &str) -> Result<Arc<Module>> {
         Ok(self
             .modules
             .get(name)

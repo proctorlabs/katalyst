@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 pub use crate::app::Katalyst;
 pub use crate::context::Context;
-pub use crate::error::GatewayError;
+pub use crate::error::*;
 pub use crate::expression::*;
 pub use crate::modules::*;
 pub(crate) use crate::parser::*;
@@ -32,15 +32,15 @@ pub(crate) trait KatalystCommonUtilities {
 impl<T> KatalystCommonUtilities for T where T: Any {}
 
 pub(crate) trait OptionUtilities<T> {
-    fn with(&self, message: &'static str) -> Result<&T, GatewayError>;
-    fn with_owned(self, message: &'static str) -> Result<T, GatewayError>;
+    fn with(&self, message: &'static str) -> Result<&T>;
+    fn with_owned(self, message: &'static str) -> Result<T>;
 }
 
 impl<T> OptionUtilities<T> for Option<T>
 where
     T: Any,
 {
-    fn with(&self, message: &'static str) -> Result<&T, GatewayError> {
+    fn with(&self, message: &'static str) -> Result<&T> {
         match self {
             Some(t) => Ok(t),
             None => Err(GatewayError::Other(
@@ -50,7 +50,7 @@ where
         }
     }
 
-    fn with_owned(self, message: &'static str) -> Result<T, GatewayError> {
+    fn with_owned(self, message: &'static str) -> Result<T> {
         match self {
             Some(t) => Ok(t),
             None => Err(GatewayError::Other(

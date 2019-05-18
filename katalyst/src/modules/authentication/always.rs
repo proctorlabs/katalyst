@@ -20,7 +20,7 @@ impl Module for AlwaysAuthenticatorBuilder {
         _: ModuleType,
         _: Arc<Katalyst>,
         _: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>, GatewayError> {
+    ) -> Result<Arc<ModuleDispatch>> {
         Ok(Arc::new(AlwaysAuthenticator {}))
     }
 }

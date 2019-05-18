@@ -14,7 +14,7 @@ pub enum ModuleType {
     CacheHandler,
 }
 
-pub type ModuleResultSync = Result<Context, ModuleError>;
+pub type ModuleResultSync = std::result::Result<Context, ModuleError>;
 pub type ModuleResult = Box<Future<Item = Context, Error = ModuleError> + Send>;
 
 pub trait Module: Send + Sync + Debug {
@@ -27,7 +27,7 @@ pub trait Module: Send + Sync + Debug {
         _: ModuleType,
         _: Arc<Katalyst>,
         _: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>, GatewayError> {
+    ) -> Result<Arc<ModuleDispatch>> {
         Err(GatewayError::InvalidResource)
     }
 
@@ -36,7 +36,7 @@ pub trait Module: Send + Sync + Debug {
         _: ModuleType,
         _: Arc<Katalyst>,
         _: &unstructured::Document,
-    ) -> Result<Arc<CacheProvider>, GatewayError> {
+    ) -> Result<Arc<CacheProvider>> {
         Err(GatewayError::InvalidResource)
     }
 }

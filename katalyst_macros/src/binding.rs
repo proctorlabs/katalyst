@@ -107,7 +107,7 @@ pub fn binding_impl(bindings: BindingTokens) -> TokenStream {
                 #id_string
             }
 
-            fn make_fn(&self, name: &str, args: &[ExpressionArg]) -> Result<ExpressionRenderMethod, GatewayError> {
+            fn make_fn(&self, name: &str, args: &[ExpressionArg]) -> Result<ExpressionRenderMethod> {
                 match name {
                     #(#match_options)*
                     _ => Err(GatewayError::ExpressionItemNotFound(#id_string.to_string()))
