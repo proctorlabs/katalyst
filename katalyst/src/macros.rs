@@ -36,17 +36,26 @@ macro_rules! err {
     };
 }
 
-// #[cfg(test)]
-// mod test {
-//     #[test]
-//     fn derive_test() {
-//         #[derive(ExpressionBinding)]
-//         enum ThingBinding {
-//             One,
-//             Two,
-//         };
-//         ThingBinding::One.test();
-//         ThingBinding::Two.test();
-//     }
+#[cfg(test)]
+mod test {
+    use crate::prelude::*;
 
-// }
+    #[derive(ExpressionBinding)]
+    #[allow(dead_code)]
+    enum ThingBinding {
+        #[expression(method = test)]
+        One,
+        #[expression(method = test)]
+        Two,
+    }
+
+    impl ThingBinding {
+        fn test(_: &Context, _: &[ExpressionArg]) -> ExpressionResult {
+            unimplemented!()
+        }
+    }
+
+    #[test]
+    fn derive_test() {}
+
+}
