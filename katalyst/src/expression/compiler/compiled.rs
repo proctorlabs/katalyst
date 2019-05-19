@@ -53,7 +53,7 @@ impl CompiledExpression for String {
     }
 }
 
-impl CompiledExpression for u64 {
+impl CompiledExpression for i64 {
     fn render(&self, _: &Context) -> RenderResult {
         Ok(self.to_string())
     }
@@ -63,7 +63,7 @@ impl CompiledExpression for u64 {
     }
 
     fn result_type(&self) -> Document {
-        (0 as u64).into()
+        (0 as i64).into()
     }
 }
 
@@ -88,7 +88,7 @@ impl fmt::Debug for CompiledExpressionNode {
         write!(f, ") -> ")?;
         match self.result {
             ExpressionResultType::Text => write!(f, "str"),
-            ExpressionResultType::Number => write!(f, "u64"),
+            ExpressionResultType::Number => write!(f, "i64"),
             ExpressionResultType::Boolean => write!(f, "bool"),
         }
     }

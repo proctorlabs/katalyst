@@ -13,7 +13,7 @@ struct TemplateParser;
 #[derive(Debug)]
 pub enum ExpressionMetadata {
     Raw(String),
-    Number(u64),
+    Number(i64),
     Bool(bool),
     Text(String),
     Expression {
@@ -25,7 +25,7 @@ pub enum ExpressionMetadata {
 
 impl ExpressionMetadata {
     pub fn compile(
-        &self,
+        self,
         directory: &BuilderDirectory,
     ) -> std::result::Result<Arc<CompiledExpression>, GatewayError> {
         match self {
@@ -38,24 +38,23 @@ impl ExpressionMetadata {
                 match builder {
                     Some(b) => {
                         let mut c_args: Vec<Arc<CompiledExpression>> = vec![];
-                        for arg in args.iter() {
+                        for arg in args.into_iter() {
                             c_args.push(arg.compile(directory)?);
                         }
                         Ok(Arc::new(CompiledExpressionNode {
-                            name: module.to_string(),
-                            args: c_args.clone(),
+                            name: module.to_owned(),
                             render_fn: b.make_fn(&method, &c_args)?,
+                            args: c_args,
                             result: ExpressionResultType::Text,
                         }))
                     }
-                    None => Err(GatewayError::ExpressionItemNotFound(module.to_string())),
+                    None => Err(GatewayError::ExpressionItemNotFound(module)),
                 }
             }
-            ExpressionMetadata::Text(text) | ExpressionMetadata::Raw(text) => {
-                Ok(Arc::new(text.to_owned()))
-            }
-            ExpressionMetadata::Number(number) => Ok(Arc::new(number.to_owned())),
-            ExpressionMetadata::Bool(cnd) => Ok(Arc::new(cnd.to_owned())),
+            ExpressionMetadata::Raw(text) => Ok(Arc::new(text)),
+            ExpressionMetadata::Text(text) => Ok(Arc::new(text)),
+            ExpressionMetadata::Number(number) => Ok(Arc::new(number)),
+            ExpressionMetadata::Bool(cnd) => Ok(Arc::new(cnd)),
         }
     }
 }
@@ -63,11 +62,11 @@ impl ExpressionMetadata {
 pub fn parse_template(
     input: &str,
     directory: &BuilderDirectory,
-) -> std::result::Result<Vec<Arc<CompiledExpression>>, GatewayError> {
+) -> Result<Vec<Arc<CompiledExpression>>> {
     let tokens = TemplateParser::parse(Rule::template, input)?;
     let metadata = parse_tokens(tokens)?;
     let mut result = vec![];
-    for item in metadata.iter() {
+    for item in metadata.into_iter() {
         result.push(item.compile(directory)?);
     }
     Ok(result)
@@ -83,9 +82,9 @@ fn parse_tokens(
             Rule::number_lit => result.push(ExpressionMetadata::Number(pair.as_str().parse()?)),
             Rule::true_lit => result.push(ExpressionMetadata::Bool(true)),
             Rule::false_lit => result.push(ExpressionMetadata::Bool(false)),
-            Rule::string_lit => {
-                result.push(ExpressionMetadata::Text(pair.into_inner().as_str().into()))
-            }
+            Rule::string_lit => result.push(ExpressionMetadata::Text(
+                pair.into_inner().as_str().replace("\\'", "'"),
+            )),
             Rule::object_call => result.push(parse_object(pair.into_inner())?),
             Rule::EOI => return Ok(result),
             _ => {
@@ -114,11 +113,14 @@ fn parse_object(
 mod test {
     use super::*;
 
-    #[test]
-    fn test_parser() -> std::result::Result<(), GatewayError> {
-        //let result = parse_template("input: &str {{ bob.dole(test.file('40')) }} dsga")?;
-        //println!("{:?}", result);
-        Ok(())
+    lazy_static! {
+        static ref BUILDERS: BuilderDirectory = BuilderDirectory::default();
     }
 
+    #[test]
+    fn test_parser() -> std::result::Result<(), GatewayError> {
+        let result = parse_template("/this/is/a/ {{ 'pa\\'th' }} /to/something", &BUILDERS)?;
+        println!("{:?}", result);
+        Ok(())
+    }
 }

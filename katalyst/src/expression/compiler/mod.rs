@@ -3,15 +3,10 @@ pub(crate) mod nodes;
 
 use crate::expression::*;
 use compiled::*;
-use regex::Regex;
 use std::collections::HashMap;
 use std::sync::Arc;
 
 type BuilderDirectory = HashMap<&'static str, Box<ExpressionBinding>>;
-
-lazy_static! {
-    static ref TEMPLATE_FINDER: Regex = Regex::new(r"\{{2}((?:[^}])*)}}").unwrap(); // Matches {{ }} templates
-}
 
 pub struct Compiler {
     builders: BuilderDirectory,
