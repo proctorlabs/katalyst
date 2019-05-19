@@ -56,7 +56,6 @@ fn get_variant_metadata(variant: &syn::Variant) -> VariantMetadata {
     VariantMetadata { ident, method_expr }
 }
 
-//TODO: Finish this
 pub fn impl_derive_expression_binding(ast: &syn::DeriveInput) -> TokenStream {
     let ident = &ast.ident;
     let name = ident.to_string().to_ascii_lowercase();

@@ -119,7 +119,7 @@ mod test {
 
     #[test]
     fn test_parser() -> std::result::Result<(), GatewayError> {
-        let result = parse_template("/this/is/a/ {{ 'pa\\'th' }} /to/something", &BUILDERS)?;
+        let result = parse_template("/this/is/a/ {{ 'path' }} /to/something", &BUILDERS)?;
         println!("{:?}", result);
         Ok(())
     }

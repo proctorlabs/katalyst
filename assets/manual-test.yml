@@ -44,6 +44,7 @@ routes:
         ip: "{{ http.ip() }}"
         encoded: "{{ encode.base64('test') }}"
         decoded: "{{ decode.base64('dGVzdA==') }}"
+        test: "{{ sys.env('USER') }}"
       headers:
         header: "{{ http.header('user-agent') }}"
     authenticators:

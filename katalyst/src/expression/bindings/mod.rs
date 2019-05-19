@@ -10,5 +10,5 @@ pub use self::content::ContentBinding;
 pub use self::encoding::DecodeBinding;
 pub use self::encoding::EncodeBinding;
 pub use self::http::HttpBinding;
-pub use self::sys::SysBinding;
+pub use self::sys::Sys;
 pub use self::url::UrlBinding;
