@@ -4,7 +4,7 @@ customization from within the configuration file.
 */
 
 mod bindings;
-mod compiler;
+pub(crate) mod compiler;
 mod traits;
 
 use crate::prelude::*;

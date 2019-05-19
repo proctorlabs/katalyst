@@ -26,11 +26,11 @@ routes:
     handler:
       type: file_server
       root_path: "../assets/"
-      selector: '{{ http.matched("file") }}'
+      selector: "{{ http.matched('file') }}"
 
   - path:
       type: template
-      template: '/test/{{ url.segment("segment") }}/{{ url.all("end") }}'
+      template: "/test/{{ url.segment('segment') }}/{{ url.all('end') }}"
     methods:
       - get
     handler:
@@ -38,14 +38,14 @@ routes:
       host: httpbin
       path: "/get"
       query:
-        segment: '{{ http.matched("segment") }}'
-        end: '{{ http.matched("end") }}'
+        segment: "{{ http.matched('segment') }}"
+        end: "{{ http.matched('end') }}"
         method: "{{ http.method() }}"
         ip: "{{ http.ip() }}"
-        encoded: '{{ encode.base64("test") }}'
-        decoded: '{{ decode.base64("dGVzdA==") }}'
+        encoded: "{{ encode.base64('test') }}"
+        decoded: "{{ decode.base64('dGVzdA==') }}"
       headers:
-        header: '{{ http.header("user-agent") }}'
+        header: "{{ http.header('user-agent') }}"
     authenticators:
       - type: http
         url: "https://postman-echo.com/get?thing=something"
@@ -61,7 +61,7 @@ routes:
       type: host
       host: httpbin
       headers:
-        Capped: '{{ content.val("body") }}'
+        Capped: "{{ content.val('body') }}"
       path: "/post"
 
   - path:

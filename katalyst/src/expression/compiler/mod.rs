@@ -1,9 +1,8 @@
 mod compiled;
-mod nodes;
+pub(crate) mod nodes;
 
 use crate::expression::*;
 use compiled::*;
-use nodes::DynamicNode;
 use regex::Regex;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -54,32 +53,7 @@ impl Compiler {
 
     pub fn compile_template(&self, raw_str: Option<&str>) -> Result<Expression> {
         if let Some(raw) = raw_str {
-            let mut results: Expression = vec![];
-            let mut last_segment_index = 0;
-            if TEMPLATE_FINDER.is_match(raw) {
-                for cap in TEMPLATE_FINDER.captures_iter(raw) {
-                    let (mtch, expr) = (
-                        cap.get(0)
-                            .ok_or_else(|| GatewayError::ElementExpected("Capture"))?,
-                        &cap[1],
-                    );
-                    if mtch.start() > last_segment_index {
-                        let offset = mtch.start() - last_segment_index;
-                        let segment: String =
-                            raw.chars().skip(last_segment_index).take(offset).collect();
-                        results.push(Arc::new(segment));
-                    }
-                    let node = DynamicNode::build(expr)?;
-                    results.push(node.compile(&self.builders)?);
-                    last_segment_index = mtch.end();
-                }
-            }
-            if last_segment_index == 0 || last_segment_index < raw.len() {
-                let offset = raw.len() - last_segment_index;
-                let segment: String = raw.chars().skip(last_segment_index).take(offset).collect();
-                results.push(Arc::new(segment));
-            }
-            Ok(results)
+            Ok(nodes::parse_template(raw, &self.builders)?)
         } else {
             Err(GatewayError::ElementExpected("template"))
         }

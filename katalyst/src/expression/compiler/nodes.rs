@@ -2,136 +2,123 @@
 #![allow(clippy::eval_order_dependence)]
 use super::*;
 use crate::prelude::*;
-use std::fmt;
-use syn::parse::{Parse, ParseStream};
-use syn::punctuated::Punctuated;
-use syn::{parenthesized, token, Ident, LitBool, LitInt, LitStr, Result, Token};
+use pest::Parser;
+use pest_derive::*;
 
-pub enum DynamicNode {
-    Method(MethodNode),
-    Text(LitStr),
-    Number(LitInt),
-    Bool(LitBool),
+#[derive(Parser)]
+#[grammar = "expression/expr.pest"]
+#[allow(dead_code)]
+struct TemplateParser;
+
+#[derive(Debug)]
+pub enum ExpressionMetadata {
+    Raw(String),
+    Number(u64),
+    Bool(bool),
+    Text(String),
+    Expression {
+        module: String,
+        method: String,
+        args: Vec<ExpressionMetadata>,
+    },
 }
 
-pub struct MethodNode {
-    pub ident: Ident,
-    pub dot_token: Token![.],
-    pub ident2: Ident,
-    pub paren_token: token::Paren,
-    pub args: Punctuated<DynamicNode, Token![,]>,
-}
-
-impl Parse for MethodNode {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let content;
-        Ok(MethodNode {
-            ident: input.parse()?,
-            dot_token: input.parse()?,
-            ident2: input.parse()?,
-            paren_token: parenthesized!(content in input),
-            args: content.parse_terminated(DynamicNode::parse)?,
-        })
-    }
-}
-
-impl fmt::Debug for MethodNode {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Method: {}(", self.ident.to_string())?;
-        for arg in self.args.iter() {
-            arg.fmt(f)?;
-            write!(f, ", ")?;
-        }
-        write!(f, ")")
-    }
-}
-
-impl Parse for DynamicNode {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let lookahead = input.lookahead1();
-        if lookahead.peek(Ident) {
-            input.parse().map(DynamicNode::Method)
-        } else if lookahead.peek(LitStr) {
-            input.parse().map(DynamicNode::Text)
-        } else if lookahead.peek(LitInt) {
-            input.parse().map(DynamicNode::Number)
-        } else if lookahead.peek(LitBool) {
-            input.parse().map(DynamicNode::Bool)
-        } else {
-            Err(lookahead.error())
-        }
-    }
-}
-
-impl fmt::Debug for DynamicNode {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            DynamicNode::Method(method) => method.fmt(f),
-            DynamicNode::Text(text) => write!(f, "Text: {}", text.value()),
-            DynamicNode::Number(number) => write!(f, "Number: {}", number.value()),
-            DynamicNode::Bool(cnd) => write!(f, "Bool: {}", cnd.value),
-        }
-    }
-}
-
-impl DynamicNode {
-    pub fn build(raw: &str) -> std::result::Result<DynamicNode, GatewayError> {
-        Ok(syn::parse_str(raw)?)
-    }
-
+impl ExpressionMetadata {
     pub fn compile(
         &self,
         directory: &BuilderDirectory,
     ) -> std::result::Result<Arc<CompiledExpression>, GatewayError> {
         match self {
-            DynamicNode::Method(node) => {
-                let method_name = node.ident.to_string();
-                let builder = directory.get(&method_name.as_str());
+            ExpressionMetadata::Expression {
+                module,
+                method,
+                args,
+            } => {
+                let builder = directory.get(&module.as_str());
                 match builder {
                     Some(b) => {
-                        let mut args: Vec<Arc<CompiledExpression>> = vec![];
-                        for arg in node.args.iter() {
-                            args.push(arg.compile(directory)?);
+                        let mut c_args: Vec<Arc<CompiledExpression>> = vec![];
+                        for arg in args.iter() {
+                            c_args.push(arg.compile(directory)?);
                         }
-                        let method = node.ident2.to_string();
                         Ok(Arc::new(CompiledExpressionNode {
-                            name: method_name.to_string(),
-                            args: args.clone(),
-                            render_fn: b.make_fn(&method, &args)?,
+                            name: module.to_string(),
+                            args: c_args.clone(),
+                            render_fn: b.make_fn(&method, &c_args)?,
                             result: ExpressionResultType::Text,
                         }))
                     }
-                    None => Err(GatewayError::ExpressionItemNotFound(
-                        method_name.to_string(),
-                    )),
+                    None => Err(GatewayError::ExpressionItemNotFound(module.to_string())),
                 }
             }
-            DynamicNode::Text(text) => Ok(Arc::new(text.value())),
-            DynamicNode::Number(number) => Ok(Arc::new(number.value())),
-            DynamicNode::Bool(cnd) => Ok(Arc::new(cnd.value)),
+            ExpressionMetadata::Text(text) | ExpressionMetadata::Raw(text) => {
+                Ok(Arc::new(text.to_owned()))
+            }
+            ExpressionMetadata::Number(number) => Ok(Arc::new(number.to_owned())),
+            ExpressionMetadata::Bool(cnd) => Ok(Arc::new(cnd.to_owned())),
         }
     }
 }
 
+pub fn parse_template(
+    input: &str,
+    directory: &BuilderDirectory,
+) -> std::result::Result<Vec<Arc<CompiledExpression>>, GatewayError> {
+    let tokens = TemplateParser::parse(Rule::template, input)?;
+    let metadata = parse_tokens(tokens)?;
+    let mut result = vec![];
+    for item in metadata.iter() {
+        result.push(item.compile(directory)?);
+    }
+    Ok(result)
+}
+
+fn parse_tokens(
+    pairs: pest::iterators::Pairs<'_, Rule>,
+) -> std::result::Result<Vec<ExpressionMetadata>, GatewayError> {
+    let mut result = vec![];
+    for pair in pairs {
+        match pair.as_rule() {
+            Rule::raw_block => result.push(ExpressionMetadata::Raw(pair.as_str().into())),
+            Rule::number_lit => result.push(ExpressionMetadata::Number(pair.as_str().parse()?)),
+            Rule::true_lit => result.push(ExpressionMetadata::Bool(true)),
+            Rule::false_lit => result.push(ExpressionMetadata::Bool(false)),
+            Rule::string_lit => {
+                result.push(ExpressionMetadata::Text(pair.into_inner().as_str().into()))
+            }
+            Rule::object_call => result.push(parse_object(pair.into_inner())?),
+            Rule::EOI => return Ok(result),
+            _ => {
+                return Err(GatewayError::ExpressionLexicalError(
+                    "Unexpected element found!".into(),
+                ))
+            }
+        }
+    }
+    Ok(result)
+}
+
+fn parse_object(
+    mut pairs: pest::iterators::Pairs<'_, Rule>,
+) -> std::result::Result<ExpressionMetadata, GatewayError> {
+    let module = pairs.next().unwrap().as_str().to_string();
+    let method = pairs.next().unwrap().as_str().to_string();
+    Ok(ExpressionMetadata::Expression {
+        module,
+        method,
+        args: parse_tokens(pairs)?,
+    })
+}
+
 #[cfg(test)]
-mod tests {
+mod test {
     use super::*;
 
     #[test]
-    fn tokenize_simple_expression() {
-        let exp = " some.thing (\"string\", true) ";
-        let node: DynamicNode = syn::parse_str(exp).unwrap();
-        println!("{:?}", node);
+    fn test_parser() -> std::result::Result<(), GatewayError> {
+        //let result = parse_template("input: &str {{ bob.dole(test.file('40')) }} dsga")?;
+        //println!("{:?}", result);
+        Ok(())
     }
 
-    #[test]
-    fn compile_from_expression() {
-        let exp = " http.matched (\"test\") ";
-        let node: DynamicNode = syn::parse_str(exp).unwrap();
-        let mut directory = BuilderDirectory::default();
-        let builder = Box::new(HttpBinding {});
-        directory.insert(builder.identifier(), builder);
-        let result = node.compile(&directory).unwrap();
-        println!("{:?}", result);
-    }
 }
