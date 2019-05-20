@@ -58,7 +58,7 @@ impl Compiler {
 impl Default for Compiler {
     fn default() -> Self {
         let mut providers = Compiler::empty();
-        providers.register(Box::new(Sys::Env));
+        providers.register(Box::new(Sys));
         providers.register(Box::new(HttpBinding {}));
         providers.register(Box::new(AuthBinding {}));
         providers.register(Box::new(UrlBinding {}));

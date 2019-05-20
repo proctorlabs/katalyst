@@ -35,27 +35,3 @@ macro_rules! err {
         Box::new(futures::future::err::<Context, ModuleError>($c.fail($e)))
     };
 }
-
-#[cfg(test)]
-mod test {
-    use crate::prelude::*;
-
-    #[derive(ExpressionBinding)]
-    #[allow(dead_code)]
-    enum ThingBinding {
-        #[expression(method = test)]
-        One,
-        #[expression(method = test)]
-        Two,
-    }
-
-    impl ThingBinding {
-        fn test(_: &Context, _: &[ExpressionArg]) -> ExpressionResult {
-            unimplemented!()
-        }
-    }
-
-    #[test]
-    fn derive_test() {}
-
-}
