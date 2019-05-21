@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use unstructured::Document;
 
 pub enum Format {
     Default,
@@ -26,6 +27,14 @@ impl Format {
             }
         } else {
             Format::Default
+        }
+    }
+
+    pub fn parse(&self, data: &[u8]) -> Result<Document> {
+        match self {
+            Format::Json => Ok(serde_json::from_slice(data)?),
+            Format::Yaml => Ok(serde_yaml::from_slice(data)?),
+            _ => Ok(serde_json::from_slice(data).unwrap_or_else(|_| Document::default())),
         }
     }
 }

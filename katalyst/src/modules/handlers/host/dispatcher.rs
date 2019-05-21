@@ -27,11 +27,9 @@ impl HostDispatcher {
         let transformer = try_req!(ctx, self.transformer(&ctx, balancer_lease.to_string()));
         ctx.metadata.balancer_lease = Some(balancer_lease);
 
-        let request = ctx.request.take();
-        ctx.request = RequestContainer::Empty;
+        let request = ctx.request.take_request();
 
         let mut client_req = try_req!(ctx, transformer.transform(request));
-        ctx.request = RequestContainer::Empty;
         add_forwarding_headers(&mut client_req.headers_mut(), &ctx.metadata.remote_ip);
         strip_hop_headers(&mut client_req.headers_mut());
         ctx.request = RequestContainer::new(client_req);
@@ -39,8 +37,7 @@ impl HostDispatcher {
     }
 
     pub fn send(mut ctx: Context) -> ModuleResult {
-        let dsr = ctx.request.take();
-        ctx.request = RequestContainer::Empty;
+        let dsr = ctx.request.take_request();
         let client = ctx.katalyst.get_client();
         let res = client.request(dsr);
         Box::new(res.then(|response| match response {

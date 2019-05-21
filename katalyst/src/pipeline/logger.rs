@@ -9,7 +9,7 @@ pub fn log_request(ctx: Context) -> ModuleResult {
 pub fn log_result(ctx: Context) -> Context {
     let duration = Instant::now().duration_since(ctx.metadata.started);
     let total_ms = u64::from(duration.subsec_millis()) + (duration.as_secs() * 1000);
-    debug!("Request processed in {:?}ms", total_ms);
+    info!("Request processed in {:?}ms", total_ms);
     ctx
 }
 

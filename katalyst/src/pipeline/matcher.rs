@@ -2,7 +2,7 @@ use crate::pipeline::*;
 use crate::prelude::*;
 
 pub fn matcher(mut ctx: Context) -> ModuleResultSync {
-    let request = ctx.request.raw();
+    let request = &ctx.request;
     let config = try_req!(
         ctx,
         ctx.katalyst
@@ -13,11 +13,11 @@ pub fn matcher(mut ctx: Context) -> ModuleResultSync {
         let method_match = match &route.methods {
             Some(methods) => {
                 let up_method = request.method();
-                methods.contains(up_method)
+                methods.contains(&up_method)
             }
             None => true,
         };
-        let path = request.uri().path();
+        let path = ctx.metadata.url.path();
         if method_match && route.pattern.is_match(path) {
             let mut cap_map = HashMap::new();
             let caps = try_req!(

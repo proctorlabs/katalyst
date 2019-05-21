@@ -30,8 +30,7 @@ impl Module for ContentPlugin {
 
 impl ModuleDispatch for ContentPlugin {
     fn dispatch(&self, mut ctx: Context) -> ModuleResult {
-        let req = ctx.request.take();
-        ctx.request = RequestContainer::Empty;
+        let req = ctx.request.take_request();
         let (parts, body) = req.into_parts();
         let format = Format::content_type(
             parts

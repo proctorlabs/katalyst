@@ -14,7 +14,7 @@ pub struct Http;
 
 impl Http {
     fn method(ctx: &Context, _: &[ExpressionArg]) -> ExpressionResult {
-        Ok(ctx.request.raw().method().as_str().into())
+        Ok(ctx.request.method().as_str().into())
     }
 
     fn ip(ctx: &Context, _: &[ExpressionArg]) -> ExpressionResult {
@@ -41,14 +41,9 @@ impl Http {
     fn header(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
         let hdr = ctx
             .request
-            .raw()
-            .headers()
-            .get(args[0].render(ctx)?)
+            .header(&args[0].render(ctx)?)
             .ok_or_else(|| GatewayError::InternalServerError)?;
-        Ok(hdr
-            .to_str()
-            .map_err(|_| GatewayError::InternalServerError)?
-            .into())
+        Ok(hdr.into())
     }
 
     fn matched(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
