@@ -42,7 +42,7 @@ pub struct Whitelist {
 
 impl ModuleDispatch for Whitelist {
     fn dispatch(&self, ctx: Context) -> ModuleResult {
-        if self.ips.contains(&ctx.detail.remote_ip) {
+        if self.ips.contains(&ctx.metadata.remote_ip) {
             Box::new(ok(ctx))
         } else {
             Box::new(err(ctx.fail(GatewayError::Unauthorized)))

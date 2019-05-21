@@ -58,13 +58,13 @@ impl Compiler {
 impl Default for Compiler {
     fn default() -> Self {
         let mut providers = Compiler::empty();
-        providers.register(Box::new(Sys));
-        providers.register(Box::new(HttpBinding {}));
-        providers.register(Box::new(AuthBinding {}));
-        providers.register(Box::new(UrlBinding {}));
-        providers.register(Box::new(ContentBinding {}));
-        providers.register(Box::new(EncodeBinding {}));
-        providers.register(Box::new(DecodeBinding {}));
+        providers.register(Sys.into());
+        providers.register(Http.into());
+        providers.register(Auth.into());
+        providers.register(Url.into());
+        providers.register(Content.into());
+        providers.register(Encode.into());
+        providers.register(Decode.into());
         providers
     }
 }

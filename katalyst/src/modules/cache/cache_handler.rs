@@ -38,7 +38,7 @@ impl ModuleDispatch for DefaultCacheHandler {
                 .clone()
                 .service
                 .cache
-                .get_key(&ctx.detail.url.as_str())
+                .get_key(&ctx.metadata.url.as_str())
                 .then(|r| match r {
                     Ok(r) => {
                         let mut content = vec![];

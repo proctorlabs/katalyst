@@ -1,9 +1,11 @@
+mod auth;
 mod data;
 mod requests;
 
 use crate::app::Katalyst;
 use crate::instance::Route;
 use crate::prelude::*;
+pub use auth::KatalystAuthenticationInfo;
 use data::ContextData;
 use hyper::{Body, Request};
 pub use requests::*;
@@ -13,78 +15,111 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Instant;
 
-#[derive(Debug, Default)]
-pub struct KatalystAuthenticationInfo {
-    claims: HashMap<String, Vec<String>>,
-}
-
-impl KatalystAuthenticationInfo {
-    pub fn add_claim(&mut self, claim_type: String, claim_value: String) {
-        if let Some(claims) = self.claims.get_mut(&claim_type) {
-            claims.push(claim_value);
-        } else {
-            self.claims.insert(claim_type, vec![claim_value]);
-        }
-    }
-
-    pub fn get_claim(&self, claim_type: String) -> String {
-        match self.claims.get(&claim_type) {
-            Some(c) => c[0].to_string(),
-            None => String::default(),
-        }
-    }
-}
-
-#[derive(Debug)]
-pub struct Detail {
-    pub remote_ip: String,
-    pub url: url::Url,
-    pub matched_route: Option<Arc<Route>>,
-    pub captures: Option<HashMap<String, String>>,
-    pub authentication: Option<KatalystAuthenticationInfo>,
-    pub balancer_lease: Option<Arc<String>>,
-}
-
-#[derive(Debug)]
-pub struct Timestamps {
-    pub started: Instant,
-    pub completed: Option<Instant>,
-}
-
 #[derive(Debug)]
 pub struct Context {
     pub request: RequestContainer,
     pub response: ResponseContainer,
-    pub detail: Detail,
-    pub timestamps: Timestamps,
+    pub metadata: Metadata,
     pub katalyst: Arc<Katalyst>,
+    state: RequestState,
     data: ContextData,
+}
+
+#[derive(Debug)]
+pub enum RequestState {
+    New,
+    Matched(MatchInfo),
+    Authenticated(AuthInfo),
+    Response(ResponseContainer),
+}
+
+#[derive(Debug)]
+pub struct Metadata {
+    pub started: Instant,
+    pub remote_ip: String,
+    pub url: url::Url,
+    pub balancer_lease: Option<Arc<String>>,
+}
+
+#[derive(Debug)]
+pub struct MatchInfo {
+    pub route: Arc<Route>,
+    pub captures: HashMap<String, String>,
+}
+
+#[derive(Debug)]
+pub struct AuthInfo {
+    pub matched: MatchInfo,
+    pub detail: KatalystAuthenticationInfo,
 }
 
 impl Default for Context {
     fn default() -> Self {
-        Context {
+        *Box::new(Context {
             request: RequestContainer::Empty,
             response: ResponseContainer::Empty,
-            detail: Detail {
+            metadata: Metadata {
                 remote_ip: String::default(),
                 url: url::Url::parse("http://localhost/").unwrap(),
-                matched_route: None,
-                captures: None,
-                authentication: None,
                 balancer_lease: None,
-            },
-            timestamps: Timestamps {
                 started: Instant::now(),
-                completed: None,
             },
+            state: RequestState::New,
             katalyst: Arc::default(),
             data: ContextData::default(),
-        }
+        })
     }
 }
 
 impl Context {
+    pub fn into_error(self, error: GatewayError) -> ModuleError {
+        ModuleError {
+            error,
+            context: self,
+        }
+    }
+
+    pub fn get_matched(&self) -> Result<&MatchInfo> {
+        match &self.state {
+            RequestState::Matched(ref m) => Ok(m),
+            RequestState::Authenticated(ref a) => Ok(&a.matched),
+            _ => Err(GatewayError::StateUnavailable),
+        }
+    }
+
+    pub fn set_match(&mut self, matched: MatchInfo) -> Result<()> {
+        match &self.state {
+            RequestState::New => {
+                self.state = RequestState::Matched(matched);
+                Ok(())
+            }
+            _ => Err(GatewayError::StateUpdateFailure),
+        }
+    }
+
+    pub fn get_authenticated(&self) -> Result<&AuthInfo> {
+        match &self.state {
+            RequestState::Authenticated(ref a) => Ok(a),
+            _ => Err(GatewayError::StateUnavailable),
+        }
+    }
+
+    pub fn set_authenticated(
+        mut self,
+        info: KatalystAuthenticationInfo,
+    ) -> std::result::Result<Self, ModuleError> {
+        match self.state {
+            RequestState::Matched(m) => {
+                self.state = RequestState::Authenticated(AuthInfo {
+                    matched: m,
+                    detail: info,
+                })
+            }
+            _ => return Err(self.into_error(GatewayError::StateUpdateFailure)),
+        };
+        Ok(self)
+    }
+
     pub fn get_extension_data<T: Any + Send + Sync>(&self) -> Result<Arc<T>> {
         self.data
             .get()
@@ -103,31 +138,18 @@ impl Context {
             host = &uri.host().unwrap_or("localhost"),
             path = &uri
         );
-        Context {
+        *Box::new(Context {
             request: RequestContainer::new(request),
             response: ResponseContainer::Empty,
-            detail: Detail {
+            metadata: Metadata {
                 remote_ip: remote_addr.ip().to_string(),
                 url: url::Url::parse(&path).unwrap(),
-                matched_route: None,
-                captures: None,
-                authentication: None,
                 balancer_lease: None,
-            },
-            timestamps: Timestamps {
                 started: Instant::now(),
-                completed: None,
             },
+            state: RequestState::New,
             katalyst,
             data: ContextData::default(),
-        }
-    }
-}
-
-impl Detail {
-    pub fn route(&self) -> Result<&Arc<Route>> {
-        self.matched_route
-            .as_ref()
-            .ok_or_else(|| GatewayError::InternalServerError)
+        })
     }
 }

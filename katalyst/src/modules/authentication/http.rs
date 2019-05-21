@@ -65,7 +65,10 @@ impl ModuleDispatch for HttpAuthenticator {
                 debug!("{}", body);
                 let mut auth = KatalystAuthenticationInfo::default();
                 auth.add_claim("KatalystAuthenticator".to_string(), "http".to_string());
-                ctx.detail.authentication = Some(auth);
+                ctx = match ctx.set_authenticated(auth) {
+                    Ok(c) => c,
+                    Err(e) => return err(e),
+                };
                 ok(ctx)
             }
             Err(_) => err(ctx.fail(GatewayError::Forbidden)),

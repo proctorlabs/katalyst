@@ -6,7 +6,7 @@ use std::any::Any;
 use std::sync::Arc;
 
 pub use crate::app::Katalyst;
-pub use crate::context::Context;
+pub use crate::context::*;
 pub use crate::error::*;
 pub use crate::expression::*;
 pub use crate::modules::*;

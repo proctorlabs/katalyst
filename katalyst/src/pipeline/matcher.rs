@@ -45,8 +45,12 @@ pub fn matcher(mut ctx: Context) -> ModuleResultSync {
                     );
                 }
             }
-            ctx.detail.matched_route = Some(route.clone());
-            ctx.detail.captures = Some(cap_map);
+            if let Err(e) = ctx.set_match(MatchInfo {
+                route: route.clone(),
+                captures: cap_map,
+            }) {
+                return Err(ctx.into_error(e));
+            }
             debug!("Request has been matched to route!");
             return Ok(ctx);
         }

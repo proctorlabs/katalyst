@@ -1,15 +1,16 @@
 use crate::expression::*;
 use crate::prelude::*;
 
-binding! {
-    Auth {
-        #[args(count=1)]
-        fn claim(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
-            if let Some(auth_info) = &ctx.detail.authentication {
-                Ok(auth_info.get_claim(args[0].render(&ctx)?).into())
-            } else {
-                Err(GatewayError::InternalServerError)
-            }
-        };
+#[derive(ExpressionBinding)]
+#[expression(name = "auth", bind = claim)]
+pub struct Auth;
+
+impl Auth {
+    fn claim(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
+        Ok(ctx
+            .get_authenticated()?
+            .detail
+            .get_claim(args[0].render(&ctx)?)
+            .into())
     }
 }

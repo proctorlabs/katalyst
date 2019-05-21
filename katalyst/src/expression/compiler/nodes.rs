@@ -51,8 +51,7 @@ impl ExpressionMetadata {
                     None => Err(GatewayError::ExpressionItemNotFound(module)),
                 }
             }
-            ExpressionMetadata::Raw(text) => Ok(Arc::new(text)),
-            ExpressionMetadata::Text(text) => Ok(Arc::new(text)),
+            ExpressionMetadata::Raw(text) | ExpressionMetadata::Text(text) => Ok(Arc::new(text)),
             ExpressionMetadata::Number(number) => Ok(Arc::new(number)),
             ExpressionMetadata::Bool(cnd) => Ok(Arc::new(cnd)),
         }

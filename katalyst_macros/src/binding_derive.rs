@@ -1,37 +1,6 @@
+use crate::attr::*;
 use proc_macro::TokenStream;
 use quote::*;
-use syn::parse::{Parse, ParseStream};
-use syn::punctuated::Punctuated;
-
-struct BindingAttrValues {
-    pub ident: syn::Ident,
-    pub equal: Token![=],
-    pub val: syn::Expr,
-}
-
-impl Parse for BindingAttrValues {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        Ok(BindingAttrValues {
-            ident: input.parse()?,
-            equal: input.parse()?,
-            val: input.parse()?,
-        })
-    }
-}
-
-struct BindingAttrParens {
-    pub parens: syn::token::Paren,
-    pub contents: Punctuated<BindingAttrValues, Token![,]>,
-}
-
-impl Parse for BindingAttrParens {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        let content;
-        let parens = parenthesized!(content in input);
-        let contents = content.parse_terminated(BindingAttrValues::parse)?;
-        Ok(BindingAttrParens { parens, contents })
-    }
-}
 
 type BindingTuple = (Option<Box<ToTokens>>, Option<Box<ToTokens>>);
 
@@ -93,6 +62,12 @@ pub fn impl_derive_expression_binding(ast: &syn::DeriveInput) -> TokenStream {
     let name = &metadata.object_name;
 
     let gen = quote! {
+        impl From<#ident> for Box<ExpressionBinding> {
+            fn from(item: #ident) -> Self {
+                Box::new(item)
+            }
+        }
+
         impl ExpressionBinding for #ident {
             fn identifier(&self) -> &'static str {
                 #name

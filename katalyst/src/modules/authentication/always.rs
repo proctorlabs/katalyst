@@ -32,7 +32,10 @@ impl ModuleDispatch for AlwaysAuthenticator {
     fn dispatch(&self, mut ctx: Context) -> ModuleResult {
         let mut result = KatalystAuthenticationInfo::default();
         result.add_claim("KatalystAuthenticator".to_string(), "always".to_string());
-        ctx.detail.authentication = Some(result);
+        ctx = match ctx.set_authenticated(result) {
+            Ok(c) => c,
+            Err(e) => return Box::new(err(e)),
+        };
         Box::new(ok::<Context, ModuleError>(ctx))
     }
 }
