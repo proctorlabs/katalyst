@@ -14,6 +14,44 @@ pub enum RequestContainer {
     ParsedRequest(Box<(Parts, Vec<u8>, Document)>),
 }
 
+impl Context {
+    pub fn preload(mut self) -> ModuleResult {
+        match &self.request {
+            RequestContainer::RawRequest(_) => {
+                if let RequestContainer::RawRequest(r) = self.request.take() {
+                    let (data, body) = *r;
+                    Box::new(body.concat2().then(|r| match r {
+                        Ok(body) => {
+                            let res = Box::new((data, body.into_iter().collect()));
+                            self.request = RequestContainer::LoadedRequest(res);
+                            Ok(self)
+                        }
+                        Err(_) => Err(self.fail(GatewayError::InternalServerError)),
+                    }))
+                } else {
+                    Box::new(ok(self))
+                }
+            }
+            _ => Box::new(ok(self)),
+        }
+    }
+
+    pub fn parse(self) -> ModuleResult {
+        Box::new(self.preload().and_then(|mut slf| {
+            let format = Format::content_type(slf.request.header("Content-Type"));
+            if let RequestContainer::LoadedRequest(r) = slf.request {
+                let (data, body) = *r;
+                let doc = match format.parse(&body) {
+                    Ok(d) => d,
+                    Err(_) => Document::Unit,
+                };
+                slf.request = RequestContainer::ParsedRequest(Box::new((data, body, doc)));
+            }
+            Ok(slf)
+        }))
+    }
+}
+
 impl RequestContainer {
     pub fn new(req: Request<Body>) -> Self {
         RequestContainer::RawRequest(Box::new(req.into_parts()))
@@ -44,33 +82,8 @@ impl RequestContainer {
         }
     }
 
-    pub fn preload(self) -> Box<Future<Item = Self, Error = GatewayError>> {
-        match self {
-            RequestContainer::RawRequest(r) => {
-                let (data, body) = *r;
-                Box::new(
-                    body.concat2()
-                        .and_then(|body| {
-                            let res = Box::new((data, body.into_iter().collect()));
-                            Ok(RequestContainer::LoadedRequest(res))
-                        })
-                        .map_err(|_| GatewayError::InternalServerError),
-                )
-            }
-            _ => Box::new(ok(self)),
-        }
-    }
-
-    pub fn parse(self) -> Box<Future<Item = Self, Error = GatewayError>> {
-        Box::new(self.preload().and_then(|mut slf| {
-            let format = Format::content_type(slf.header("Content-Type"));
-            if let RequestContainer::LoadedRequest(r) = slf {
-                let (data, body) = *r;
-                let doc = format.parse(&body)?;
-                slf = RequestContainer::ParsedRequest(Box::new((data, body, doc)));
-            }
-            Ok(slf)
-        }))
+    pub fn take(&mut self) -> Self {
+        std::mem::replace(self, RequestContainer::Empty)
     }
 
     pub fn take_request(&mut self) -> Request<Body> {
