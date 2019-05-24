@@ -70,13 +70,13 @@ macro_rules! register_modules {
 }
 
 register_modules! {
-    handlers::FileServerModule{};
-    handlers::HostModule{};
-    authentication::AlwaysAuthenticatorBuilder{};
-    authentication::NeverAuthenticatorBuilder{};
-    authentication::HttpAuthenticatorBuilder{};
-    authentication::WhitelistBuilder{};
-    plugins::ContentPlugin{};
-    cache::DefaultCacheHandler{};
-    cache::MemoryCacheBuilder{}
+    handlers::FileServerModule;
+    handlers::HostModule;
+    authentication::AlwaysAuthenticatorBuilder;
+    authentication::NeverAuthenticatorBuilder;
+    authentication::HttpAuthenticatorBuilder;
+    authentication::WhitelistBuilder;
+    plugins::ContentPlugin;
+    cache::DefaultCacheHandler;
+    cache::MemoryCacheBuilder
 }

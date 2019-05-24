@@ -15,7 +15,7 @@ struct HttpConfig {
 }
 
 #[derive(Default, Debug)]
-pub struct HttpAuthenticatorBuilder {}
+pub struct HttpAuthenticatorBuilder;
 
 impl Module for HttpAuthenticatorBuilder {
     fn name(&self) -> &'static str {

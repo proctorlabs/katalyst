@@ -10,7 +10,7 @@ pub use never::NeverAuthenticatorBuilder;
 pub use whitelist::WhitelistBuilder;
 
 #[derive(Default, Clone, Debug)]
-pub struct AuthenticatorModule {}
+pub struct AuthenticatorModule;
 
 impl ModuleProvider for AuthenticatorModule {
     const MODULE_TYPE: ModuleType = ModuleType::Authenticator;

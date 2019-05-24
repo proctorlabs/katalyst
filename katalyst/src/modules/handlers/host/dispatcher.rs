@@ -32,7 +32,7 @@ impl HostDispatcher {
         let mut client_req = try_req!(ctx, transformer.transform(request));
         add_forwarding_headers(&mut client_req.headers_mut(), &ctx.metadata.remote_ip);
         strip_hop_headers(&mut client_req.headers_mut());
-        ctx.request = RequestContainer::new(client_req);
+        ctx.request = HttpRequest::new(client_req);
         Ok(ctx)
     }
 
@@ -42,7 +42,7 @@ impl HostDispatcher {
         let res = client.request(dsr);
         Box::new(res.then(|response| match response {
             Ok(r) => {
-                ctx.response = ResponseContainer::new(r);
+                ctx.request.set_response(r);
                 ok(ctx)
             }
             Err(e) => {
@@ -53,8 +53,8 @@ impl HostDispatcher {
     }
 
     pub fn clean_response(mut ctx: Context) -> Context {
-        if let ResponseContainer::Raw { data } = &mut ctx.response {
-            strip_hop_headers(data.headers_mut());
+        if let HttpRequest::RawResponse (res) = &mut ctx.request {
+            strip_hop_headers(&mut res.0.headers);
         }
         ctx
     }

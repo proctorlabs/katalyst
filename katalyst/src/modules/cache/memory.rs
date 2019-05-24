@@ -5,7 +5,7 @@ use std::sync::Arc;
 use std::sync::RwLock;
 
 #[derive(Default, Debug)]
-pub struct MemoryCacheBuilder {}
+pub struct MemoryCacheBuilder;
 
 impl Module for MemoryCacheBuilder {
     fn name(&self) -> &'static str {

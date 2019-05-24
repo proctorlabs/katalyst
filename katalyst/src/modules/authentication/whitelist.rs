@@ -11,7 +11,7 @@ struct WhitelistConfig {
 }
 
 #[derive(Default, Debug)]
-pub struct WhitelistBuilder {}
+pub struct WhitelistBuilder;
 
 impl Module for WhitelistBuilder {
     fn name(&self) -> &'static str {

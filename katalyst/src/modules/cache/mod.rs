@@ -9,7 +9,7 @@ pub use cache_handler::DefaultCacheHandler;
 pub use memory::MemoryCacheBuilder;
 
 #[derive(Default, Clone, Debug)]
-pub struct CacheModule {}
+pub struct CacheModule;
 
 impl ModuleProvider for CacheModule {
     const MODULE_TYPE: ModuleType = ModuleType::CacheProvider;
@@ -26,7 +26,7 @@ impl ModuleProvider for CacheModule {
 }
 
 #[derive(Default, Clone, Debug)]
-pub struct CacheHandler {}
+pub struct CacheHandler;
 
 impl ModuleProvider for CacheHandler {
     const MODULE_TYPE: ModuleType = ModuleType::CacheHandler;

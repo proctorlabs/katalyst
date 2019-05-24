@@ -4,7 +4,7 @@ use crate::modules::*;
 pub use content_plugin::ContentPlugin;
 
 #[derive(Default, Clone, Debug)]
-pub struct PluginModule {}
+pub struct PluginModule;
 
 impl ModuleProvider for PluginModule {
     const MODULE_TYPE: ModuleType = ModuleType::Plugin;

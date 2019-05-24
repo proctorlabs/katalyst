@@ -4,7 +4,7 @@ use crate::modules::*;
 use futures::future::err;
 
 #[derive(Default, Debug)]
-pub struct NeverAuthenticatorBuilder {}
+pub struct NeverAuthenticatorBuilder;
 
 impl Module for NeverAuthenticatorBuilder {
     fn name(&self) -> &'static str {
@@ -26,7 +26,7 @@ impl Module for NeverAuthenticatorBuilder {
 }
 
 #[derive(Default, Debug)]
-pub struct NeverAuthenticator {}
+pub struct NeverAuthenticator;
 
 impl ModuleDispatch for NeverAuthenticator {
     fn dispatch(&self, ctx: Context) -> ModuleResult {

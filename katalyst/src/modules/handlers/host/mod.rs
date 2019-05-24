@@ -40,7 +40,7 @@ pub struct HostDispatcher {
 }
 
 #[derive(Debug)]
-pub struct HostModule {}
+pub struct HostModule;
 
 impl Module for HostModule {
     fn name(&self) -> &'static str {

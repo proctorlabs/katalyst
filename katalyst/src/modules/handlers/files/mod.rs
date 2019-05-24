@@ -18,7 +18,7 @@ struct FileServerConfig {
 }
 
 #[derive(Debug)]
-pub struct FileServerModule {}
+pub struct FileServerModule;
 
 impl Module for FileServerModule {
     fn name(&self) -> &'static str {
@@ -82,7 +82,7 @@ fn send_file(mut ctx: Context, file: PathBuf) -> ModuleResult {
             let hdrs = r.headers_mut();
             let hdr_val = HeaderValue::from_str(mime).unwrap();
             hdrs.append("Content-Type", hdr_val);
-            ctx.response = ResponseContainer::new(r);
+            ctx.request.set_response(r);
             ok(ctx)
         }
         Err(_) => err(ctx.fail(GatewayError::NotFound)),

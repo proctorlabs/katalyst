@@ -1,10 +1,9 @@
 use super::*;
-use crate::context::ResponseContainer;
 use hyper::{Body, Response};
 use std::sync::Arc;
 
 #[derive(Debug)]
-pub struct DefaultCacheHandler {}
+pub struct DefaultCacheHandler;
 
 impl Module for DefaultCacheHandler {
     fn name(&self) -> &'static str {
@@ -21,7 +20,7 @@ impl Module for DefaultCacheHandler {
         _: Arc<Katalyst>,
         _: &unstructured::Document,
     ) -> Result<Arc<ModuleDispatch>> {
-        Ok(Arc::new(DefaultCacheHandler {}))
+        Ok(Arc::new(DefaultCacheHandler))
     }
 }
 
@@ -46,7 +45,7 @@ impl ModuleDispatch for DefaultCacheHandler {
                         let mut resp = Response::default();
                         *resp.status_mut() = http::status::StatusCode::OK;
                         *resp.body_mut() = Body::from(content);
-                        ctx.response = ResponseContainer::new(resp);
+                        ctx.request.set_response(resp);
                         ok!(ctx)
                     }
                     Err(_) => ok!(ctx),

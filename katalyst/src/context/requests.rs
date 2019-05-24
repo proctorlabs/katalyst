@@ -7,30 +7,40 @@ use hyper::{Body, Request, Response};
 use unstructured::Document;
 
 #[derive(Debug)]
-pub enum RequestContainer {
+pub enum HttpRequest {
     Empty,
     RawRequest(Box<(Parts, Body)>),
     LoadedRequest(Box<(Parts, Vec<u8>)>),
     ParsedRequest(Box<(Parts, Vec<u8>, Document)>),
+    RawResponse(Box<(http::response::Parts, Body)>),
+    LoadedResponse(Box<(http::response::Parts, Vec<u8>)>),
+    ParsedResponse(Box<(http::response::Parts, Vec<u8>, Document)>),
 }
 
 impl Context {
     pub fn preload(mut self) -> ModuleResult {
         match &self.request {
-            RequestContainer::RawRequest(_) => {
-                if let RequestContainer::RawRequest(r) = self.request.take() {
-                    let (data, body) = *r;
-                    Box::new(body.concat2().then(|r| match r {
-                        Ok(body) => {
-                            let res = Box::new((data, body.into_iter().collect()));
-                            self.request = RequestContainer::LoadedRequest(res);
-                            Ok(self)
-                        }
-                        Err(_) => Err(self.fail(GatewayError::InternalServerError)),
-                    }))
-                } else {
-                    Box::new(ok(self))
-                }
+            HttpRequest::RawRequest(_) => {
+                let (data, body) = self.request.take_request().into_parts();
+                Box::new(body.concat2().then(|r| match r {
+                    Ok(body) => {
+                        let res = Box::new((data, body.into_iter().collect()));
+                        self.request = HttpRequest::LoadedRequest(res);
+                        Ok(self)
+                    }
+                    Err(_) => Err(self.fail(GatewayError::InternalServerError)),
+                }))
+            }
+            HttpRequest::RawResponse(_) => {
+                let (data, body) = self.request.take_response().into_parts();
+                Box::new(body.concat2().then(|r| match r {
+                    Ok(body) => {
+                        let res = Box::new((data, body.into_iter().collect()));
+                        self.request = HttpRequest::LoadedResponse(res);
+                        Ok(self)
+                    }
+                    Err(_) => Err(self.fail(GatewayError::InternalServerError)),
+                }))
             }
             _ => Box::new(ok(self)),
         }
@@ -39,29 +49,65 @@ impl Context {
     pub fn parse(self) -> ModuleResult {
         Box::new(self.preload().and_then(|mut slf| {
             let format = Format::content_type(slf.request.header("Content-Type"));
-            if let RequestContainer::LoadedRequest(r) = slf.request {
-                let (data, body) = *r;
-                let doc = match format.parse(&body) {
-                    Ok(d) => d,
-                    Err(_) => Document::Unit,
-                };
-                slf.request = RequestContainer::ParsedRequest(Box::new((data, body, doc)));
+            match slf.request {
+                HttpRequest::LoadedRequest(r) => {
+                    let (data, body) = *r;
+                    let doc = match format.parse(&body) {
+                        Ok(d) => d,
+                        Err(_) => Document::Unit,
+                    };
+                    slf.request = HttpRequest::ParsedRequest(Box::new((data, body, doc)));
+                }
+                HttpRequest::LoadedResponse(r) => {
+                    let (data, body) = *r;
+                    let doc = match format.parse(&body) {
+                        Ok(d) => d,
+                        Err(_) => Document::Unit,
+                    };
+                    slf.request = HttpRequest::ParsedResponse(Box::new((data, body, doc)));
+                }
+                _ => (),
             }
             Ok(slf)
         }))
     }
 }
 
-impl RequestContainer {
+impl HttpRequest {
     pub fn new(req: Request<Body>) -> Self {
-        RequestContainer::RawRequest(Box::new(req.into_parts()))
+        HttpRequest::RawRequest(Box::new(req.into_parts()))
+    }
+
+    pub fn set_response(&mut self, rsp: Response<Body>) {
+        std::mem::replace(
+            self,
+            HttpRequest::RawResponse(Box::new(rsp.into_parts())),
+        );
+    }
+
+    pub fn is_request(&self) -> bool {
+        match self {
+            HttpRequest::RawRequest(_)
+            | HttpRequest::LoadedRequest(_)
+            | HttpRequest::ParsedRequest(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_response(&self) -> bool {
+        match self {
+            HttpRequest::RawResponse(_)
+            | HttpRequest::LoadedResponse(_)
+            | HttpRequest::ParsedResponse(_) => true,
+            _ => false,
+        }
     }
 
     fn parts(&self) -> Option<&Parts> {
         match self {
-            RequestContainer::RawRequest(r) => Some(&r.0),
-            RequestContainer::LoadedRequest(r) => Some(&r.0),
-            RequestContainer::ParsedRequest(r) => Some(&r.0),
+            HttpRequest::RawRequest(r) => Some(&r.0),
+            HttpRequest::LoadedRequest(r) => Some(&r.0),
+            HttpRequest::ParsedRequest(r) => Some(&r.0),
             _ => None,
         }
     }
@@ -83,42 +129,32 @@ impl RequestContainer {
     }
 
     pub fn take(&mut self) -> Self {
-        std::mem::replace(self, RequestContainer::Empty)
+        std::mem::replace(self, HttpRequest::Empty)
     }
 
     pub fn take_request(&mut self) -> Request<Body> {
-        match std::mem::replace(self, RequestContainer::Empty) {
-            RequestContainer::RawRequest(data) => Request::from_parts(data.0, data.1),
-            RequestContainer::LoadedRequest(data) => {
+        match std::mem::replace(self, HttpRequest::Empty) {
+            HttpRequest::RawRequest(data) => Request::from_parts(data.0, data.1),
+            HttpRequest::LoadedRequest(data) => {
                 Request::from_parts(data.0, Body::from(data.1))
             }
-            RequestContainer::ParsedRequest(data) => {
+            HttpRequest::ParsedRequest(data) => {
                 Request::from_parts(data.0, Body::from(data.1))
             }
             _ => Request::default(),
         }
     }
-}
 
-#[derive(Debug)]
-pub enum ResponseContainer {
-    Empty,
-    Raw { data: Box<Response<Body>> },
-    Parsed,
-}
-
-impl ResponseContainer {
-    pub fn new(req: Response<Body>) -> Self {
-        ResponseContainer::Raw {
-            data: Box::new(req),
-        }
-    }
-
-    pub fn take(self) -> Response<Body> {
-        match self {
-            ResponseContainer::Empty => Response::default(),
-            ResponseContainer::Raw { data } => *data,
-            ResponseContainer::Parsed => unimplemented!(),
+    pub fn take_response(&mut self) -> Response<Body> {
+        match std::mem::replace(self, HttpRequest::Empty) {
+            HttpRequest::RawResponse(data) => Response::from_parts(data.0, data.1),
+            HttpRequest::LoadedResponse(data) => {
+                Response::from_parts(data.0, Body::from(data.1))
+            }
+            HttpRequest::ParsedResponse(data) => {
+                Response::from_parts(data.0, Body::from(data.1))
+            }
+            _ => Response::default(),
         }
     }
 }

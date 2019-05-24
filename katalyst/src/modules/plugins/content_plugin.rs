@@ -3,7 +3,7 @@ use crate::context::*;
 use crate::modules::*;
 
 #[derive(Debug)]
-pub struct ContentPlugin {}
+pub struct ContentPlugin;
 
 impl Module for ContentPlugin {
     fn name(&self) -> &'static str {

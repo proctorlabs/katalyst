@@ -17,8 +17,7 @@ use std::time::Instant;
 
 #[derive(Debug)]
 pub struct Context {
-    pub request: RequestContainer,
-    pub response: ResponseContainer,
+    pub request: HttpRequest,
     pub metadata: Metadata,
     pub katalyst: Arc<Katalyst>,
     state: RequestState,
@@ -30,7 +29,7 @@ pub enum RequestState {
     New,
     Matched(MatchInfo),
     Authenticated(AuthInfo),
-    Response(ResponseContainer),
+    Response(HttpRequest),
 }
 
 #[derive(Debug)]
@@ -56,8 +55,7 @@ pub struct AuthInfo {
 impl Default for Context {
     fn default() -> Self {
         *Box::new(Context {
-            request: RequestContainer::Empty,
-            response: ResponseContainer::Empty,
+            request: HttpRequest::Empty,
             metadata: Metadata {
                 remote_ip: String::default(),
                 url: url::Url::parse("http://localhost/").unwrap(),
@@ -139,8 +137,7 @@ impl Context {
             path = &uri
         );
         *Box::new(Context {
-            request: RequestContainer::new(request),
-            response: ResponseContainer::Empty,
+            request: HttpRequest::new(request),
             metadata: Metadata {
                 remote_ip: remote_addr.ip().to_string(),
                 url: url::Url::parse(&path).unwrap(),

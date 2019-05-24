@@ -4,7 +4,7 @@ use crate::modules::*;
 use futures::future::*;
 
 #[derive(Default, Debug)]
-pub struct AlwaysAuthenticatorBuilder {}
+pub struct AlwaysAuthenticatorBuilder;
 
 impl Module for AlwaysAuthenticatorBuilder {
     fn name(&self) -> &'static str {
