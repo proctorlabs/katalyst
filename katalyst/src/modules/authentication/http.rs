@@ -17,25 +17,23 @@ struct HttpConfig {
 #[derive(Default, Debug)]
 pub struct HttpAuthenticatorBuilder;
 
-impl Module for HttpAuthenticatorBuilder {
+impl ModuleProvider for HttpAuthenticatorBuilder {
     fn name(&self) -> &'static str {
         "http"
     }
 
-    fn supported_hooks(&self) -> Vec<ModuleType> {
-        vec![ModuleType::Authenticator]
-    }
-
-    fn build_hook(
+    fn build(
         &self,
         _: ModuleType,
         _: Arc<Katalyst>,
         config: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>> {
+    ) -> Result<Module> {
         let c: HttpConfig = config.clone().try_into().map_err(|_| {
             GatewayError::ConfigNotParseable("Host module configuration failed".into())
         })?;
-        Ok(Arc::new(HttpAuthenticator { url: c.url }))
+        Ok(Module::Authenticator(Arc::new(HttpAuthenticator {
+            url: c.url,
+        })))
     }
 }
 

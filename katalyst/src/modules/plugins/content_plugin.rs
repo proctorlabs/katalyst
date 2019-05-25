@@ -5,22 +5,13 @@ use crate::modules::*;
 #[derive(Debug)]
 pub struct ContentPlugin;
 
-impl Module for ContentPlugin {
+impl ModuleProvider for ContentPlugin {
     fn name(&self) -> &'static str {
         "parse-content"
     }
 
-    fn supported_hooks(&self) -> Vec<ModuleType> {
-        vec![ModuleType::Plugin]
-    }
-
-    fn build_hook(
-        &self,
-        _: ModuleType,
-        _: Arc<Katalyst>,
-        _: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>> {
-        Ok(Arc::new(ContentPlugin {}))
+    fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
+        Ok(Module::Plugin(Arc::new(ContentPlugin)))
     }
 }
 

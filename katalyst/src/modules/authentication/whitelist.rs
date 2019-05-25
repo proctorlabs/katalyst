@@ -13,25 +13,21 @@ struct WhitelistConfig {
 #[derive(Default, Debug)]
 pub struct WhitelistBuilder;
 
-impl Module for WhitelistBuilder {
+impl ModuleProvider for WhitelistBuilder {
     fn name(&self) -> &'static str {
         "whitelist"
     }
 
-    fn supported_hooks(&self) -> Vec<ModuleType> {
-        vec![ModuleType::Authenticator]
-    }
-
-    fn build_hook(
+    fn build(
         &self,
         _: ModuleType,
         _: Arc<Katalyst>,
         config: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>> {
+    ) -> Result<Module> {
         let c: WhitelistConfig = config.clone().try_into().map_err(|_| {
             GatewayError::ConfigNotParseable("Host module configuration failed".into())
         })?;
-        Ok(Arc::new(Whitelist { ips: c.ips }))
+        Ok(Module::Authenticator(Arc::new(Whitelist { ips: c.ips })))
     }
 }
 

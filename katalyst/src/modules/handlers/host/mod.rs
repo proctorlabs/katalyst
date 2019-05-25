@@ -42,21 +42,17 @@ pub struct HostDispatcher {
 #[derive(Debug)]
 pub struct HostModule;
 
-impl Module for HostModule {
+impl ModuleProvider for HostModule {
     fn name(&self) -> &'static str {
         "host"
     }
 
-    fn supported_hooks(&self) -> Vec<ModuleType> {
-        vec![ModuleType::RequestHandler]
-    }
-
-    fn build_hook(
+    fn build(
         &self,
         _: ModuleType,
         engine: Arc<Katalyst>,
         config: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>> {
+    ) -> Result<Module> {
         let c: HostConfig = config.clone().try_into().map_err(|_| {
             GatewayError::ConfigNotParseable("Host module configuration failed".into())
         })?;
@@ -73,14 +69,14 @@ impl Module for HostModule {
             }
             None => None,
         };
-        Ok(Arc::new(HostDispatcher {
+        Ok(Module::RequestHandler(Arc::new(HostDispatcher {
             host: c.host.to_owned(),
             path: providers.compile_template(Some(c.path.as_str()))?,
             method,
             query: providers.compile_template_map(&c.query)?,
             headers: providers.compile_template_map(&c.headers)?,
             body: providers.compile_template_option(body)?,
-        }))
+        })))
     }
 }
 

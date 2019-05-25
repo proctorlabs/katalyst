@@ -2,7 +2,7 @@ use super::*;
 use std::sync::RwLock;
 
 #[derive(Default, Debug)]
-pub struct RoundRobinBalancerBuilder {}
+pub struct RoundRobinBalancerBuilder;
 
 impl KatalystBalancerBuilder for RoundRobinBalancerBuilder {
     fn name(&self) -> &'static str {

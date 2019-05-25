@@ -53,7 +53,7 @@ impl HostDispatcher {
     }
 
     pub fn clean_response(mut ctx: Context) -> Context {
-        if let HttpRequest::RawResponse (res) = &mut ctx.request {
+        if let HttpRequest::RawResponse(res) = &mut ctx.request {
             strip_hop_headers(&mut res.0.headers);
         }
         ctx

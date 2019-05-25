@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct ModuleBuilder<T: ModuleProvider> {
+pub struct ModuleBuilder<T: ModuleProviderDefinition> {
     #[serde(skip)]
     __module_type: PhantomData<T>,
     #[serde(rename = "type")]
@@ -18,7 +18,7 @@ pub struct ModuleBuilder<T: ModuleProvider> {
     pub config: unstructured::Document,
 }
 
-impl<T: ModuleProvider> Default for ModuleBuilder<T> {
+impl<T: ModuleProviderDefinition> Default for ModuleBuilder<T> {
     fn default() -> Self {
         ModuleBuilder {
             __module_type: PhantomData::default(),
@@ -28,15 +28,12 @@ impl<T: ModuleProvider> Default for ModuleBuilder<T> {
     }
 }
 
-impl<T: ModuleProvider> Builder<T::ModuleImplType> for ModuleBuilder<T>
+impl<T> Builder<Module> for ModuleBuilder<T>
 where
-    T: ModuleProvider,
+    T: ModuleProviderDefinition,
 {
-    fn build(&self, engine: Arc<Katalyst>) -> Result<T::ModuleImplType, GatewayError> {
+    fn build(&self, engine: Arc<Katalyst>) -> Result<Module, GatewayError> {
         let module = engine.get_module(&self.module)?;
-        if !module.supported_hooks().contains(&T::MODULE_TYPE) {
-            return Err(GatewayError::InvalidResource);
-        }
-        Ok(T::build(module, engine, &self.config)?)
+        Ok(module.build(T::MODULE_TYPE, engine.clone(), &self.config)?)
     }
 }

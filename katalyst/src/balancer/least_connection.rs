@@ -1,7 +1,7 @@
 use super::*;
 
 #[derive(Default, Debug)]
-pub struct LeastConnectionBalancerBuilder {}
+pub struct LeastConnectionBalancerBuilder;
 
 impl KatalystBalancerBuilder for LeastConnectionBalancerBuilder {
     fn name(&self) -> &'static str {

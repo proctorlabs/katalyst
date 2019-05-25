@@ -2,7 +2,7 @@ use super::*;
 use rand::Rng;
 
 #[derive(Default, Debug)]
-pub struct RandomBalancerBuilder {}
+pub struct RandomBalancerBuilder;
 
 impl KatalystBalancerBuilder for RandomBalancerBuilder {
     fn name(&self) -> &'static str {

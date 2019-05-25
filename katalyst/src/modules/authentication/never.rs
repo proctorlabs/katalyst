@@ -6,22 +6,13 @@ use futures::future::err;
 #[derive(Default, Debug)]
 pub struct NeverAuthenticatorBuilder;
 
-impl Module for NeverAuthenticatorBuilder {
+impl ModuleProvider for NeverAuthenticatorBuilder {
     fn name(&self) -> &'static str {
         "never"
     }
 
-    fn supported_hooks(&self) -> Vec<ModuleType> {
-        vec![ModuleType::Authenticator]
-    }
-
-    fn build_hook(
-        &self,
-        _: ModuleType,
-        _: Arc<Katalyst>,
-        _: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>> {
-        Ok(Arc::new(NeverAuthenticator {}))
+    fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
+        Ok(Module::Authenticator(Arc::new(NeverAuthenticator)))
     }
 }
 

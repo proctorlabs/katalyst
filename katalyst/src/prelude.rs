@@ -20,13 +20,6 @@ pub(crate) trait KatalystCommonUtilities {
     {
         Arc::new(Self::default())
     }
-
-    fn boxed() -> Box<Self>
-    where
-        Self: Sized + Default,
-    {
-        Box::new(Self::default())
-    }
 }
 
 impl<T> KatalystCommonUtilities for T where T: Any {}

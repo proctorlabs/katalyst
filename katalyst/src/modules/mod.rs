@@ -1,7 +1,6 @@
 mod definitions;
 use crate::prelude::*;
 use std::collections::HashMap;
-use std::fmt::Debug;
 use std::sync::Arc;
 
 pub mod authentication;
@@ -12,39 +11,29 @@ pub mod handlers;
 pub mod plugins;
 pub use authentication::AuthenticatorModule;
 pub use authorization::AuthorizerModule;
-pub use cache::{CacheHandler, CacheModule, CacheProvider};
+pub use cache::{CacheHandler, CacheModule};
 pub use definitions::*;
 pub use errors::*;
 pub use handlers::HandlerModule;
 pub use plugins::PluginModule;
 
-pub trait ModuleProvider {
+pub trait ModuleProviderDefinition {
     const MODULE_TYPE: ModuleType;
-
     type ModuleImplType;
-
-    fn build(
-        _: Arc<Module>,
-        _: Arc<Katalyst>,
-        _: &unstructured::Document,
-    ) -> Result<Self::ModuleImplType>;
 }
 
-pub trait ModuleDispatch: Send + Sync + Debug {
-    fn dispatch(&self, ctx: Context) -> ModuleResult;
-}
 
 #[derive(Debug)]
-pub struct Modules {
-    modules: HashMap<String, Arc<Module>>,
+pub struct ModuleRegistry {
+    modules: HashMap<String, Arc<ModuleProvider>>,
 }
 
-impl Modules {
-    pub fn register(&mut self, module: Arc<Module>) {
+impl ModuleRegistry {
+    pub fn register(&mut self, module: Arc<ModuleProvider>) {
         self.modules.insert(module.name().to_string(), module);
     }
 
-    pub fn get(&self, name: &str) -> Result<Arc<Module>> {
+    pub fn get(&self, name: &str) -> Result<Arc<ModuleProvider>> {
         Ok(self
             .modules
             .get(name)
@@ -55,9 +44,9 @@ impl Modules {
 
 macro_rules! register_modules {
     ($($toreg:expr);*) => {
-        impl Default for Modules {
+        impl Default for ModuleRegistry {
             fn default() -> Self {
-                let mut result = Modules {
+                let mut result = ModuleRegistry {
                     modules: HashMap::default(),
                 };
                 $(

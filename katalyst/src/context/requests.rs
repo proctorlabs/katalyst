@@ -79,10 +79,7 @@ impl HttpRequest {
     }
 
     pub fn set_response(&mut self, rsp: Response<Body>) {
-        std::mem::replace(
-            self,
-            HttpRequest::RawResponse(Box::new(rsp.into_parts())),
-        );
+        std::mem::replace(self, HttpRequest::RawResponse(Box::new(rsp.into_parts())));
     }
 
     pub fn is_request(&self) -> bool {
@@ -135,12 +132,8 @@ impl HttpRequest {
     pub fn take_request(&mut self) -> Request<Body> {
         match std::mem::replace(self, HttpRequest::Empty) {
             HttpRequest::RawRequest(data) => Request::from_parts(data.0, data.1),
-            HttpRequest::LoadedRequest(data) => {
-                Request::from_parts(data.0, Body::from(data.1))
-            }
-            HttpRequest::ParsedRequest(data) => {
-                Request::from_parts(data.0, Body::from(data.1))
-            }
+            HttpRequest::LoadedRequest(data) => Request::from_parts(data.0, Body::from(data.1)),
+            HttpRequest::ParsedRequest(data) => Request::from_parts(data.0, Body::from(data.1)),
             _ => Request::default(),
         }
     }
@@ -148,12 +141,8 @@ impl HttpRequest {
     pub fn take_response(&mut self) -> Response<Body> {
         match std::mem::replace(self, HttpRequest::Empty) {
             HttpRequest::RawResponse(data) => Response::from_parts(data.0, data.1),
-            HttpRequest::LoadedResponse(data) => {
-                Response::from_parts(data.0, Body::from(data.1))
-            }
-            HttpRequest::ParsedResponse(data) => {
-                Response::from_parts(data.0, Body::from(data.1))
-            }
+            HttpRequest::LoadedResponse(data) => Response::from_parts(data.0, Body::from(data.1)),
+            HttpRequest::ParsedResponse(data) => Response::from_parts(data.0, Body::from(data.1)),
             _ => Response::default(),
         }
     }

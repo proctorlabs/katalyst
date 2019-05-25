@@ -2,7 +2,7 @@ use crate::balancer;
 use crate::config::parsers;
 use crate::error::*;
 use crate::instance::Instance;
-use crate::modules::Modules;
+use crate::modules::ModuleRegistry;
 use crate::pipeline::{run, HyperResult};
 use crate::prelude::*;
 use futures::future::Future;
@@ -26,7 +26,7 @@ pub struct Katalyst {
     client: Arc<HttpsClient>,
     balancers: Arc<balancer::BalancerDirectory>,
     compiler: Arc<Compiler>,
-    modules: Modules,
+    modules: ModuleRegistry,
     rt: RwLock<Runtime>,
 }
 
@@ -50,7 +50,7 @@ impl Default for Katalyst {
             client: Arc::new(builder.build(HttpsConnector::from((http_connector, tls)))),
             balancers: Arc::new(balancer::all()),
             compiler: Arc::new(Compiler::default()),
-            modules: Modules::default(),
+            modules: ModuleRegistry::default(),
             rt: RwLock::new(Runtime::new().unwrap()),
         }
     }
@@ -130,7 +130,7 @@ impl Katalyst {
     }
 
     #[inline]
-    pub(crate) fn get_module(&self, name: &str) -> Result<Arc<Module>> {
+    pub(crate) fn get_module(&self, name: &str) -> Result<Arc<ModuleProvider>> {
         self.modules.get(name)
     }
 

@@ -7,22 +7,13 @@ use std::sync::RwLock;
 #[derive(Default, Debug)]
 pub struct MemoryCacheBuilder;
 
-impl Module for MemoryCacheBuilder {
+impl ModuleProvider for MemoryCacheBuilder {
     fn name(&self) -> &'static str {
         "memory_cache"
     }
 
-    fn supported_hooks(&self) -> Vec<ModuleType> {
-        vec![ModuleType::CacheProvider]
-    }
-
-    fn build_cache(
-        &self,
-        _: ModuleType,
-        _: Arc<Katalyst>,
-        _: &unstructured::Document,
-    ) -> Result<Arc<CacheProvider>> {
-        Ok(Arc::new(MemoryCache::default()))
+    fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
+        Ok(Module::CacheProvider(Arc::new(MemoryCache::default())))
     }
 }
 

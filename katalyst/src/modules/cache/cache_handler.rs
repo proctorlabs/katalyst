@@ -1,26 +1,18 @@
 use super::*;
 use hyper::{Body, Response};
 use std::sync::Arc;
+use futures::Future;
 
 #[derive(Debug)]
 pub struct DefaultCacheHandler;
 
-impl Module for DefaultCacheHandler {
+impl ModuleProvider for DefaultCacheHandler {
     fn name(&self) -> &'static str {
         "cache_response"
     }
 
-    fn supported_hooks(&self) -> Vec<ModuleType> {
-        vec![ModuleType::CacheHandler]
-    }
-
-    fn build_hook(
-        &self,
-        _: ModuleType,
-        _: Arc<Katalyst>,
-        _: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>> {
-        Ok(Arc::new(DefaultCacheHandler))
+    fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
+        Ok(Module::CacheHandler(Arc::new(DefaultCacheHandler)))
     }
 }
 

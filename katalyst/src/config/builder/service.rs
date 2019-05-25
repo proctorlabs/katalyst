@@ -12,6 +12,15 @@ pub struct ServiceBuilder {
     pub cache: ModuleBuilder<CacheModule>,
 }
 
+macro_rules! module {
+    ($name:ident, $mt:expr) => {
+        match $mt {
+            Module::$name(mtch) => mtch,
+            _ => return Err(GatewayError::FeatureUnavailable),
+        }
+    };
+}
+
 impl Builder<Service> for ServiceBuilder {
     fn build(&self, instance: Arc<Katalyst>) -> Result<Service, GatewayError> {
         Ok(Service {
@@ -19,7 +28,7 @@ impl Builder<Service> for ServiceBuilder {
                 .interface
                 .parse()
                 .map_err(|_| GatewayError::InvalidAddress("Service listener address is invalid"))?,
-            cache: self.cache.build(instance.clone())?,
+            cache: module!(CacheProvider, self.cache.build(instance.clone())?),
         })
     }
 }

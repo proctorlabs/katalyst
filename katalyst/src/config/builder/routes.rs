@@ -27,6 +27,15 @@ pub struct RouteBuilder {
     authenticators: Option<Vec<ModuleBuilder<AuthenticatorModule>>>,
 }
 
+macro_rules! module {
+    ($name:ident, $mt:expr) => {
+        match $mt {
+            Module::$name(mtch) => mtch,
+            _ => return Err(GatewayError::FeatureUnavailable),
+        }
+    };
+}
+
 impl Builder<Route> for RouteBuilder {
     fn build(&self, engine: Arc<Katalyst>) -> Result<Route, GatewayError> {
         let routebuilders: &Option<Vec<RouteBuilder>> = &self.children;
@@ -40,7 +49,7 @@ impl Builder<Route> for RouteBuilder {
             }
             None => None,
         };
-        let handler = self.handler.build(engine.clone())?;
+        let handler = module!(RequestHandler, self.handler.build(engine.clone())?);
 
         //Build method hashset
         let methods = match &self.methods {
@@ -59,7 +68,7 @@ impl Builder<Route> for RouteBuilder {
             Some(plugins) => {
                 let mut vec_plugins: Vec<Arc<ModuleDispatch>> = vec![];
                 for p in plugins {
-                    vec_plugins.push(p.build(engine.clone())?);
+                    vec_plugins.push(module!(Plugin, p.build(engine.clone())?));
                 }
                 Some(vec_plugins)
             }
@@ -70,7 +79,7 @@ impl Builder<Route> for RouteBuilder {
             Some(auths) => {
                 let mut vec_auths: Vec<Arc<ModuleDispatch>> = vec![];
                 for a in auths {
-                    vec_auths.push(a.build(engine.clone())?);
+                    vec_auths.push(module!(Authorizer, a.build(engine.clone())?));
                 }
                 Some(vec_auths)
             }
@@ -81,7 +90,7 @@ impl Builder<Route> for RouteBuilder {
             Some(auths) => {
                 let mut vec_auths: Vec<Arc<ModuleDispatch>> = vec![];
                 for a in auths {
-                    vec_auths.push(a.build(engine.clone())?);
+                    vec_auths.push(module!(Authenticator, a.build(engine.clone())?));
                 }
                 Some(vec_auths)
             }
@@ -89,7 +98,7 @@ impl Builder<Route> for RouteBuilder {
         };
 
         let cache: Option<Arc<ModuleDispatch>> = match &self.cache {
-            Some(c) => Some(c.build(engine.clone())?),
+            Some(c) => Some(module!(CacheHandler, c.build(engine.clone())?)),
             None => None,
         };
 

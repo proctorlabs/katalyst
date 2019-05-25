@@ -20,28 +20,24 @@ struct FileServerConfig {
 #[derive(Debug)]
 pub struct FileServerModule;
 
-impl Module for FileServerModule {
+impl ModuleProvider for FileServerModule {
     fn name(&self) -> &'static str {
         "file_server"
     }
 
-    fn supported_hooks(&self) -> Vec<ModuleType> {
-        vec![ModuleType::RequestHandler]
-    }
-
-    fn build_hook(
+    fn build(
         &self,
         _: ModuleType,
         engine: Arc<Katalyst>,
         config: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>> {
+    ) -> Result<Module> {
         let c: FileServerConfig = config.clone().try_into().map_err(|_| {
             GatewayError::ConfigNotParseable("Host module configuration failed".into())
         })?;
-        Ok(Arc::new(FileServerDispatcher {
+        Ok(Module::RequestHandler(Arc::new(FileServerDispatcher {
             root_path: c.root_path,
             selector: engine.get_compiler().compile_template(Some(&c.selector))?,
-        }))
+        })))
     }
 }
 

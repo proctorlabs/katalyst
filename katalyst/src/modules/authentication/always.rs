@@ -6,27 +6,18 @@ use futures::future::*;
 #[derive(Default, Debug)]
 pub struct AlwaysAuthenticatorBuilder;
 
-impl Module for AlwaysAuthenticatorBuilder {
+impl ModuleProvider for AlwaysAuthenticatorBuilder {
     fn name(&self) -> &'static str {
         "always"
     }
 
-    fn supported_hooks(&self) -> Vec<ModuleType> {
-        vec![ModuleType::Authenticator]
-    }
-
-    fn build_hook(
-        &self,
-        _: ModuleType,
-        _: Arc<Katalyst>,
-        _: &unstructured::Document,
-    ) -> Result<Arc<ModuleDispatch>> {
-        Ok(Arc::new(AlwaysAuthenticator {}))
+    fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
+        Ok(Module::Authenticator(Arc::new(AlwaysAuthenticator)))
     }
 }
 
 #[derive(Default, Debug)]
-pub struct AlwaysAuthenticator {}
+pub struct AlwaysAuthenticator;
 
 impl ModuleDispatch for AlwaysAuthenticator {
     fn dispatch(&self, mut ctx: Context) -> ModuleResult {
