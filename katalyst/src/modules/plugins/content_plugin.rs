@@ -15,8 +15,8 @@ impl ModuleProvider for ContentPlugin {
     }
 }
 
-impl ModuleDispatch for ContentPlugin {
-    fn dispatch(&self, ctx: Context) -> ModuleResult {
+impl RequestHook for ContentPlugin {
+    fn run(&self, ctx: Context) -> ModuleResult {
         ctx.parse()
     }
 }

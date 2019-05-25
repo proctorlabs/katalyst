@@ -19,8 +19,8 @@ impl ModuleProvider for NeverAuthenticatorBuilder {
 #[derive(Default, Debug)]
 pub struct NeverAuthenticator;
 
-impl ModuleDispatch for NeverAuthenticator {
-    fn dispatch(&self, ctx: Context) -> ModuleResult {
+impl RequestHook for NeverAuthenticator {
+    fn run(&self, ctx: Context) -> ModuleResult {
         Box::new(err(ctx.fail(GatewayError::Unauthorized)))
     }
 }

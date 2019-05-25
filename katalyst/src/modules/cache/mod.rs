@@ -15,12 +15,12 @@ pub struct CacheHandler;
 
 impl ModuleProviderDefinition for CacheModule {
     const MODULE_TYPE: ModuleType = ModuleType::CacheProvider;
-    type ModuleImplType = Arc<CacheProvider>;
+    type ModuleImplType = Arc<dyn CacheProvider>;
 }
 
 impl ModuleProviderDefinition for CacheHandler {
     const MODULE_TYPE: ModuleType = ModuleType::CacheHandler;
-    type ModuleImplType = Arc<ModuleDispatch>;
+    type ModuleImplType = Arc<dyn RequestHook>;
 }
 
 pub fn default_cache() -> Arc<CacheProvider> {

@@ -19,8 +19,8 @@ impl ModuleProvider for AlwaysAuthenticatorBuilder {
 #[derive(Default, Debug)]
 pub struct AlwaysAuthenticator;
 
-impl ModuleDispatch for AlwaysAuthenticator {
-    fn dispatch(&self, mut ctx: Context) -> ModuleResult {
+impl RequestHook for AlwaysAuthenticator {
+    fn run(&self, mut ctx: Context) -> ModuleResult {
         let mut result = KatalystAuthenticationInfo::default();
         result.add_claim("KatalystAuthenticator".to_string(), "always".to_string());
         ctx = match ctx.set_authenticated(result) {

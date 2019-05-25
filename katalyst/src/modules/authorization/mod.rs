@@ -5,5 +5,5 @@ pub struct AuthorizerModule;
 
 impl ModuleProviderDefinition for AuthorizerModule {
     const MODULE_TYPE: ModuleType = ModuleType::Authorizer;
-    type ModuleImplType = Arc<ModuleDispatch>;
+    type ModuleImplType = Arc<dyn RequestHook>;
 }

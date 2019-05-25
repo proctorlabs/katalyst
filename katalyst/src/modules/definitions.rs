@@ -33,15 +33,15 @@ pub trait CacheProvider: Send + Sync + Debug {
     ) -> Box<Future<Item = (), Error = GatewayError> + Send>;
 }
 
-pub trait ModuleDispatch: Send + Sync + Debug {
-    fn dispatch(&self, ctx: Context) -> ModuleResult;
+pub trait RequestHook: Send + Sync + Debug {
+    fn run(&self, ctx: Context) -> ModuleResult;
 }
 
 pub enum Module {
-    Authenticator(Arc<ModuleDispatch>),
-    Authorizer(Arc<ModuleDispatch>),
-    RequestHandler(Arc<ModuleDispatch>),
-    Plugin(Arc<ModuleDispatch>),
-    CacheProvider(Arc<CacheProvider>),
-    CacheHandler(Arc<ModuleDispatch>),
+    Authenticator(Arc<dyn RequestHook>),
+    Authorizer(Arc<dyn RequestHook>),
+    RequestHandler(Arc<dyn RequestHook>),
+    Plugin(Arc<dyn RequestHook>),
+    CacheProvider(Arc<dyn CacheProvider>),
+    CacheHandler(Arc<dyn RequestHook>),
 }

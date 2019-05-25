@@ -8,7 +8,7 @@ pub fn run_plugins(ctx: Context) -> ModuleResult {
     if let Some(plugins) = &route.plugins {
         for plugin in plugins.iter() {
             let p = plugin.clone();
-            result = Box::new(result.and_then(move |ctx| p.dispatch(ctx)));
+            result = Box::new(result.and_then(move |ctx| p.run(ctx)));
         }
     }
     result
@@ -16,5 +16,5 @@ pub fn run_plugins(ctx: Context) -> ModuleResult {
 
 pub fn run_handler(ctx: Context) -> ModuleResult {
     let r = try_fut!(ctx, ctx.get_matched()).route.clone();
-    Box::new(r.handler.dispatch(ctx))
+    Box::new(r.handler.run(ctx))
 }

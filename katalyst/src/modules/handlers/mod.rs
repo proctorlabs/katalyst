@@ -10,5 +10,5 @@ pub struct HandlerModule;
 
 impl ModuleProviderDefinition for HandlerModule {
     const MODULE_TYPE: ModuleType = ModuleType::RequestHandler;
-    type ModuleImplType = Arc<ModuleDispatch>;
+    type ModuleImplType = Arc<dyn RequestHook>;
 }

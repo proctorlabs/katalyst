@@ -14,6 +14,5 @@ pub struct AuthenticatorModule;
 
 impl ModuleProviderDefinition for AuthenticatorModule {
     const MODULE_TYPE: ModuleType = ModuleType::Authenticator;
-
-    type ModuleImplType = Arc<ModuleDispatch>;
+    type ModuleImplType = Arc<dyn RequestHook>;
 }

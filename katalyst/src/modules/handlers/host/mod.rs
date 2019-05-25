@@ -80,8 +80,8 @@ impl ModuleProvider for HostModule {
     }
 }
 
-impl ModuleDispatch for HostDispatcher {
-    fn dispatch(&self, ctx: Context) -> ModuleResult {
+impl RequestHook for HostDispatcher {
+    fn run(&self, ctx: Context) -> ModuleResult {
         Box::new(
             result(self.prepare(ctx))
                 .and_then(HostDispatcher::send)

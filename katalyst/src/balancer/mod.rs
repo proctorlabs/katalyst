@@ -23,10 +23,10 @@ use std::sync::Arc;
 pub type BalancerLease = Result<Arc<String>>;
 
 /// Directory of all currently registered load balancer builders.
-pub type BalancerDirectory = HashMap<&'static str, Arc<KatalystBalancerBuilder>>;
+pub type BalancerDirectory = HashMap<&'static str, Arc<dyn KatalystBalancerBuilder>>;
 
 /// Result of building a new load balancer
-pub type BalancerBuilderResult = Result<Arc<KatalystBalancer>>;
+pub type BalancerBuilderResult = Result<Arc<dyn KatalystBalancer>>;
 
 pub trait KatalystBalancerBuilder: Send + Sync + Debug {
     fn name(&self) -> &'static str;

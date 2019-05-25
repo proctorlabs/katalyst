@@ -8,5 +8,5 @@ pub struct PluginModule;
 
 impl ModuleProviderDefinition for PluginModule {
     const MODULE_TYPE: ModuleType = ModuleType::Plugin;
-    type ModuleImplType = Arc<ModuleDispatch>;
+    type ModuleImplType = Arc<dyn RequestHook>;
 }

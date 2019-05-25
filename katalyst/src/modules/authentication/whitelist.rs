@@ -36,8 +36,8 @@ pub struct Whitelist {
     ips: Vec<String>,
 }
 
-impl ModuleDispatch for Whitelist {
-    fn dispatch(&self, ctx: Context) -> ModuleResult {
+impl RequestHook for Whitelist {
+    fn run(&self, ctx: Context) -> ModuleResult {
         if self.ips.contains(&ctx.metadata.remote_ip) {
             Box::new(ok(ctx))
         } else {

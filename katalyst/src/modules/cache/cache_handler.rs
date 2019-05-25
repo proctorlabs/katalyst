@@ -16,8 +16,8 @@ impl ModuleProvider for DefaultCacheHandler {
     }
 }
 
-impl ModuleDispatch for DefaultCacheHandler {
-    fn dispatch(&self, mut ctx: Context) -> ModuleResult {
+impl RequestHook for DefaultCacheHandler {
+    fn run(&self, mut ctx: Context) -> ModuleResult {
         let instance = try_fut!(
             ctx,
             ctx.katalyst
