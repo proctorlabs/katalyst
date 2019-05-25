@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct ModuleBuilder<T: ModuleProviderDefinition> {
+pub struct ModuleBuilder<T: ModuleData> {
     #[serde(skip)]
     __module_type: PhantomData<T>,
     #[serde(rename = "type")]
@@ -18,7 +18,7 @@ pub struct ModuleBuilder<T: ModuleProviderDefinition> {
     pub config: unstructured::Document,
 }
 
-impl<T: ModuleProviderDefinition> Default for ModuleBuilder<T> {
+impl<T: ModuleData> Default for ModuleBuilder<T> {
     fn default() -> Self {
         ModuleBuilder {
             __module_type: PhantomData::default(),
@@ -30,7 +30,7 @@ impl<T: ModuleProviderDefinition> Default for ModuleBuilder<T> {
 
 impl<T> Builder<Module> for ModuleBuilder<T>
 where
-    T: ModuleProviderDefinition,
+    T: ModuleData,
 {
     fn build(&self, engine: Arc<Katalyst>) -> Result<Module, GatewayError> {
         let module = engine.get_module(&self.module)?;

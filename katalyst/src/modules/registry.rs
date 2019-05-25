@@ -2,15 +2,15 @@ use super::*;
 
 #[derive(Debug)]
 pub struct ModuleRegistry {
-    modules: HashMap<String, Arc<ModuleProvider>>,
+    modules: HashMap<String, Arc<dyn ModuleProvider>>,
 }
 
 impl ModuleRegistry {
-    pub fn register(&mut self, module: Arc<ModuleProvider>) {
+    pub fn register(&mut self, module: Arc<dyn ModuleProvider>) {
         self.modules.insert(module.name().to_string(), module);
     }
 
-    pub fn get(&self, name: &str) -> Result<Arc<ModuleProvider>> {
+    pub fn get(&self, name: &str) -> Result<Arc<dyn ModuleProvider>> {
         Ok(self
             .modules
             .get(name)

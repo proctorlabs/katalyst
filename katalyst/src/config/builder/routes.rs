@@ -14,13 +14,13 @@ pub struct RouteBuilder {
     path: PathBuilder,
     #[serde(default)]
     children: Option<Vec<RouteBuilder>>,
-    handler: ModuleBuilder<HandlerModule>,
+    handler: ModuleBuilder<RequestHandlerModule>,
     #[serde(default)]
     methods: Option<Vec<String>>,
     #[serde(default)]
     plugins: Option<Vec<ModuleBuilder<PluginModule>>>,
     #[serde(default)]
-    cache: Option<ModuleBuilder<CacheHandler>>,
+    cache: Option<ModuleBuilder<CacheHandlerModule>>,
     #[serde(default)]
     authorizers: Option<Vec<ModuleBuilder<AuthorizerModule>>>,
     #[serde(default)]
@@ -30,7 +30,7 @@ pub struct RouteBuilder {
 macro_rules! module {
     ($name:ident, $mt:expr) => {
         match $mt {
-            Module::$name(mtch) => mtch,
+            Module::$name(mtch) => mtch.0,
             _ => return Err(GatewayError::FeatureUnavailable),
         }
     };

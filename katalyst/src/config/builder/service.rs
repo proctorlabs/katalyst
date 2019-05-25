@@ -9,13 +9,13 @@ use std::sync::Arc;
 #[serde(default)]
 pub struct ServiceBuilder {
     pub interface: String,
-    pub cache: ModuleBuilder<CacheModule>,
+    pub cache: ModuleBuilder<CacheProviderModule>,
 }
 
 macro_rules! module {
     ($name:ident, $mt:expr) => {
         match $mt {
-            Module::$name(mtch) => mtch,
+            Module::$name(mtch) => mtch.0,
             _ => return Err(GatewayError::FeatureUnavailable),
         }
     };

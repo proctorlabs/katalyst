@@ -11,7 +11,7 @@ impl ModuleProvider for ContentPlugin {
     }
 
     fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
-        Ok(Module::Plugin(Arc::new(ContentPlugin)))
+        Ok(Module::Plugin(PluginModule(Arc::new(ContentPlugin))))
     }
 }
 

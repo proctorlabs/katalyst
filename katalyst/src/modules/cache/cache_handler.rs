@@ -12,7 +12,7 @@ impl ModuleProvider for DefaultCacheHandler {
     }
 
     fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
-        Ok(Module::CacheHandler(Arc::new(DefaultCacheHandler)))
+        Ok(Module::CacheHandler(CacheHandlerModule(Arc::new(DefaultCacheHandler))))
     }
 }
 

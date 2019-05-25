@@ -69,14 +69,14 @@ impl ModuleProvider for HostModule {
             }
             None => None,
         };
-        Ok(Module::RequestHandler(Arc::new(HostDispatcher {
+        Ok(Module::RequestHandler(RequestHandlerModule(Arc::new(HostDispatcher {
             host: c.host.to_owned(),
             path: providers.compile_template(Some(c.path.as_str()))?,
             method,
             query: providers.compile_template_map(&c.query)?,
             headers: providers.compile_template_map(&c.headers)?,
             body: providers.compile_template_option(body)?,
-        })))
+        }))))
     }
 }
 

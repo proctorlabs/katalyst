@@ -13,7 +13,7 @@ impl ModuleProvider for MemoryCacheBuilder {
     }
 
     fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
-        Ok(Module::CacheProvider(Arc::new(MemoryCache::default())))
+        Ok(Module::CacheProvider(CacheProviderModule(Arc::new(MemoryCache::default()))))
     }
 }
 

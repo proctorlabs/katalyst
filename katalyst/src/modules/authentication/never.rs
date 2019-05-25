@@ -12,7 +12,7 @@ impl ModuleProvider for NeverAuthenticatorBuilder {
     }
 
     fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
-        Ok(Module::Authenticator(Arc::new(NeverAuthenticator)))
+        Ok(Module::Authenticator(AuthenticatorModule(Arc::new(NeverAuthenticator))))
     }
 }
 
