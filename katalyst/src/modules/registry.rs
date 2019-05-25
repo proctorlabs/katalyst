@@ -1,0 +1,48 @@
+use super::*;
+
+#[derive(Debug)]
+pub struct ModuleRegistry {
+    modules: HashMap<String, Arc<ModuleProvider>>,
+}
+
+impl ModuleRegistry {
+    pub fn register(&mut self, module: Arc<ModuleProvider>) {
+        self.modules.insert(module.name().to_string(), module);
+    }
+
+    pub fn get(&self, name: &str) -> Result<Arc<ModuleProvider>> {
+        Ok(self
+            .modules
+            .get(name)
+            .ok_or_else(|| GatewayError::FeatureUnavailable)?
+            .clone())
+    }
+}
+
+macro_rules! register_modules {
+    ($($toreg:expr);*) => {
+        impl Default for ModuleRegistry {
+            fn default() -> Self {
+                let mut result = ModuleRegistry {
+                    modules: HashMap::default(),
+                };
+                $(
+                    result.register(Arc::new($toreg));
+                )*
+                result
+            }
+        }
+    };
+}
+
+register_modules! {
+    handlers::FileServerModule;
+    handlers::HostModule;
+    authentication::AlwaysAuthenticatorBuilder;
+    authentication::NeverAuthenticatorBuilder;
+    authentication::HttpAuthenticatorBuilder;
+    authentication::WhitelistBuilder;
+    plugins::ContentPlugin;
+    cache::DefaultCacheHandler;
+    cache::MemoryCacheBuilder
+}

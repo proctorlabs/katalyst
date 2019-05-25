@@ -1,7 +1,7 @@
 use super::*;
+use futures::Future;
 use hyper::{Body, Response};
 use std::sync::Arc;
-use futures::Future;
 
 #[derive(Debug)]
 pub struct DefaultCacheHandler;
