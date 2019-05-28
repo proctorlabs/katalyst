@@ -27,7 +27,7 @@ pub fn authorize(ctx: Context) -> ModuleResult {
     if let Some(authorizers) = &route.authorizers {
         for auth in authorizers.iter() {
             let a = auth.clone();
-            result = Box::new(result.and_then(move |ctx| a.run(ctx)));
+            result = Box::new(result.and_then(move |ctx| a.0.run(ctx)));
         }
     }
     result

@@ -34,10 +34,12 @@ impl ModuleProvider for FileServerModule {
         let c: FileServerConfig = config.clone().try_into().map_err(|_| {
             GatewayError::ConfigNotParseable("Host module configuration failed".into())
         })?;
-        Ok(Module::RequestHandler(RequestHandlerModule(Arc::new(FileServerDispatcher {
-            root_path: c.root_path,
-            selector: engine.get_compiler().compile_template(Some(&c.selector))?,
-        }))))
+        Ok(Module::RequestHandler(RequestHandler(Box::new(
+            FileServerDispatcher {
+                root_path: c.root_path,
+                selector: engine.get_compiler().compile_template(Some(&c.selector))?,
+            },
+        ))))
     }
 }
 

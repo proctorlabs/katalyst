@@ -4,8 +4,13 @@ install_crate = "cargo-deb"
 command = "cargo"
 args = ["deb"]
 
+[tasks.run]
+description = "Run Katalyst"
+command = "cargo"
+args = ["run", "--", "-c", "../assets/manual-test.yml"]
+
 [tasks.watch]
-description = "Run the project, monitor for changes and rerun when changed"
+description = "Run Katalyst and watch for changes"
 install_crate = "cargo-watch"
 command = "cargo"
 args = ["watch", "-x", "run -- -c ../assets/manual-test.yml"]

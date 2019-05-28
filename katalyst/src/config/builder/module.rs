@@ -7,7 +7,7 @@ use std::marker::PhantomData;
 use std::string::String;
 use std::sync::Arc;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct ModuleBuilder<T: ModuleData> {
     #[serde(skip)]

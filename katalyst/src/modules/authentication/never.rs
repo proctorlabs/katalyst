@@ -4,20 +4,19 @@ use crate::modules::*;
 use futures::future::err;
 
 #[derive(Default, Debug)]
-pub struct NeverAuthenticatorBuilder;
+pub struct NeverAuthenticator;
 
-impl ModuleProvider for NeverAuthenticatorBuilder {
+impl ModuleProvider for NeverAuthenticator {
     fn name(&self) -> &'static str {
         "never"
     }
 
     fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
-        Ok(Module::Authenticator(AuthenticatorModule(Arc::new(NeverAuthenticator))))
+        Ok(Module::Authenticator(Authenticator(Box::new(
+            NeverAuthenticator,
+        ))))
     }
 }
-
-#[derive(Default, Debug)]
-pub struct NeverAuthenticator;
 
 impl RequestHook for NeverAuthenticator {
     fn run(&self, ctx: Context) -> ModuleResult {

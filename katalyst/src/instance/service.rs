@@ -5,7 +5,7 @@ use std::sync::Arc;
 #[derive(Debug)]
 pub struct Service {
     pub interface: SocketAddr,
-    pub cache: Arc<CacheProvider>,
+    pub cache: Arc<CacheProviderModule>,
 }
 
 impl Default for Service {

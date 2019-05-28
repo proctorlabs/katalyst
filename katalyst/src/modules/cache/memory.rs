@@ -13,7 +13,9 @@ impl ModuleProvider for MemoryCacheBuilder {
     }
 
     fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
-        Ok(Module::CacheProvider(CacheProviderModule(Arc::new(MemoryCache::default()))))
+        Ok(Module::CacheProvider(CacheProvider(Box::new(
+            MemoryCache::default(),
+        ))))
     }
 }
 
@@ -22,7 +24,7 @@ pub struct MemoryCache {
     cache: RwLock<HashMap<String, Arc<Vec<u8>>>>,
 }
 
-impl CacheProvider for MemoryCache {
+impl CacheProviderModule for MemoryCache {
     fn get_key(&self, key: &str) -> Box<Future<Item = Arc<Vec<u8>>, Error = GatewayError> + Send> {
         Box::new(match self.cache.read() {
             Ok(read) => match read.get(key) {

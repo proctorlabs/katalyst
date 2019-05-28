@@ -5,19 +5,19 @@ use crate::modules::*;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
-#[derive(Clone, Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct ServiceBuilder {
     pub interface: String,
-    pub cache: ModuleBuilder<CacheProviderModule>,
+    pub cache: ModuleBuilder<CacheProvider>,
 }
 
 macro_rules! module {
     ($name:ident, $mt:expr) => {
-        match $mt {
-            Module::$name(mtch) => mtch.0,
+        Arc::new(match $mt {
+            Module::$name(mtch) => mtch,
             _ => return Err(GatewayError::FeatureUnavailable),
-        }
+        })
     };
 }
 

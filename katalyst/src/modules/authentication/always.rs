@@ -4,20 +4,17 @@ use crate::modules::*;
 use futures::future::*;
 
 #[derive(Default, Debug)]
-pub struct AlwaysAuthenticatorBuilder;
+pub struct AlwaysAuthenticator;
 
-impl ModuleProvider for AlwaysAuthenticatorBuilder {
+impl ModuleProvider for AlwaysAuthenticator {
     fn name(&self) -> &'static str {
         "always"
     }
 
     fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
-        Ok(Module::Authenticator(AuthenticatorModule(Arc::new(AlwaysAuthenticator))))
+        Ok(Authenticator(Box::new(AlwaysAuthenticator)).into())
     }
 }
-
-#[derive(Default, Debug)]
-pub struct AlwaysAuthenticator;
 
 impl RequestHook for AlwaysAuthenticator {
     fn run(&self, mut ctx: Context) -> ModuleResult {

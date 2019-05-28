@@ -31,9 +31,9 @@ impl ModuleProvider for HttpAuthenticatorBuilder {
         let c: HttpConfig = config.clone().try_into().map_err(|_| {
             GatewayError::ConfigNotParseable("Host module configuration failed".into())
         })?;
-        Ok(Module::Authenticator(AuthenticatorModule(Arc::new(HttpAuthenticator {
-            url: c.url,
-        }))))
+        Ok(Module::Authenticator(Authenticator(Box::new(
+            HttpAuthenticator { url: c.url },
+        ))))
     }
 }
 

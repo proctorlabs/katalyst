@@ -9,30 +9,30 @@ use std::collections::HashSet;
 use std::string::String;
 use std::sync::Arc;
 
-#[derive(Clone, Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct RouteBuilder {
     path: PathBuilder,
     #[serde(default)]
     children: Option<Vec<RouteBuilder>>,
-    handler: ModuleBuilder<RequestHandlerModule>,
+    handler: ModuleBuilder<RequestHandler>,
     #[serde(default)]
     methods: Option<Vec<String>>,
     #[serde(default)]
-    plugins: Option<Vec<ModuleBuilder<PluginModule>>>,
+    plugins: Option<Vec<ModuleBuilder<Plugin>>>,
     #[serde(default)]
-    cache: Option<ModuleBuilder<CacheHandlerModule>>,
+    cache: Option<ModuleBuilder<CacheHandler>>,
     #[serde(default)]
-    authorizers: Option<Vec<ModuleBuilder<AuthorizerModule>>>,
+    authorizers: Option<Vec<ModuleBuilder<Authorizer>>>,
     #[serde(default)]
-    authenticators: Option<Vec<ModuleBuilder<AuthenticatorModule>>>,
+    authenticators: Option<Vec<ModuleBuilder<Authenticator>>>,
 }
 
 macro_rules! module {
     ($name:ident, $mt:expr) => {
-        match $mt {
-            Module::$name(mtch) => mtch.0,
+        Arc::new(match $mt {
+            Module::$name(mtch) => mtch,
             _ => return Err(GatewayError::FeatureUnavailable),
-        }
+        })
     };
 }
 
@@ -77,7 +77,7 @@ impl Builder<Route> for RouteBuilder {
 
         let authorizers = match &self.authorizers {
             Some(auths) => {
-                let mut vec_auths: Vec<Arc<RequestHook>> = vec![];
+                let mut vec_auths: Vec<Arc<Authorizer>> = vec![];
                 for a in auths {
                     vec_auths.push(module!(Authorizer, a.build(engine.clone())?));
                 }

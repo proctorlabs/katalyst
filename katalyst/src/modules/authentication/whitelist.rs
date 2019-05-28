@@ -27,7 +27,9 @@ impl ModuleProvider for WhitelistBuilder {
         let c: WhitelistConfig = config.clone().try_into().map_err(|_| {
             GatewayError::ConfigNotParseable("Host module configuration failed".into())
         })?;
-        Ok(Module::Authenticator(AuthenticatorModule(Arc::new(Whitelist { ips: c.ips }))))
+        Ok(Module::Authenticator(Authenticator(Box::new(
+            Whitelist { ips: c.ips },
+        ))))
     }
 }
 

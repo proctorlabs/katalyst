@@ -38,8 +38,8 @@ macro_rules! register_modules {
 register_modules! {
     handlers::FileServerModule;
     handlers::HostModule;
-    authentication::AlwaysAuthenticatorBuilder;
-    authentication::NeverAuthenticatorBuilder;
+    authentication::AlwaysAuthenticator;
+    authentication::NeverAuthenticator;
     authentication::HttpAuthenticatorBuilder;
     authentication::WhitelistBuilder;
     plugins::ContentPlugin;

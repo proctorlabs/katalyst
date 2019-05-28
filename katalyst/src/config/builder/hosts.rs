@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::string::String;
 use std::sync::Arc;
 
-#[derive(Clone, Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct HostsBuilder {
     #[serde(default = "default_balancer")]

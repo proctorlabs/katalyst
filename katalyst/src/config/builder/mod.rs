@@ -21,7 +21,7 @@ pub trait Builder<T> {
     fn build(&self, engine: Arc<Katalyst>) -> Result<T, GatewayError>;
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct KatalystBuilder {
     hosts: HashMap<String, HostsBuilder>,
