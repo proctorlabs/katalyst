@@ -8,10 +8,10 @@ use std::sync::Arc;
 pub struct Route {
     pub pattern: Regex,
     pub children: Option<Vec<Arc<Route>>>,
-    pub handler: Arc<RequestHook>,
-    pub plugins: Option<Vec<Arc<RequestHook>>>,
+    pub handler: Arc<RequestHandler>,
+    pub plugins: Option<Vec<Arc<Plugin>>>,
     pub authorizers: Option<Vec<Arc<Authorizer>>>,
-    pub cache: Option<Arc<RequestHook>>,
+    pub cache: Option<Arc<CacheHandler>>,
     pub methods: Option<HashSet<Method>>,
-    pub authenticators: Option<Vec<Arc<RequestHook>>>,
+    pub authenticators: Option<Vec<Arc<Authenticator>>>,
 }

@@ -12,14 +12,12 @@ impl ModuleProvider for NeverAuthenticator {
     }
 
     fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
-        Ok(Module::Authenticator(Authenticator(Box::new(
-            NeverAuthenticator,
-        ))))
+        Ok(NeverAuthenticator.into_module())
     }
 }
 
-impl RequestHook for NeverAuthenticator {
-    fn run(&self, ctx: Context) -> ModuleResult {
+impl AuthenticatorModule for NeverAuthenticator {
+    fn authenticate(&self, ctx: Context) -> ModuleResult {
         Box::new(err(ctx.fail(GatewayError::Unauthorized)))
     }
 }

@@ -5,7 +5,7 @@ use crate::instance::Instance;
 use crate::modules::ModuleRegistry;
 use crate::pipeline::{run, HyperResult};
 use crate::prelude::*;
-use futures::future::Future;
+use futures::future::*;
 use hyper::client::connect::dns::TokioThreadpoolGaiResolver;
 use hyper::client::HttpConnector;
 use hyper::server::conn::AddrStream;
@@ -13,6 +13,8 @@ use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Client, Request, Server};
 use hyper_rustls::HttpsConnector;
 use rustls::ClientConfig;
+use signal_hook::iterator::Signals;
+use signal_hook::{SIGINT, SIGQUIT, SIGTERM};
 use std::fmt;
 use std::net::SocketAddr;
 use std::sync::{Arc, RwLock};
@@ -142,7 +144,17 @@ impl Katalyst {
 
     pub fn wait(&self) -> Result<()> {
         let mut rt = self.rt.write().unwrap();
-        rt.block_on(futures::empty::<(), GatewayError>())?;
+        let signals = Signals::new(&[SIGINT, SIGTERM, SIGQUIT])?;
+        rt.block_on(Box::new(lazy(move || {
+            for sig in signals.forever() {
+                match sig {
+                    SIGINT | SIGTERM | SIGQUIT => break,
+                    _ => (),
+                };
+            }
+            info!("Signal received, shutting down...");
+            ok::<(), GatewayError>(())
+        })))?;
         Ok(())
     }
 

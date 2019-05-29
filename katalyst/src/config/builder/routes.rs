@@ -66,7 +66,7 @@ impl Builder<Route> for RouteBuilder {
 
         let plugins = match &self.plugins {
             Some(plugins) => {
-                let mut vec_plugins: Vec<Arc<RequestHook>> = vec![];
+                let mut vec_plugins: Vec<Arc<Plugin>> = vec![];
                 for p in plugins {
                     vec_plugins.push(module!(Plugin, p.build(engine.clone())?));
                 }
@@ -88,7 +88,7 @@ impl Builder<Route> for RouteBuilder {
 
         let authenticators = match &self.authenticators {
             Some(auths) => {
-                let mut vec_auths: Vec<Arc<RequestHook>> = vec![];
+                let mut vec_auths: Vec<Arc<Authenticator>> = vec![];
                 for a in auths {
                     vec_auths.push(module!(Authenticator, a.build(engine.clone())?));
                 }
@@ -97,7 +97,7 @@ impl Builder<Route> for RouteBuilder {
             None => None,
         };
 
-        let cache: Option<Arc<RequestHook>> = match &self.cache {
+        let cache: Option<Arc<CacheHandler>> = match &self.cache {
             Some(c) => Some(module!(CacheHandler, c.build(engine.clone())?)),
             None => None,
         };

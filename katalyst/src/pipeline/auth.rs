@@ -12,7 +12,7 @@ pub fn authenticate(ctx: Context) -> ModuleResult {
             for a in authenticators.iter() {
                 result = Box::new(result.and_then({
                     let r = a.clone();
-                    move |s| r.run(s)
+                    move |s| r.authenticate(s)
                 }));
             }
             result
@@ -27,7 +27,7 @@ pub fn authorize(ctx: Context) -> ModuleResult {
     if let Some(authorizers) = &route.authorizers {
         for auth in authorizers.iter() {
             let a = auth.clone();
-            result = Box::new(result.and_then(move |ctx| a.0.run(ctx)));
+            result = Box::new(result.and_then(move |ctx| a.authorize(ctx)));
         }
     }
     result

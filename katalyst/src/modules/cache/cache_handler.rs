@@ -12,14 +12,12 @@ impl ModuleProvider for DefaultCacheHandler {
     }
 
     fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
-        Ok(Module::CacheHandler(CacheHandler(Box::new(
-            DefaultCacheHandler,
-        ))))
+        Ok(DefaultCacheHandler.into_module())
     }
 }
 
-impl RequestHook for DefaultCacheHandler {
-    fn run(&self, mut ctx: Context) -> ModuleResult {
+impl CacheHandlerModule for DefaultCacheHandler {
+    fn check_cache(&self, mut ctx: Context) -> ModuleResult {
         let instance = try_fut!(
             ctx,
             ctx.katalyst

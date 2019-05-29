@@ -11,11 +11,11 @@ impl ModuleProvider for ContentPlugin {
     }
 
     fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
-        Ok(Module::Plugin(Plugin(Box::new(ContentPlugin))))
+        Ok(ContentPlugin.into_module())
     }
 }
 
-impl RequestHook for ContentPlugin {
+impl PluginModule for ContentPlugin {
     fn run(&self, ctx: Context) -> ModuleResult {
         ctx.parse()
     }

@@ -34,12 +34,11 @@ impl ModuleProvider for FileServerModule {
         let c: FileServerConfig = config.clone().try_into().map_err(|_| {
             GatewayError::ConfigNotParseable("Host module configuration failed".into())
         })?;
-        Ok(Module::RequestHandler(RequestHandler(Box::new(
-            FileServerDispatcher {
-                root_path: c.root_path,
-                selector: engine.get_compiler().compile_template(Some(&c.selector))?,
-            },
-        ))))
+        Ok(FileServerDispatcher {
+            root_path: c.root_path,
+            selector: engine.get_compiler().compile_template(Some(&c.selector))?,
+        }
+        .into_module())
     }
 }
 
@@ -49,8 +48,8 @@ pub struct FileServerDispatcher {
     pub selector: Expression,
 }
 
-impl RequestHook for FileServerDispatcher {
-    fn run(&self, ctx: Context) -> ModuleResult {
+impl RequestHandlerModule for FileServerDispatcher {
+    fn dispatch(&self, ctx: Context) -> ModuleResult {
         let path = try_fut!(ctx, self.selector.render(&ctx));
         let mut full_path = PathBuf::from(&self.root_path);
         full_path.push(&path);

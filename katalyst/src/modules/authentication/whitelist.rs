@@ -27,9 +27,7 @@ impl ModuleProvider for WhitelistBuilder {
         let c: WhitelistConfig = config.clone().try_into().map_err(|_| {
             GatewayError::ConfigNotParseable("Host module configuration failed".into())
         })?;
-        Ok(Module::Authenticator(Authenticator(Box::new(
-            Whitelist { ips: c.ips },
-        ))))
+        Ok(Whitelist { ips: c.ips }.into_module())
     }
 }
 
@@ -38,8 +36,8 @@ pub struct Whitelist {
     ips: Vec<String>,
 }
 
-impl RequestHook for Whitelist {
-    fn run(&self, ctx: Context) -> ModuleResult {
+impl AuthenticatorModule for Whitelist {
+    fn authenticate(&self, ctx: Context) -> ModuleResult {
         if self.ips.contains(&ctx.metadata.remote_ip) {
             Box::new(ok(ctx))
         } else {

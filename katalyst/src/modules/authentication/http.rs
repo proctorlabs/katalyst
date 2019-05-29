@@ -31,9 +31,7 @@ impl ModuleProvider for HttpAuthenticatorBuilder {
         let c: HttpConfig = config.clone().try_into().map_err(|_| {
             GatewayError::ConfigNotParseable("Host module configuration failed".into())
         })?;
-        Ok(Module::Authenticator(Authenticator(Box::new(
-            HttpAuthenticator { url: c.url },
-        ))))
+        Ok(HttpAuthenticator { url: c.url }.into_module())
     }
 }
 
@@ -42,8 +40,8 @@ pub struct HttpAuthenticator {
     url: String,
 }
 
-impl RequestHook for HttpAuthenticator {
-    fn run(&self, mut ctx: Context) -> ModuleResult {
+impl AuthenticatorModule for HttpAuthenticator {
+    fn authenticate(&self, mut ctx: Context) -> ModuleResult {
         let client = ctx.katalyst.get_client();
         let mut request = Request::builder();
         request.uri(&self.url.to_string());

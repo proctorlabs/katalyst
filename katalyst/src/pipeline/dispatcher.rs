@@ -16,5 +16,5 @@ pub fn run_plugins(ctx: Context) -> ModuleResult {
 
 pub fn run_handler(ctx: Context) -> ModuleResult {
     let r = try_fut!(ctx, ctx.get_matched()).route.clone();
-    Box::new(r.handler.run(ctx))
+    Box::new(r.handler.dispatch(ctx))
 }

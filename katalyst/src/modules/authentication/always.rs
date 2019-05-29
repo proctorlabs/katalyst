@@ -12,12 +12,12 @@ impl ModuleProvider for AlwaysAuthenticator {
     }
 
     fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
-        Ok(Authenticator(Box::new(AlwaysAuthenticator)).into())
+        Ok(AlwaysAuthenticator.into_module())
     }
 }
 
-impl RequestHook for AlwaysAuthenticator {
-    fn run(&self, mut ctx: Context) -> ModuleResult {
+impl AuthenticatorModule for AlwaysAuthenticator {
+    fn authenticate(&self, mut ctx: Context) -> ModuleResult {
         let mut result = KatalystAuthenticationInfo::default();
         result.add_claim("KatalystAuthenticator".to_string(), "always".to_string());
         ctx = match ctx.set_authenticated(result) {

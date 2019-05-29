@@ -69,21 +69,20 @@ impl ModuleProvider for HostModule {
             }
             None => None,
         };
-        Ok(Module::RequestHandler(RequestHandler(Box::new(
-            HostDispatcher {
-                host: c.host.to_owned(),
-                path: providers.compile_template(Some(c.path.as_str()))?,
-                method,
-                query: providers.compile_template_map(&c.query)?,
-                headers: providers.compile_template_map(&c.headers)?,
-                body: providers.compile_template_option(body)?,
-            },
-        ))))
+        Ok(HostDispatcher {
+            host: c.host.to_owned(),
+            path: providers.compile_template(Some(c.path.as_str()))?,
+            method,
+            query: providers.compile_template_map(&c.query)?,
+            headers: providers.compile_template_map(&c.headers)?,
+            body: providers.compile_template_option(body)?,
+        }
+        .into_module())
     }
 }
 
-impl RequestHook for HostDispatcher {
-    fn run(&self, ctx: Context) -> ModuleResult {
+impl RequestHandlerModule for HostDispatcher {
+    fn dispatch(&self, ctx: Context) -> ModuleResult {
         Box::new(
             result(self.prepare(ctx))
                 .and_then(HostDispatcher::send)
