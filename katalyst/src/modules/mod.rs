@@ -11,6 +11,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 pub(crate) mod cache;
+pub use cache::CachedObject;
 pub use def::*;
 pub use errors::*;
 pub use plugins::*;

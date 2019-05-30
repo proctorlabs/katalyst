@@ -1,4 +1,5 @@
 mod auth;
+mod cache;
 mod dispatcher;
 mod logger;
 mod mapper;
@@ -25,10 +26,23 @@ pub(crate) fn run(
             .and_then(matcher::matcher)
             .and_then(auth::authenticate)
             .and_then(auth::authorize)
+            .and_then(cache::check_cache)
             .and_then(dispatcher::run_plugins)
             .and_then(dispatcher::run_handler)
+            .and_then(cache::update_cache)
+            .then(map_early_finish)
             .map(logger::log_result)
             .map_err(logger::log_error)
             .then(mapper::map_result_to_hyper),
     )
+}
+
+pub fn map_early_finish(res: ModuleResultSync) -> ModuleResult {
+    match res {
+        Err(ModuleError {
+            error: GatewayError::Done,
+            context,
+        }) => ok!(context),
+        other => Box::new(futures::future::result(other)),
+    }
 }

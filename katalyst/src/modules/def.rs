@@ -96,12 +96,13 @@ impl_module! {
     };
 
     CacheHandler, CacheHandlerModule {
-        ModuleResult: check_cache => ctx: Context
+        ModuleResult: check_cache => ctx: Context;
+        ModuleResult: update_cache => ctx: Context
     };
 
     CacheProvider, CacheProviderModule {
-        Box<Future<Item = Arc<Vec<u8>>, Error = GatewayError> + Send>: get_key => key: &str;
-        Box<Future<Item = (), Error = GatewayError> + Send>: set_key => key: &str, val: Vec<u8>
+        Box<Future<Item = Arc<CachedObject>, Error = GatewayError> + Send>: get_key => key: &str;
+        Box<Future<Item = (), Error = GatewayError> + Send>: set_key => key: &str, val: CachedObject
     };
 
     Plugin, PluginModule {

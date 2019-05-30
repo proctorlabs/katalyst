@@ -143,18 +143,14 @@ impl Katalyst {
     }
 
     pub fn wait(&self) -> Result<()> {
-        let mut rt = self.rt.write().unwrap();
         let signals = Signals::new(&[SIGINT, SIGTERM, SIGQUIT])?;
-        rt.block_on(Box::new(lazy(move || {
-            for sig in signals.forever() {
-                match sig {
-                    SIGINT | SIGTERM | SIGQUIT => break,
-                    _ => (),
-                };
-            }
-            info!("Signal received, shutting down...");
-            ok::<(), GatewayError>(())
-        })))?;
+        for sig in signals.forever() {
+            match sig {
+                SIGINT | SIGTERM | SIGQUIT => break,
+                _ => (),
+            };
+        }
+        info!("Signal received, shutting down...");
         Ok(())
     }
 

@@ -41,6 +41,8 @@ pub enum GatewayError {
     Unauthorized,
     #[display(fmt = "Internal Server Error")]
     InternalServerError,
+    #[display(fmt = "Request finished early")]
+    Done,
     #[display(fmt = "{}", _1)]
     Other(StatusCode, &'static str),
 }

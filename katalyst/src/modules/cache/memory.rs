@@ -19,11 +19,14 @@ impl ModuleProvider for MemoryCacheBuilder {
 
 #[derive(Default, Debug)]
 pub struct MemoryCache {
-    cache: RwLock<HashMap<String, Arc<Vec<u8>>>>,
+    cache: RwLock<HashMap<String, Arc<CachedObject>>>,
 }
 
 impl CacheProviderModule for MemoryCache {
-    fn get_key(&self, key: &str) -> Box<Future<Item = Arc<Vec<u8>>, Error = GatewayError> + Send> {
+    fn get_key(
+        &self,
+        key: &str,
+    ) -> Box<Future<Item = Arc<CachedObject>, Error = GatewayError> + Send> {
         Box::new(match self.cache.read() {
             Ok(read) => match read.get(key) {
                 Some(r) => ok(r.clone()),
@@ -36,7 +39,7 @@ impl CacheProviderModule for MemoryCache {
     fn set_key(
         &self,
         key: &str,
-        val: Vec<u8>,
+        val: CachedObject,
     ) -> Box<Future<Item = (), Error = GatewayError> + Send> {
         let mut cache = match self.cache.write() {
             Ok(s) => s,

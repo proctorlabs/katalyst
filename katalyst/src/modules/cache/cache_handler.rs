@@ -1,6 +1,5 @@
 use super::*;
 use futures::Future;
-use hyper::{Body, Response};
 use std::sync::Arc;
 
 #[derive(Debug)]
@@ -32,16 +31,36 @@ impl CacheHandlerModule for DefaultCacheHandler {
                 .get_key(&ctx.metadata.url.as_str())
                 .then(|r| match r {
                     Ok(r) => {
-                        let mut content = vec![];
-                        content.clone_from_slice(r.as_slice());
-                        let mut resp = Response::default();
-                        *resp.status_mut() = http::status::StatusCode::OK;
-                        *resp.body_mut() = Body::from(content);
-                        ctx.request.set_response(resp);
-                        ok!(ctx)
+                        ctx.request = r.as_ref().clone().into_response();
+                        err!(ctx, GatewayError::Done)
                     }
                     Err(_) => ok!(ctx),
                 }),
         )
+    }
+
+    fn update_cache(&self, ctx: Context) -> ModuleResult {
+        if !ctx.request.is_response() {
+            return ok!(ctx);
+        }
+        let cache = try_fut!(
+            ctx,
+            ctx.katalyst
+                .get_instance()
+                .map_err(|_| GatewayError::InternalServerError)
+        )
+        .service
+        .cache
+        .clone();
+        Box::new(ctx.preload().and_then(move |mut ctx| {
+            ctx.request = match ctx.request {
+                HttpRequest::LoadedResponse(_) => {
+                    cache.set_key(&ctx.metadata.url.as_str(), CachedObject::from_response(&ctx.request).unwrap());
+                    ctx.request
+                }
+                _ => ctx.request,
+            };
+            Ok(ctx)
+        }))
     }
 }
