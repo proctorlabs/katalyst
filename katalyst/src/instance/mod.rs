@@ -8,7 +8,7 @@ mod service;
 
 pub use hosts::Hosts;
 pub use route::Route;
-pub use service::Service;
+pub use service::{Interface, Service};
 use std::collections::HashMap;
 use std::sync::Arc;
 

@@ -1,14 +1,43 @@
 use super::*;
 use crate::app::Katalyst;
-use crate::instance::Service;
+use crate::instance::{Interface, Service};
 use crate::modules::*;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
+pub struct InterfaceBuilder {
+    pub address: String,
+    pub ssl: bool,
+    pub ssl_cert: String,
+    pub ssl_key: String,
+}
+
+impl InterfaceBuilder {
+    fn make_interface(&self) -> Result<Interface, GatewayError> {
+        Ok(if self.ssl {
+            Interface::Https {
+                addr: self.address.parse().map_err(|_| {
+                    GatewayError::InvalidAddress("Service listener address is invalid")
+                })?,
+                cert: self.ssl_cert.clone(),
+                key: self.ssl_key.clone(),
+            }
+        } else {
+            Interface::Http {
+                addr: self.address.parse().map_err(|_| {
+                    GatewayError::InvalidAddress("Service listener address is invalid")
+                })?,
+            }
+        })
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(default)]
 pub struct ServiceBuilder {
-    pub interface: String,
+    pub interfaces: Vec<InterfaceBuilder>,
     pub cache: ModuleBuilder<CacheProvider>,
 }
 
@@ -24,10 +53,11 @@ macro_rules! module {
 impl Builder<Service> for ServiceBuilder {
     fn build(&self, instance: Arc<Katalyst>) -> Result<Service, GatewayError> {
         Ok(Service {
-            interface: self
-                .interface
-                .parse()
-                .map_err(|_| GatewayError::InvalidAddress("Service listener address is invalid"))?,
+            interfaces: self
+                .interfaces
+                .iter()
+                .map(|i| i.make_interface())
+                .collect::<Result<Vec<Interface>, GatewayError>>()?,
             cache: module!(CacheProvider, self.cache.build(instance.clone())?),
         })
     }

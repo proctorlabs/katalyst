@@ -36,14 +36,14 @@
     - [x] Authorization modules
     - [x] Plugin modules
     - [x] Handler modules
-    - [ ] Caching modules
+    - [x] Caching modules
 - [ ] Authentication modules: Login, Basic, HTTP
 - [ ] Authorization modules: Claim verifier
 - [ ] Load Python modules
 - [x] Register signals from OS *(Appliance)*
-- [ ] Server TLS termination *(Note: You can use a reverse proxy to accomplish this for the time being)*
+- [x] Server TLS termination
 - [ ] Health checks
-- [ ] Caching module: In-Memory
+- [x] Caching module: In-Memory
 - [ ] Caching module: Redis
 - [ ] Caching module: Disk
 - [ ] INotify for config file changes

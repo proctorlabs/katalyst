@@ -55,7 +55,10 @@ impl CacheHandlerModule for DefaultCacheHandler {
         Box::new(ctx.preload().and_then(move |mut ctx| {
             ctx.request = match ctx.request {
                 HttpRequest::LoadedResponse(_) => {
-                    cache.set_key(&ctx.metadata.url.as_str(), CachedObject::from_response(&ctx.request).unwrap());
+                    cache.set_key(
+                        &ctx.metadata.url.as_str(),
+                        CachedObject::from_response(&ctx.request).unwrap(),
+                    );
                     ctx.request
                 }
                 _ => ctx.request,
