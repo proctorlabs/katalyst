@@ -32,10 +32,9 @@ impl DownstreamTransformer {
 
         if let Some(headers) = self.headers {
             for (key_str, val_str) in headers.iter() {
-                if let (Ok(key), Ok(val)) = (
-                    HeaderName::from_str(&key_str),
-                    HeaderValue::from_str(val_str),
-                ) {
+                if let (Ok(key), Ok(val)) =
+                    (HeaderName::from_str(&key_str), HeaderValue::from_str(val_str))
+                {
                     while parts.headers.contains_key(key_str) {
                         parts.headers.remove(key_str);
                     }

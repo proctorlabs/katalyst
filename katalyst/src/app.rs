@@ -41,8 +41,7 @@ impl Default for Katalyst {
         let mut http_connector = HttpConnector::new_with_tokio_threadpool_resolver();
         http_connector.enforce_http(false);
         let mut tls = ClientConfig::new();
-        tls.root_store
-            .add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
+        tls.root_store.add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
 
         Katalyst {
             instance: RwLock::default(),
@@ -87,10 +86,7 @@ impl ArcKatalystImpl for Arc<Katalyst> {
         for interface in instance.service.interfaces.iter() {
             let server = Server::new(interface)?;
             server.spawn(self)?;
-            let mut servers = self
-                .servers
-                .write()
-                .map_err(|_| GatewayError::InvalidResource)?;
+            let mut servers = self.servers.write().map_err(|_| GatewayError::InvalidResource)?;
             servers.push(server);
         }
         Ok(())

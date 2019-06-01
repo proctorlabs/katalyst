@@ -19,24 +19,17 @@ impl CacheHandlerModule for DefaultCacheHandler {
     fn check_cache(&self, mut ctx: Context) -> ModuleResult {
         let instance = try_fut!(
             ctx,
-            ctx.katalyst
-                .get_instance()
-                .map_err(|_| GatewayError::InternalServerError)
+            ctx.katalyst.get_instance().map_err(|_| GatewayError::InternalServerError)
         );
-        Box::new(
-            instance
-                .clone()
-                .service
-                .cache
-                .get_key(&ctx.metadata.url.as_str())
-                .then(|r| match r {
-                    Ok(r) => {
-                        ctx.request = r.as_ref().clone().into_response();
-                        err!(ctx, GatewayError::Done)
-                    }
-                    Err(_) => ok!(ctx),
-                }),
-        )
+        Box::new(instance.clone().service.cache.get_key(&ctx.metadata.url.as_str()).then(
+            |r| match r {
+                Ok(r) => {
+                    ctx.request = r.as_ref().clone().into_response();
+                    err!(ctx, GatewayError::Done)
+                }
+                Err(_) => ok!(ctx),
+            },
+        ))
     }
 
     fn update_cache(&self, ctx: Context) -> ModuleResult {
@@ -45,9 +38,7 @@ impl CacheHandlerModule for DefaultCacheHandler {
         }
         let cache = try_fut!(
             ctx,
-            ctx.katalyst
-                .get_instance()
-                .map_err(|_| GatewayError::InternalServerError)
+            ctx.katalyst.get_instance().map_err(|_| GatewayError::InternalServerError)
         )
         .service
         .cache

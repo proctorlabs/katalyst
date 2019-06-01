@@ -7,18 +7,13 @@ impl HostDispatcher {
     pub fn prepare(&self, mut ctx: Context) -> ModuleResultSync {
         let config = try_req!(
             ctx,
-            ctx.katalyst
-                .get_instance()
-                .map_err(|_| GatewayError::InternalServerError)
+            ctx.katalyst.get_instance().map_err(|_| GatewayError::InternalServerError)
         );
 
         let balancer_lease = match config.hosts.get(&self.host) {
-            Some(s) => try_req!(
-                ctx,
-                s.servers
-                    .lease()
-                    .map_err(|_| GatewayError::InternalServerError)
-            ),
+            Some(s) => {
+                try_req!(ctx, s.servers.lease().map_err(|_| GatewayError::InternalServerError))
+            }
             None => {
                 return Err(ctx.fail(GatewayError::NotFound));
             }

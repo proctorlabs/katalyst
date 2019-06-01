@@ -4,21 +4,13 @@ use std::sync::Arc;
 
 #[derive(Debug)]
 pub enum Interface {
-    Http {
-        addr: SocketAddr,
-    },
-    Https {
-        addr: SocketAddr,
-        cert: String,
-        key: String,
-    },
+    Http { addr: SocketAddr },
+    Https { addr: SocketAddr, cert: String, key: String },
 }
 
 impl Default for Interface {
     fn default() -> Self {
-        Interface::Http {
-            addr: "0.0.0.0:8080".parse().unwrap(),
-        }
+        Interface::Http { addr: "0.0.0.0:8080".parse().unwrap() }
     }
 }
 
@@ -30,9 +22,6 @@ pub struct Service {
 
 impl Default for Service {
     fn default() -> Self {
-        Service {
-            interfaces: vec![],
-            cache: cache::default_cache(),
-        }
+        Service { interfaces: vec![], cache: cache::default_cache() }
     }
 }

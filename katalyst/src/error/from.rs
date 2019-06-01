@@ -27,11 +27,6 @@ impl From<serde_json::Error> for GatewayError {
         GatewayError::ConfigNotParseable(m.to_string())
     }
 }
-impl From<std::io::Error> for GatewayError {
-    fn from(m: std::io::Error) -> Self {
-        GatewayError::ConfigNotParseable(m.to_string())
-    }
-}
 
 impl From<sync::PoisonError<sync::RwLockWriteGuard<'_, Arc<Instance>>>> for GatewayError {
     fn from(_: sync::PoisonError<sync::RwLockWriteGuard<Arc<Instance>>>) -> Self {
@@ -72,5 +67,11 @@ impl From<pest::error::Error<crate::expression::compiler::nodes::Rule>> for Gate
 impl From<std::num::ParseIntError> for GatewayError {
     fn from(_: std::num::ParseIntError) -> Self {
         GatewayError::ExpressionLexicalError("Failed to parse integer!".into())
+    }
+}
+
+impl From<std::io::Error> for GatewayError {
+    fn from(err: std::io::Error) -> Self {
+        GatewayError::IoError(err)
     }
 }

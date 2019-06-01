@@ -7,9 +7,6 @@ pub struct ModuleError {
 
 impl Context {
     pub fn fail(self, error: GatewayError) -> ModuleError {
-        ModuleError {
-            error,
-            context: self,
-        }
+        ModuleError { error, context: self }
     }
 }

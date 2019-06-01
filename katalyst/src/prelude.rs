@@ -2,16 +2,10 @@
 This module provides a "prelude" useful for extending Katalyst functionality
 */
 
-use std::any::Any;
-use std::sync::Arc;
+use std::{any::Any, sync::Arc};
 
-pub use crate::app::Katalyst;
-pub use crate::context::*;
-pub use crate::error::*;
-pub use crate::expression::*;
-pub use crate::modules::*;
-pub(crate) use crate::parser::*;
-pub(crate) use crate::*;
+pub use crate::{app::Katalyst, context::*, error::*, expression::*, modules::*};
+pub(crate) use crate::{parser::*, *};
 
 pub(crate) trait KatalystCommonUtilities {
     fn arc() -> Arc<Self>
@@ -36,20 +30,18 @@ where
     fn with(&self, message: &'static str) -> Result<&T> {
         match self {
             Some(t) => Ok(t),
-            None => Err(GatewayError::Other(
-                http::StatusCode::INTERNAL_SERVER_ERROR,
-                message,
-            )),
+            None => {
+                Err(GatewayError::RequestFailed(http::StatusCode::INTERNAL_SERVER_ERROR, message))
+            }
         }
     }
 
     fn with_owned(self, message: &'static str) -> Result<T> {
         match self {
             Some(t) => Ok(t),
-            None => Err(GatewayError::Other(
-                http::StatusCode::INTERNAL_SERVER_ERROR,
-                message,
-            )),
+            None => {
+                Err(GatewayError::RequestFailed(http::StatusCode::INTERNAL_SERVER_ERROR, message))
+            }
         }
     }
 }

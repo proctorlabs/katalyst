@@ -70,10 +70,7 @@ fn send_file(mut ctx: Context, file: PathBuf) -> ModuleResult {
     Box::new(result.then(move |result| match result {
         Ok(mut r) => {
             let mime = mime_guess::get_mime_type_str(
-                file.extension()
-                    .unwrap_or_default()
-                    .to_str()
-                    .unwrap_or_default(),
+                file.extension().unwrap_or_default().to_str().unwrap_or_default(),
             )
             .unwrap_or("application/octet-stream");
             let hdrs = r.headers_mut();

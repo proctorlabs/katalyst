@@ -43,8 +43,12 @@ pub enum GatewayError {
     InternalServerError,
     #[display(fmt = "Request finished early")]
     Done,
+    #[display(fmt = "IO Error occurred: {:?}", _0)]
+    IoError(std::io::Error),
     #[display(fmt = "{}", _1)]
-    Other(StatusCode, &'static str),
+    RequestFailed(StatusCode, &'static str),
+    #[display(fmt = "{}", _0)]
+    Other(String),
 }
 
 impl std::error::Error for GatewayError {}
@@ -58,7 +62,7 @@ impl GatewayError {
             GatewayError::GatewayTimeout => StatusCode::GATEWAY_TIMEOUT,
             GatewayError::Forbidden => StatusCode::FORBIDDEN,
             GatewayError::Unauthorized => StatusCode::UNAUTHORIZED,
-            GatewayError::Other(code, _) => code,
+            GatewayError::RequestFailed(code, _) => code,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

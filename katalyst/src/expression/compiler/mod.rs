@@ -18,9 +18,7 @@ impl Compiler {
     }
 
     pub fn empty() -> Self {
-        Compiler {
-            builders: HashMap::new(),
-        }
+        Compiler { builders: HashMap::new() }
     }
 
     pub fn compile_template_map(

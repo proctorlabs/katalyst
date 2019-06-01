@@ -122,11 +122,6 @@ impl HostDispatcher {
             None => None,
         };
 
-        Ok(DownstreamTransformer {
-            uri,
-            method,
-            headers,
-            body,
-        })
+        Ok(DownstreamTransformer { uri, method, headers, body })
     }
 }

@@ -8,8 +8,6 @@ pub struct Hosts {
 
 impl Default for Hosts {
     fn default() -> Self {
-        Hosts {
-            servers: default_balancer(),
-        }
+        Hosts { servers: default_balancer() }
     }
 }

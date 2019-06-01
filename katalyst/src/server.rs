@@ -74,8 +74,8 @@ impl Service for HttpsServer {
     fn spawn(&self, instance: &mut Arc<Katalyst>) -> Result<()> {
         let engine = instance.clone();
         let tls_cfg = {
-            let certs = load_certs(&self.cert)?;
-            let key = load_private_key(&self.key)?;
+            let certs = self.load_certs(&self.cert)?;
+            let key = self.load_private_key(&self.key)?;
             let mut cfg = rustls::ServerConfig::new(rustls::NoClientAuth::new());
             cfg.set_single_cert(certs, key).unwrap();
             Arc::new(cfg)
@@ -112,27 +112,22 @@ impl Service for HttpsServer {
     }
 }
 
-fn error(_: String) -> GatewayError {
-    GatewayError::InvalidResource
-}
-
-fn load_certs(filename: &str) -> Result<Vec<rustls::Certificate>> {
-    let certfile = fs::File::open(filename)
-        .map_err(|e| error(format!("failed to open {}: {}", filename, e)))?;
-    let mut reader = io::BufReader::new(certfile);
-
-    pemfile::certs(&mut reader).map_err(|_| error("failed to load certificate".into()))
-}
-
-fn load_private_key(filename: &str) -> Result<rustls::PrivateKey> {
-    let keyfile = fs::File::open(filename)
-        .map_err(|e| error(format!("failed to open {}: {}", filename, e)))?;
-    let mut reader = io::BufReader::new(keyfile);
-
-    let keys = pemfile::rsa_private_keys(&mut reader)
-        .map_err(|_| error("failed to load private key".into()))?;
-    if keys.len() != 1 {
-        return Err(error("expected a single private key".into()));
+impl HttpsServer {
+    fn load_certs(&self, filename: &str) -> Result<Vec<rustls::Certificate>> {
+        let certfile = fs::File::open(filename)?;
+        let mut reader = io::BufReader::new(certfile);
+        pemfile::certs(&mut reader)
+            .map_err(|_| GatewayError::Other("Failed to load certificate".into()))
     }
-    Ok(keys[0].clone())
+
+    fn load_private_key(&self, filename: &str) -> Result<rustls::PrivateKey> {
+        let keyfile = fs::File::open(filename)?;
+        let mut reader = io::BufReader::new(keyfile);
+        let mut keys = pemfile::rsa_private_keys(&mut reader)
+            .map_err(|_| GatewayError::Other("Failed to load private key".into()))?;
+        if keys.len() != 1 {
+            return Err(GatewayError::Other("Expected a single private key".into()));
+        }
+        Ok(keys.pop().unwrap())
+    }
 }

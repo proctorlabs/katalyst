@@ -46,9 +46,7 @@ mod tests {
     #[test]
     fn compile_template() {
         let compiler = Compiler::default();
-        compiler
-            .compile_template(Some("/testing/the/parser/{{http.ip()}}/test"))
-            .unwrap();
+        compiler.compile_template(Some("/testing/the/parser/{{http.ip()}}/test")).unwrap();
     }
 
 }

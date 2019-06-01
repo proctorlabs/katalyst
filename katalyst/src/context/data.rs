@@ -9,9 +9,7 @@ struct Container<T: Any + Send + Sync> {
 
 impl<T: Any + Send + Sync> Container<T> {
     fn new(obj: T) -> Self {
-        Container {
-            data: Arc::new(obj),
-        }
+        Container { data: Arc::new(obj) }
     }
 
     fn get(&self) -> Arc<T> {

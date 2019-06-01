@@ -71,10 +71,7 @@ impl Default for Context {
 
 impl Context {
     pub fn into_error(self, error: GatewayError) -> ModuleError {
-        ModuleError {
-            error,
-            context: self,
-        }
+        ModuleError { error, context: self }
     }
 
     pub fn get_matched(&self) -> Result<&MatchInfo> {
@@ -108,10 +105,7 @@ impl Context {
     ) -> std::result::Result<Self, ModuleError> {
         match self.state {
             RequestState::Matched(m) => {
-                self.state = RequestState::Authenticated(AuthInfo {
-                    matched: m,
-                    detail: info,
-                })
+                self.state = RequestState::Authenticated(AuthInfo { matched: m, detail: info })
             }
             _ => return Err(self.into_error(GatewayError::StateUpdateFailure)),
         };
@@ -119,9 +113,7 @@ impl Context {
     }
 
     pub fn get_extension_data<T: Any + Send + Sync>(&self) -> Result<Arc<T>> {
-        self.data
-            .get()
-            .ok_or_else(|| GatewayError::InternalServerError)
+        self.data.get().ok_or_else(|| GatewayError::InternalServerError)
     }
 
     pub fn set_extension_data<T: Any + Send + Sync>(&mut self, data: T) {

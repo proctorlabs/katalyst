@@ -22,9 +22,7 @@ impl Decode {
     fn base64(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
         let to_decode = args[0].render(ctx)?;
         Ok(str::from_utf8(
-            decode(&to_decode)
-                .map_err(|_| GatewayError::InternalServerError)?
-                .as_slice(),
+            decode(&to_decode).map_err(|_| GatewayError::InternalServerError)?.as_slice(),
         )
         .map_err(|_| GatewayError::InternalServerError)?
         .to_string()

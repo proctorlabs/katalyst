@@ -39,10 +39,7 @@ pub(crate) fn run(
 
 pub fn map_early_finish(res: ModuleResultSync) -> ModuleResult {
     match res {
-        Err(ModuleError {
-            error: GatewayError::Done,
-            context,
-        }) => ok!(context),
+        Err(ModuleError { error: GatewayError::Done, context }) => ok!(context),
         other => Box::new(futures::future::result(other)),
     }
 }

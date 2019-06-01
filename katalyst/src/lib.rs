@@ -21,9 +21,6 @@ Current features include:
 #![recursion_limit = "128"]
 
 #[macro_use]
-extern crate katalyst_macros;
-
-#[macro_use]
 extern crate log;
 
 #[macro_use]
@@ -49,3 +46,4 @@ pub mod modules;
 pub mod prelude;
 
 pub use app::Katalyst;
+pub use katalyst_macros::ExpressionBinding;

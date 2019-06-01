@@ -24,12 +24,7 @@ impl Builder<HashMap<String, Hosts>> for HashMap<String, HostsBuilder> {
             .iter()
             .map(|v| {
                 let builder = &balancers[&v.1.balancer.as_str()];
-                (
-                    v.0.clone(),
-                    Hosts {
-                        servers: builder.build(v.1.servers.clone()).unwrap(),
-                    },
-                )
+                (v.0.clone(), Hosts { servers: builder.build(v.1.servers.clone()).unwrap() })
             })
             .collect())
     }

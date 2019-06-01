@@ -23,10 +23,7 @@ pub enum PathBuilder {
 
 impl Default for PathBuilder {
     fn default() -> Self {
-        PathBuilder::Exact {
-            path: "/".to_string(),
-            sensitive: false,
-        }
+        PathBuilder::Exact { path: "/".to_string(), sensitive: false }
     }
 }
 

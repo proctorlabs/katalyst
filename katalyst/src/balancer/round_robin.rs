@@ -14,10 +14,7 @@ impl KatalystBalancerBuilder for RoundRobinBalancerBuilder {
         for new_host in hosts.iter() {
             arc_hosts.push(Arc::new(new_host.to_string()));
         }
-        Ok(Arc::new(RoundRobinBalancer {
-            hosts: arc_hosts,
-            host_index: RwLock::new(0),
-        }))
+        Ok(Arc::new(RoundRobinBalancer { hosts: arc_hosts, host_index: RwLock::new(0) }))
     }
 }
 

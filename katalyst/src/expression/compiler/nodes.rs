@@ -16,11 +16,7 @@ pub enum ExpressionMetadata {
     Number(i64),
     Bool(bool),
     Text(String),
-    Expression {
-        module: String,
-        method: String,
-        args: Vec<ExpressionMetadata>,
-    },
+    Expression { module: String, method: String, args: Vec<ExpressionMetadata> },
 }
 
 impl ExpressionMetadata {
@@ -29,11 +25,7 @@ impl ExpressionMetadata {
         directory: &BuilderDirectory,
     ) -> std::result::Result<Arc<CompiledExpression>, GatewayError> {
         match self {
-            ExpressionMetadata::Expression {
-                module,
-                method,
-                args,
-            } => {
+            ExpressionMetadata::Expression { module, method, args } => {
                 let builder = directory.get(&module.as_str());
                 match builder {
                     Some(b) => {
@@ -81,9 +73,8 @@ fn parse_tokens(
             Rule::number_lit => result.push(ExpressionMetadata::Number(pair.as_str().parse()?)),
             Rule::true_lit => result.push(ExpressionMetadata::Bool(true)),
             Rule::false_lit => result.push(ExpressionMetadata::Bool(false)),
-            Rule::string_lit => result.push(ExpressionMetadata::Text(
-                pair.into_inner().as_str().replace("\\'", "'"),
-            )),
+            Rule::string_lit => result
+                .push(ExpressionMetadata::Text(pair.into_inner().as_str().replace("\\'", "'"))),
             Rule::object_call => result.push(parse_object(pair.into_inner())?),
             Rule::EOI => return Ok(result),
             _ => {
@@ -101,11 +92,7 @@ fn parse_object(
 ) -> std::result::Result<ExpressionMetadata, GatewayError> {
     let module = pairs.next().unwrap().as_str().to_string();
     let method = pairs.next().unwrap().as_str().to_string();
-    Ok(ExpressionMetadata::Expression {
-        module,
-        method,
-        args: parse_tokens(pairs)?,
-    })
+    Ok(ExpressionMetadata::Expression { module, method, args: parse_tokens(pairs)? })
 }
 
 #[cfg(test)]

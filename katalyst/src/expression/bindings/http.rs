@@ -32,10 +32,7 @@ impl Http {
     fn query_param(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
         let name = args[0].render(ctx)?;
         let res = ctx.metadata.url.query_pairs().find(|q| q.0 == name);
-        res.map_or_else(
-            || Err(GatewayError::InternalServerError),
-            |v| Ok(v.1.to_string().into()),
-        )
+        res.map_or_else(|| Err(GatewayError::InternalServerError), |v| Ok(v.1.to_string().into()))
     }
 
     fn header(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
@@ -49,12 +46,7 @@ impl Http {
     fn matched(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
         let value = args[0].render(ctx)?;
         let caps = &ctx.get_matched()?.captures;
-        let res = caps
-            .get(&value)
-            .ok_or_else(|| GatewayError::InternalServerError)?;
-        Ok(String::from_str(res)
-            .map_err(|_| GatewayError::InternalServerError)?
-            .to_string()
-            .into())
+        let res = caps.get(&value).ok_or_else(|| GatewayError::InternalServerError)?;
+        Ok(String::from_str(res).map_err(|_| GatewayError::InternalServerError)?.to_string().into())
     }
 }

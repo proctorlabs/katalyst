@@ -11,11 +11,7 @@ impl ModuleRegistry {
     }
 
     pub fn get(&self, name: &str) -> Result<Arc<dyn ModuleProvider>> {
-        Ok(self
-            .modules
-            .get(name)
-            .ok_or_else(|| GatewayError::FeatureUnavailable)?
-            .clone())
+        Ok(self.modules.get(name).ok_or_else(|| GatewayError::FeatureUnavailable)?.clone())
     }
 }
 
