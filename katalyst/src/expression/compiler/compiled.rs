@@ -1,7 +1,5 @@
-use crate::expression::*;
-use crate::prelude::*;
-use std::fmt;
-use std::sync::Arc;
+use crate::{expression::*, prelude::*};
+use std::{fmt, sync::Arc};
 use unstructured::Document;
 
 pub struct CompiledExpressionNode {

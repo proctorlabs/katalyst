@@ -1,6 +1,5 @@
 use crate::prelude::*;
-use std::fmt::Debug;
-use std::sync::Arc;
+use std::{fmt::Debug, sync::Arc};
 use unstructured::Document;
 
 lazy_static! {

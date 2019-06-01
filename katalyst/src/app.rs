@@ -1,12 +1,12 @@
-use crate::balancer;
-use crate::config::parsers;
-use crate::error::*;
-use crate::instance::Instance;
-use crate::modules::ModuleRegistry;
-use crate::prelude::*;
-use crate::server::*;
-use hyper::client::{connect::dns::TokioThreadpoolGaiResolver, HttpConnector};
-use hyper::{rt::Future, Body, Client};
+use crate::{
+    balancer, config::parsers, error::*, instance::Instance, modules::ModuleRegistry, prelude::*,
+    server::*,
+};
+use hyper::{
+    client::{connect::dns::TokioThreadpoolGaiResolver, HttpConnector},
+    rt::Future,
+    Body, Client,
+};
 use hyper_rustls::HttpsConnector;
 use rustls::ClientConfig;
 use signal_hook::{iterator::Signals, SIGINT, SIGQUIT, SIGTERM};

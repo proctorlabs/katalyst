@@ -1,10 +1,10 @@
 use crate::prelude::*;
-use http::header::{HeaderName, HeaderValue};
-use http::Method;
-use hyper::Body;
-use hyper::Request;
-use std::collections::HashMap;
-use std::str::FromStr;
+use http::{
+    header::{HeaderName, HeaderValue},
+    Method,
+};
+use hyper::{Body, Request};
+use std::{collections::HashMap, str::FromStr};
 
 #[derive(Debug)]
 pub struct DownstreamTransformer {

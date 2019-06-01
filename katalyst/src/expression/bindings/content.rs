@@ -1,5 +1,4 @@
-use crate::expression::*;
-use crate::prelude::*;
+use crate::{expression::*, prelude::*};
 use unstructured::Document;
 
 #[derive(ExpressionBinding)]

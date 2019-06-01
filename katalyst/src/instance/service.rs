@@ -1,6 +1,5 @@
 use crate::prelude::*;
-use std::net::SocketAddr;
-use std::sync::Arc;
+use std::{net::SocketAddr, sync::Arc};
 
 #[derive(Debug)]
 pub enum Interface {

@@ -7,8 +7,7 @@ mod plugins;
 mod registry;
 
 use crate::prelude::*;
-use std::collections::HashMap;
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 pub(crate) mod cache;
 pub use cache::CachedObject;

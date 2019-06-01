@@ -1,9 +1,5 @@
-use crate::config::builder::KatalystBuilder;
-use crate::prelude::*;
-use std::ffi::OsStr;
-use std::fs::File;
-use std::io::prelude::*;
-use std::path::Path;
+use crate::{config::builder::KatalystBuilder, prelude::*};
+use std::{ffi::OsStr, fs::File, io::prelude::*, path::Path};
 
 pub(crate) fn parse_file(file_path: &str) -> Result<KatalystBuilder> {
     let path = Path::new(file_path);

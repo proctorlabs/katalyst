@@ -1,5 +1,4 @@
-use http::header::HeaderValue;
-use http::HeaderMap;
+use http::{header::HeaderValue, HeaderMap};
 
 lazy_static! {
     static ref HOP_HEADERS: Vec<&'static str> = vec![

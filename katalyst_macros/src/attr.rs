@@ -1,5 +1,7 @@
-use syn::parse::{Parse, ParseStream};
-use syn::punctuated::Punctuated;
+use syn::{
+    parse::{Parse, ParseStream},
+    punctuated::Punctuated,
+};
 
 pub(crate) struct BindingAttrValues {
     pub ident: syn::Ident,

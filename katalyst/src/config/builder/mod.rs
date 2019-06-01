@@ -11,11 +11,9 @@ pub use path::PathBuilder;
 pub use routes::RouteBuilder;
 pub use service::ServiceBuilder;
 
-use crate::app::Katalyst;
-use crate::error::GatewayError;
+use crate::{app::Katalyst, error::GatewayError};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 pub trait Builder<T> {
     fn build(&self, engine: Arc<Katalyst>) -> Result<T, GatewayError>;

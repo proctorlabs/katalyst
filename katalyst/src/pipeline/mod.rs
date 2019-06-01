@@ -5,13 +5,10 @@ mod logger;
 mod mapper;
 mod matcher;
 
-use crate::app::Katalyst;
-use crate::prelude::*;
+use crate::{app::Katalyst, prelude::*};
 use futures::Future;
 use hyper::{Body, Request};
-use std::collections::HashMap;
-use std::net::SocketAddr;
-use std::sync::Arc;
+use std::{collections::HashMap, net::SocketAddr, sync::Arc};
 
 pub(crate) use mapper::HyperResult;
 

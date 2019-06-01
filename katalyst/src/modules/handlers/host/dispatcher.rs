@@ -1,7 +1,6 @@
 use super::*;
 use crate::context::*;
-use futures::future::*;
-use futures::Future;
+use futures::{future::*, Future};
 
 impl HostDispatcher {
     pub fn prepare(&self, mut ctx: Context) -> ModuleResultSync {

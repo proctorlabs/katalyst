@@ -1,5 +1,4 @@
-use crate::pipeline::*;
-use crate::prelude::*;
+use crate::{pipeline::*, prelude::*};
 
 pub fn matcher(mut ctx: Context) -> ModuleResultSync {
     let request = &ctx.request;

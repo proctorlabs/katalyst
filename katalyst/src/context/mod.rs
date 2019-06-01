@@ -2,18 +2,12 @@ mod auth;
 mod data;
 mod requests;
 
-use crate::app::Katalyst;
-use crate::instance::Route;
-use crate::prelude::*;
+use crate::{app::Katalyst, instance::Route, prelude::*};
 pub use auth::KatalystAuthenticationInfo;
 use data::ContextData;
 use hyper::{Body, Request};
 pub use requests::*;
-use std::any::Any;
-use std::collections::HashMap;
-use std::net::SocketAddr;
-use std::sync::Arc;
-use std::time::Instant;
+use std::{any::Any, collections::HashMap, net::SocketAddr, sync::Arc, time::Instant};
 
 #[derive(Debug)]
 pub struct Context {

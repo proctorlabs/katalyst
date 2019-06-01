@@ -9,8 +9,7 @@ mod service;
 pub use hosts::Hosts;
 pub use route::Route;
 pub use service::{Interface, Service};
-use std::collections::HashMap;
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 #[derive(Debug, Default)]
 pub struct Instance {

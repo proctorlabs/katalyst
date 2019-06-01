@@ -1,5 +1,4 @@
-use crate::expression::*;
-use crate::prelude::*;
+use crate::{expression::*, prelude::*};
 
 #[derive(ExpressionBinding)]
 #[expression(name = "url", bind = segment)]

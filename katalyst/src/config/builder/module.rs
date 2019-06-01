@@ -1,11 +1,7 @@
 use super::*;
-use crate::app::Katalyst;
-use crate::error::GatewayError;
-use crate::modules::*;
+use crate::{app::Katalyst, error::GatewayError, modules::*};
 use serde::{Deserialize, Serialize};
-use std::marker::PhantomData;
-use std::string::String;
-use std::sync::Arc;
+use std::{marker::PhantomData, string::String, sync::Arc};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

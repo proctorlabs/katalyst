@@ -3,8 +3,7 @@ pub(crate) mod nodes;
 
 use crate::expression::*;
 use compiled::*;
-use std::collections::HashMap;
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 type BuilderDirectory = HashMap<&'static str, Box<ExpressionBinding>>;
 

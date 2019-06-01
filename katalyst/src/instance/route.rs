@@ -1,8 +1,7 @@
 use crate::modules::*;
 use http::Method;
 use regex::Regex;
-use std::collections::HashSet;
-use std::sync::Arc;
+use std::{collections::HashSet, sync::Arc};
 
 #[derive(Debug)]
 pub struct Route {

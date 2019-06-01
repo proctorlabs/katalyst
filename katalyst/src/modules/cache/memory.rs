@@ -1,8 +1,9 @@
 use super::*;
 use futures::future::*;
-use std::collections::HashMap;
-use std::sync::Arc;
-use std::sync::RwLock;
+use std::{
+    collections::HashMap,
+    sync::{Arc, RwLock},
+};
 
 #[derive(Default, Debug)]
 pub struct MemoryCacheBuilder;

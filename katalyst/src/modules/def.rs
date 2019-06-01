@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use futures::Future;
-use std::fmt::Debug;
-use std::sync::Arc;
+use std::{fmt::Debug, sync::Arc};
 use unstructured::Document;
 
 pub type ModuleResultSync = std::result::Result<Context, ModuleError>;

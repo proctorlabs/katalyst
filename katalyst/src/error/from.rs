@@ -1,8 +1,9 @@
 use super::GatewayError;
 use crate::instance::Instance;
-use std::net::AddrParseError;
-use std::sync;
-use std::sync::Arc;
+use std::{
+    net::AddrParseError,
+    sync::{self, Arc},
+};
 
 impl From<regex::Error> for GatewayError {
     fn from(r: regex::Error) -> Self {

@@ -1,6 +1,5 @@
 use super::Builder;
-use crate::app::Katalyst;
-use crate::prelude::*;
+use crate::{app::Katalyst, prelude::*};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 

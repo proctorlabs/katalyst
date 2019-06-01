@@ -15,9 +15,7 @@ mod random;
 mod round_robin;
 
 use crate::prelude::*;
-use std::collections::HashMap;
-use std::fmt::Debug;
-use std::sync::Arc;
+use std::{collections::HashMap, fmt::Debug, sync::Arc};
 
 /// Result for acquiring a new load balancer lease.
 pub type BalancerLease = Result<Arc<String>>;

@@ -1,9 +1,7 @@
 #![allow(clippy::implicit_hasher)]
 use super::*;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::string::String;
-use std::sync::Arc;
+use std::{collections::HashMap, string::String, sync::Arc};
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 #[serde(default)]

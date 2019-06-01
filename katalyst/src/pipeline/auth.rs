@@ -1,5 +1,4 @@
-use crate::prelude::*;
-use crate::*;
+use crate::{prelude::*, *};
 use futures::future::*;
 
 pub fn authenticate(ctx: Context) -> ModuleResult {

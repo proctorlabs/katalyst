@@ -1,7 +1,9 @@
 use super::*;
-use crate::app::Katalyst;
-use crate::instance::{Interface, Service};
-use crate::modules::*;
+use crate::{
+    app::Katalyst,
+    instance::{Interface, Service},
+    modules::*,
+};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 

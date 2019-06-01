@@ -2,11 +2,8 @@ mod dispatcher;
 mod transformers;
 mod util;
 
-use crate::app::Katalyst;
-use crate::expression::*;
-use crate::modules::*;
-use futures::future::*;
-use futures::Future;
+use crate::{app::Katalyst, expression::*, modules::*};
+use futures::{future::*, Future};
 use http::Method;
 use std::collections::HashMap;
 use transformers::DownstreamTransformer;

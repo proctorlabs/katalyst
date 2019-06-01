@@ -4,8 +4,7 @@ mod memory;
 use crate::modules::*;
 use hyper::Response;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 pub use cache_handler::DefaultCacheHandler;
 pub use memory::MemoryCacheBuilder;

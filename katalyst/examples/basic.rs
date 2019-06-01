@@ -3,9 +3,7 @@ extern crate log;
 
 use katalyst::Katalyst;
 use log::Level;
-use std::env;
-use std::io;
-use std::path::PathBuf;
+use std::{env, io, path::PathBuf};
 
 fn config_path() -> io::Result<PathBuf> {
     let mut dir = env::current_exe()?;

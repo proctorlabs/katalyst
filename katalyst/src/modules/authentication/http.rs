@@ -1,11 +1,6 @@
-use crate::app::Katalyst;
-use crate::context::*;
-use crate::modules::*;
-use futures::future::*;
-use futures::stream::Stream;
-use futures::Future;
-use hyper::body::Body;
-use hyper::Request;
+use crate::{app::Katalyst, context::*, modules::*};
+use futures::{future::*, stream::Stream, Future};
+use hyper::{body::Body, Request};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

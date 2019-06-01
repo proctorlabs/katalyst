@@ -1,13 +1,9 @@
 use super::*;
-use crate::app::Katalyst;
-use crate::instance::Route;
-use crate::modules::*;
+use crate::{app::Katalyst, instance::Route, modules::*};
 use http::Method;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
-use std::string::String;
-use std::sync::Arc;
+use std::{collections::HashSet, string::String, sync::Arc};
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct RouteBuilder {

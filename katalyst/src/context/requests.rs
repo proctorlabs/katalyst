@@ -1,7 +1,5 @@
 use crate::prelude::*;
-use futures::future::*;
-use futures::stream::Stream;
-use futures::Future;
+use futures::{future::*, stream::Stream, Future};
 use http::request::Parts;
 use hyper::{Body, Request, Response};
 use unstructured::Document;

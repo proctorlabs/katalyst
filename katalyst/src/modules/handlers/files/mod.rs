@@ -1,8 +1,4 @@
-use crate::app::Katalyst;
-use crate::context::*;
-use crate::expression::*;
-use crate::modules::*;
-use crate::*;
+use crate::{app::Katalyst, context::*, expression::*, modules::*, *};
 use futures::future::*;
 use http::header::HeaderValue;
 use hyper::{Body, Response};
