@@ -2,34 +2,26 @@ use crate::balancer;
 use crate::config::parsers;
 use crate::error::*;
 use crate::instance::Instance;
-use crate::instance::Interface;
 use crate::modules::ModuleRegistry;
-use crate::pipeline::{run, HyperResult};
 use crate::prelude::*;
-use hyper::client::connect::dns::TokioThreadpoolGaiResolver;
-use hyper::client::HttpConnector;
-use hyper::server::conn::AddrStream;
-use hyper::service::{make_service_fn, service_fn};
-use hyper::{Body, Client, Request, Server};
+use crate::server::*;
+use hyper::client::{connect::dns::TokioThreadpoolGaiResolver, HttpConnector};
+use hyper::{rt::Future, Body, Client};
 use hyper_rustls::HttpsConnector;
 use rustls::ClientConfig;
-use signal_hook::iterator::Signals;
-use signal_hook::{SIGINT, SIGQUIT, SIGTERM};
-use std::fmt;
-use std::sync::{Arc, RwLock};
+use signal_hook::{iterator::Signals, SIGINT, SIGQUIT, SIGTERM};
+use std::{
+    fmt,
+    sync::{Arc, RwLock},
+};
 use tokio::runtime::Runtime;
-
-use futures::stream::Stream;
-use hyper::rt::Future;
-use rustls::internal::pemfile;
-use std::{fs, io};
-use tokio_rustls::TlsAcceptor;
 
 pub type HttpsClient = Client<HttpsConnector<HttpConnector<TokioThreadpoolGaiResolver>>, Body>;
 
 /// This is the core structure for the API Gateway.
 pub struct Katalyst {
     instance: RwLock<Arc<Instance>>,
+    servers: RwLock<Vec<Server>>,
     client: Arc<HttpsClient>,
     balancers: Arc<balancer::BalancerDirectory>,
     compiler: Arc<Compiler>,
@@ -54,6 +46,7 @@ impl Default for Katalyst {
 
         Katalyst {
             instance: RwLock::default(),
+            servers: RwLock::default(),
             client: Arc::new(builder.build(HttpsConnector::from((http_connector, tls)))),
             balancers: Arc::new(balancer::all()),
             compiler: Arc::new(Compiler::default()),
@@ -92,91 +85,16 @@ impl ArcKatalystImpl for Arc<Katalyst> {
     fn run_service(&mut self) -> Result<()> {
         let instance = self.get_instance()?.clone();
         for interface in instance.service.interfaces.iter() {
-            match interface {
-                Interface::Http { addr } => {
-                    let engine = self.clone();
-                    let server = Server::bind(&addr)
-                        .serve(make_service_fn(move |conn: &AddrStream| {
-                            let engine = engine.clone();
-                            let remote_addr = conn.remote_addr();
-                            service_fn(move |req: Request<Body>| -> HyperResult {
-                                run(remote_addr, req, engine.clone())
-                            })
-                        }))
-                        .map_err(|e| error!("server error: {}", e));
-
-                    info!("Listening on http://{}", addr);
-                    self.spawn(server)?;
-                }
-                Interface::Https { addr, cert, key } => {
-                    let addr = addr.clone();
-                    let engine = self.clone();
-                    let tls_cfg = {
-                        let certs = load_certs(&cert)?;
-                        let key = load_private_key(&key)?;
-                        let mut cfg = rustls::ServerConfig::new(rustls::NoClientAuth::new());
-                        cfg.set_single_cert(certs, key).unwrap();
-                        Arc::new(cfg)
-                    };
-
-                    let tcp = tokio_tcp::TcpListener::bind(&addr)?;
-                    let tls_acceptor = TlsAcceptor::from(tls_cfg);
-                    let tls = tcp
-                        .incoming()
-                        .and_then(move |s| tls_acceptor.accept(s))
-                        .then(|r| match r {
-                            Ok(x) => Ok::<_, io::Error>(Some(x)),
-                            Err(_e) => Ok(None),
-                        })
-                        .filter_map(|x| x);
-                    let server = Server::builder(tls)
-                        .serve(
-                            //make_service_fn(move |conn: &AddrStream| {
-                            //let engine = engine.clone();
-                            //let remote_addr = conn.remote_addr();
-                            move || {
-                                let addr = addr.clone();
-                                let engine = engine.clone();
-                                service_fn(move |req: Request<Body>| -> HyperResult {
-                                    run(addr.clone(), req, engine.clone())
-                                })
-                            },
-                        )
-                        .map_err(|e| error!("server error: {}", e));
-
-                    info!("Listening on https://{}", addr);
-                    self.spawn(server)?;
-                }
-            }
+            let server = Server::new(interface)?;
+            server.spawn(self)?;
+            let mut servers = self
+                .servers
+                .write()
+                .map_err(|_| GatewayError::InvalidResource)?;
+            servers.push(server);
         }
         Ok(())
     }
-}
-
-fn error(err: String) -> io::Error {
-    io::Error::new(io::ErrorKind::Other, err)
-}
-
-fn load_certs(filename: &str) -> io::Result<Vec<rustls::Certificate>> {
-    let certfile = fs::File::open(filename)
-        .map_err(|e| error(format!("failed to open {}: {}", filename, e)))?;
-    let mut reader = io::BufReader::new(certfile);
-
-    pemfile::certs(&mut reader).map_err(|_| error("failed to load certificate".into()))
-}
-
-fn load_private_key(filename: &str) -> io::Result<rustls::PrivateKey> {
-    let keyfile = fs::File::open(filename)
-        .map_err(|e| error(format!("failed to open {}: {}", filename, e)))?;
-    let mut reader = io::BufReader::new(keyfile);
-
-    let keys = pemfile::rsa_private_keys(&mut reader)
-        .map_err(|_| error("failed to load private key".into()))?;
-    println!("{}", keys.len());
-    if keys.len() != 1 {
-        return Err(error("expected a single private key".into()));
-    }
-    Ok(keys[0].clone())
 }
 
 impl Katalyst {

@@ -38,6 +38,7 @@ mod app;
 mod instance;
 pub(crate) mod parser;
 mod pipeline;
+mod server;
 
 pub mod balancer;
 pub mod config;
