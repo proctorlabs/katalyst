@@ -3,6 +3,7 @@ use crate::{
     app::Katalyst,
     instance::{Interface, Service},
     modules::*,
+    prelude::*,
 };
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -17,7 +18,7 @@ pub struct InterfaceBuilder {
 }
 
 impl InterfaceBuilder {
-    fn make_interface(&self) -> Result<Interface, GatewayError> {
+    fn make_interface(&self) -> Result<Interface> {
         Ok(if self.ssl {
             Interface::Https {
                 addr: self.address.parse().map_err(|_| {
@@ -28,9 +29,10 @@ impl InterfaceBuilder {
             }
         } else {
             Interface::Http {
-                addr: self.address.parse().map_err(|_| {
-                    GatewayError::InvalidAddress("Service listener address is invalid")
-                })?,
+                addr: self
+                    .address
+                    .parse()
+                    .map_err(|_| InvalidAddress("Service listener address is invalid"))?,
             }
         })
     }
@@ -53,13 +55,13 @@ macro_rules! module {
 }
 
 impl Builder<Service> for ServiceBuilder {
-    fn build(&self, instance: Arc<Katalyst>) -> Result<Service, GatewayError> {
+    fn build(&self, instance: Arc<Katalyst>) -> Result<Service> {
         Ok(Service {
             interfaces: self
                 .interfaces
                 .iter()
                 .map(|i| i.make_interface())
-                .collect::<Result<Vec<Interface>, GatewayError>>()?,
+                .collect::<Result<Vec<Interface>>>()?,
             cache: module!(CacheProvider, self.cache.build(instance.clone())?),
         })
     }

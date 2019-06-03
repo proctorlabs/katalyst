@@ -2,6 +2,8 @@ use crate::prelude::*;
 use futures::{future::*, stream::Stream, Future};
 use http::request::Parts;
 use hyper::{Body, Request, Response};
+use parking_lot::Mutex;
+use std::mem::replace;
 use unstructured::Document;
 
 #[derive(Debug)]
@@ -15,133 +17,153 @@ pub enum HttpRequest {
     ParsedResponse(Box<(http::response::Parts, Vec<u8>, Document)>),
 }
 
-impl Context {
-    pub fn preload(mut self) -> ModuleResult {
-        match &self.request {
-            HttpRequest::RawRequest(_) => {
-                let (data, body) = self.request.take_request().into_parts();
-                Box::new(body.concat2().then(|r| match r {
+impl ContextGuard {
+    pub fn preload(&self) -> ModuleResult {
+        let guard = self.clone();
+        let req = ensure_fut!(guard.take_http_request());
+        match req {
+            HttpRequest::RawRequest(r) => {
+                let (data, body) = (r.0, r.1);
+                Box::new(body.concat2().then(move |r| match r {
                     Ok(body) => {
                         let res = Box::new((data, body.into_iter().collect()));
-                        self.request = HttpRequest::LoadedRequest(res);
-                        Ok(self)
+                        guard.set_http_request(HttpRequest::LoadedRequest(res))?;
+                        Ok(())
                     }
-                    Err(_) => Err(self.fail(GatewayError::InternalServerError)),
+                    Err(_) => Err(GatewayError::InternalServerError),
                 }))
             }
-            HttpRequest::RawResponse(_) => {
-                let (data, body) = self.request.take_response().into_parts();
-                Box::new(body.concat2().then(|r| match r {
+            HttpRequest::RawResponse(r) => {
+                let (data, body) = (r.0, r.1);
+                Box::new(body.concat2().then(move |r| match r {
                     Ok(body) => {
                         let res = Box::new((data, body.into_iter().collect()));
-                        self.request = HttpRequest::LoadedResponse(res);
-                        Ok(self)
+                        guard.set_http_request(HttpRequest::LoadedResponse(res))?;
+                        Ok(())
                     }
-                    Err(_) => Err(self.fail(GatewayError::InternalServerError)),
+                    Err(_) => Err(GatewayError::InternalServerError),
                 }))
             }
-            _ => Box::new(ok(self)),
+            _ => {
+                ensure_fut!(guard.set_http_request(req));
+                Box::new(ok(()))
+            }
         }
     }
 
-    pub fn parse(self) -> ModuleResult {
-        Box::new(self.preload().and_then(|mut slf| {
-            let format = Format::content_type(slf.request.header("Content-Type"));
-            match slf.request {
-                HttpRequest::LoadedRequest(r) => {
-                    let (data, body) = *r;
-                    let doc = match format.parse(&body) {
-                        Ok(d) => d,
-                        Err(_) => Document::Unit,
-                    };
-                    slf.request = HttpRequest::ParsedRequest(Box::new((data, body, doc)));
-                }
-                HttpRequest::LoadedResponse(r) => {
-                    let (data, body) = *r;
-                    let doc = match format.parse(&body) {
-                        Ok(d) => d,
-                        Err(_) => Document::Unit,
-                    };
-                    slf.request = HttpRequest::ParsedResponse(Box::new((data, body, doc)));
-                }
-                _ => (),
+    pub fn parse(&self) -> ModuleResult {
+        let guard = self.clone();
+        Box::new(self.preload().and_then(move |_| {
+            let hdr = guard.header("Content-Type").unwrap_or_default();
+            let format = Format::content_type(Some(&hdr));
+            let mut req = guard.take_http_request()?;
+            if let HttpRequest::LoadedRequest(boxed) = req {
+                let (data, body) = *boxed;
+                let doc = match format.parse(&body) {
+                    Ok(d) => d,
+                    Err(_) => Document::Unit,
+                };
+                req = HttpRequest::ParsedRequest(Box::new((data, body, doc)));
+            } else if let HttpRequest::LoadedResponse(boxed) = req {
+                let (data, body) = *boxed;
+                let doc = match format.parse(&body) {
+                    Ok(d) => d,
+                    Err(_) => Document::Unit,
+                };
+                req = HttpRequest::ParsedResponse(Box::new((data, body, doc)));
             }
-            Ok(slf)
+            guard.set_http_request(req)?;
+            Ok(())
         }))
+    }
+
+    pub fn get_http_request(&self) -> Result<Arc<Mutex<HttpRequest>>> {
+        Ok(self.context.request.clone())
+    }
+
+    pub fn take_http_request(&self) -> Result<HttpRequest> {
+        let req = &mut self.context.request.lock();
+        Ok(replace(req, HttpRequest::Empty))
+    }
+
+    pub fn set_http_request(&self, inreq: HttpRequest) -> Result<HttpRequest> {
+        let req = &mut self.context.request.lock();
+        Ok(replace(req, inreq))
+    }
+
+    pub fn take_request(&self) -> Result<Request<Body>> {
+        let res: HttpRequest = self.take_http_request()?;
+        Ok(match res {
+            HttpRequest::RawRequest(data) => Request::from_parts(data.0, data.1),
+            HttpRequest::LoadedRequest(data) => Request::from_parts(data.0, Body::from(data.1)),
+            HttpRequest::ParsedRequest(data) => Request::from_parts(data.0, Body::from(data.1)),
+            _ => Request::default(),
+        })
+    }
+
+    pub fn take_response(&self) -> Result<Response<Body>> {
+        let res: HttpRequest = self.take_http_request()?;
+        Ok(match res {
+            HttpRequest::RawResponse(data) => Response::from_parts(data.0, data.1),
+            HttpRequest::LoadedResponse(data) => Response::from_parts(data.0, Body::from(data.1)),
+            HttpRequest::ParsedResponse(data) => Response::from_parts(data.0, Body::from(data.1)),
+            _ => Response::default(),
+        })
+    }
+
+    pub fn method(&self) -> http::Method {
+        let req: &HttpRequest = &self.context.request.lock();
+        match req {
+            HttpRequest::RawRequest(r) => r.0.method.clone(),
+            HttpRequest::LoadedRequest(r) => r.0.method.clone(),
+            HttpRequest::ParsedRequest(r) => r.0.method.clone(),
+            _ => http::Method::GET,
+        }
+    }
+
+    pub fn header(&self, key: &str) -> Option<String> {
+        let req: &HttpRequest = &self.context.request.lock();
+        let prts = match req {
+            HttpRequest::RawRequest(r) => &r.0,
+            HttpRequest::LoadedRequest(r) => &r.0,
+            HttpRequest::ParsedRequest(r) => &r.0,
+            _ => return None,
+        };
+        if let Some(h) = prts.headers.get(key).map(|h| h.to_str().unwrap_or_default()) {
+            Some(h.to_owned())
+        } else {
+            None
+        }
+    }
+
+    pub fn set_response(&self, rsp: Response<Body>) -> Result<()> {
+        self.set_http_request(HttpRequest::RawResponse(Box::new(rsp.into_parts())))?;
+        Ok(())
+    }
+
+    pub fn is_request(&self) -> Result<bool> {
+        let req: &HttpRequest = &self.context.request.lock();
+        Ok(match req {
+            HttpRequest::RawRequest(_)
+            | HttpRequest::LoadedRequest(_)
+            | HttpRequest::ParsedRequest(_) => true,
+            _ => false,
+        })
+    }
+
+    pub fn is_response(&self) -> Result<bool> {
+        let req: &HttpRequest = &self.context.request.lock();
+        Ok(match req {
+            HttpRequest::RawResponse(_)
+            | HttpRequest::LoadedResponse(_)
+            | HttpRequest::ParsedResponse(_) => true,
+            _ => false,
+        })
     }
 }
 
 impl HttpRequest {
     pub fn new(req: Request<Body>) -> Self {
         HttpRequest::RawRequest(Box::new(req.into_parts()))
-    }
-
-    pub fn set_response(&mut self, rsp: Response<Body>) {
-        std::mem::replace(self, HttpRequest::RawResponse(Box::new(rsp.into_parts())));
-    }
-
-    pub fn is_request(&self) -> bool {
-        match self {
-            HttpRequest::RawRequest(_)
-            | HttpRequest::LoadedRequest(_)
-            | HttpRequest::ParsedRequest(_) => true,
-            _ => false,
-        }
-    }
-
-    pub fn is_response(&self) -> bool {
-        match self {
-            HttpRequest::RawResponse(_)
-            | HttpRequest::LoadedResponse(_)
-            | HttpRequest::ParsedResponse(_) => true,
-            _ => false,
-        }
-    }
-
-    fn parts(&self) -> Option<&Parts> {
-        match self {
-            HttpRequest::RawRequest(r) => Some(&r.0),
-            HttpRequest::LoadedRequest(r) => Some(&r.0),
-            HttpRequest::ParsedRequest(r) => Some(&r.0),
-            _ => None,
-        }
-    }
-
-    pub fn method(&self) -> &http::Method {
-        if let Some(s) = self.parts() {
-            &s.method
-        } else {
-            &http::Method::GET
-        }
-    }
-
-    pub fn header(&self, key: &str) -> Option<&str> {
-        if let Some(s) = self.parts() {
-            s.headers.get(key).map(|h| h.to_str().unwrap_or_default())
-        } else {
-            None
-        }
-    }
-
-    pub fn take(&mut self) -> Self {
-        std::mem::replace(self, HttpRequest::Empty)
-    }
-
-    pub fn take_request(&mut self) -> Request<Body> {
-        match std::mem::replace(self, HttpRequest::Empty) {
-            HttpRequest::RawRequest(data) => Request::from_parts(data.0, data.1),
-            HttpRequest::LoadedRequest(data) => Request::from_parts(data.0, Body::from(data.1)),
-            HttpRequest::ParsedRequest(data) => Request::from_parts(data.0, Body::from(data.1)),
-            _ => Request::default(),
-        }
-    }
-
-    pub fn take_response(&mut self) -> Response<Body> {
-        match std::mem::replace(self, HttpRequest::Empty) {
-            HttpRequest::RawResponse(data) => Response::from_parts(data.0, data.1),
-            HttpRequest::LoadedResponse(data) => Response::from_parts(data.0, Body::from(data.1)),
-            HttpRequest::ParsedResponse(data) => Response::from_parts(data.0, Body::from(data.1)),
-            _ => Response::default(),
-        }
     }
 }

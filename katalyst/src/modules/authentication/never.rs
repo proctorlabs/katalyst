@@ -15,7 +15,7 @@ impl ModuleProvider for NeverAuthenticator {
 }
 
 impl AuthenticatorModule for NeverAuthenticator {
-    fn authenticate(&self, ctx: Context) -> ModuleResult {
-        Box::new(err(ctx.fail(GatewayError::Unauthorized)))
+    fn authenticate(&self, _: ContextGuard) -> ModuleResult {
+        Box::new(err(GatewayError::Unauthorized))
     }
 }

@@ -79,25 +79,30 @@ impl ModuleProvider for HostModule {
 }
 
 impl RequestHandlerModule for HostDispatcher {
-    fn dispatch(&self, ctx: Context) -> ModuleResult {
+    fn dispatch(&self, guard: ContextGuard) -> ModuleResult {
+        let guard2 = guard.clone();
         Box::new(
-            result(self.prepare(ctx))
-                .and_then(HostDispatcher::send)
-                .map(HostDispatcher::clean_response),
+            result(self.prepare(guard.clone()))
+                .and_then(move |_| HostDispatcher::send(guard))
+                .then(move |_| HostDispatcher::clean_response(guard2)),
         )
     }
 }
 
 impl HostDispatcher {
-    pub fn transformer(&self, ctx: &Context, lease_str: String) -> Result<DownstreamTransformer> {
+    pub fn transformer(
+        &self,
+        guard: ContextGuard,
+        lease_str: String,
+    ) -> Result<DownstreamTransformer> {
         let mut uri = lease_str;
-        uri.push_str(&self.path.render(ctx)?);
+        uri.push_str(&self.path.render(&guard)?);
         if let Some(query) = &self.query {
             uri.push_str("?");
             for (key, val) in query.iter() {
                 uri.push_str(&key);
                 uri.push_str("=");
-                uri.push_str(&val.render(&ctx)?);
+                uri.push_str(&val.render(&guard)?);
                 uri.push_str("&");
             }
             uri.truncate(uri.len() - 1);
@@ -108,14 +113,14 @@ impl HostDispatcher {
         let headers = match &self.headers {
             Some(h) => Some(
                 h.iter()
-                    .map(|(key, val)| Ok((key.to_string(), val.render(ctx)?)))
+                    .map(|(key, val)| Ok((key.to_string(), val.render(&guard)?)))
                     .collect::<Result<HashMap<String, String>>>()?,
             ),
             None => None,
         };
 
         let body = match &self.body {
-            Some(b) => Some(b.render(&ctx)?),
+            Some(b) => Some(b.render(&guard)?),
             None => None,
         };
 

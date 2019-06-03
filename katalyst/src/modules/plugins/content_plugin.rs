@@ -14,7 +14,7 @@ impl ModuleProvider for ContentPlugin {
 }
 
 impl PluginModule for ContentPlugin {
-    fn run(&self, ctx: Context) -> ModuleResult {
-        ctx.parse()
+    fn run(&self, guard: ContextGuard) -> ModuleResult {
+        guard.parse()
     }
 }

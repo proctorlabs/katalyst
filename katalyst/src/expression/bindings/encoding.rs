@@ -7,8 +7,8 @@ use std::str;
 pub struct Encode;
 
 impl Encode {
-    fn base64(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
-        let to_encode = args[0].render(ctx)?;
+    fn base64(guard: &ContextGuard, args: &[ExpressionArg]) -> ExpressionResult {
+        let to_encode = args[0].render(guard)?;
         Ok(encode(&to_encode).into())
     }
 }
@@ -18,8 +18,8 @@ impl Encode {
 pub struct Decode;
 
 impl Decode {
-    fn base64(ctx: &Context, args: &[ExpressionArg]) -> ExpressionResult {
-        let to_decode = args[0].render(ctx)?;
+    fn base64(guard: &ContextGuard, args: &[ExpressionArg]) -> ExpressionResult {
+        let to_decode = args[0].render(guard)?;
         Ok(str::from_utf8(
             decode(&to_decode).map_err(|_| GatewayError::InternalServerError)?.as_slice(),
         )

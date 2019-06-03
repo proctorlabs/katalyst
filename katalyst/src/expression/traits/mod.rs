@@ -10,7 +10,7 @@ pub type RenderResult = Result<String>;
 pub type ExpressionResult = Result<Document>;
 pub type ExpressionArg = Arc<CompiledExpression>;
 pub type ExpressionRenderMethod =
-    Arc<Fn(&Context, &[ExpressionArg]) -> ExpressionResult + Send + Sync>;
+    Arc<Fn(&ContextGuard, &[ExpressionArg]) -> ExpressionResult + Send + Sync>;
 
 #[derive(Clone)]
 pub enum ExpressionResultType {
@@ -30,10 +30,10 @@ pub trait ExpressionBinding: Send + Sync {
 /// This is the trait that must be implemented by any expression that can be compiled from config
 pub trait CompiledExpression: Send + Sync + Debug {
     /// Render processes the compiled expression and returns a string rendering of the contents regardless of underlying types
-    fn render(&self, ctx: &Context) -> RenderResult;
+    fn render(&self, guard: &ContextGuard) -> RenderResult;
 
     /// Get the direct result of evaluating the expression
-    fn result(&self, ctx: &Context) -> ExpressionResult;
+    fn result(&self, guard: &ContextGuard) -> ExpressionResult;
 
     /// Return a document shell indicating the type
     fn result_type(&self) -> Document;

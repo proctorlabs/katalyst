@@ -1,78 +1,89 @@
-use super::GatewayError;
-use crate::instance::Instance;
-use std::{
-    net::AddrParseError,
-    sync::{self, Arc},
-};
-
-impl From<regex::Error> for GatewayError {
-    fn from(r: regex::Error) -> Self {
-        GatewayError::InvalidRegex(format!("{}", r))
-    }
-}
-
-impl From<http::method::InvalidMethod> for GatewayError {
-    fn from(m: http::method::InvalidMethod) -> Self {
-        GatewayError::InvalidHttpMethod(m.to_string())
-    }
-}
-
-impl From<serde_yaml::Error> for GatewayError {
-    fn from(m: serde_yaml::Error) -> Self {
-        GatewayError::ConfigNotParseable(m.to_string())
-    }
-}
-
-impl From<serde_json::Error> for GatewayError {
-    fn from(m: serde_json::Error) -> Self {
-        GatewayError::ConfigNotParseable(m.to_string())
-    }
-}
-
-impl From<sync::PoisonError<sync::RwLockWriteGuard<'_, Arc<Instance>>>> for GatewayError {
-    fn from(_: sync::PoisonError<sync::RwLockWriteGuard<Arc<Instance>>>) -> Self {
-        GatewayError::StateUpdateFailure
-    }
-}
-
-impl From<sync::PoisonError<sync::RwLockReadGuard<'_, Arc<Instance>>>> for GatewayError {
-    fn from(_: sync::PoisonError<sync::RwLockReadGuard<Arc<Instance>>>) -> Self {
-        GatewayError::StateUnavailable
-    }
-}
-
-impl From<&'static str> for GatewayError {
-    fn from(_: &'static str) -> Self {
-        GatewayError::InternalServerError
-    }
-}
-
-impl From<http::uri::InvalidUri> for GatewayError {
-    fn from(_: http::uri::InvalidUri) -> Self {
-        GatewayError::InternalServerError
-    }
-}
-
-impl From<AddrParseError> for GatewayError {
-    fn from(_: AddrParseError) -> Self {
-        GatewayError::InvalidAddress("network")
-    }
-}
-
-impl From<pest::error::Error<crate::expression::compiler::nodes::Rule>> for GatewayError {
-    fn from(e: pest::error::Error<crate::expression::compiler::nodes::Rule>) -> Self {
-        GatewayError::ExpressionLexicalError(format!("Invalid expression due to {}", e))
-    }
-}
-
-impl From<std::num::ParseIntError> for GatewayError {
-    fn from(_: std::num::ParseIntError) -> Self {
-        GatewayError::ExpressionLexicalError("Failed to parse integer!".into())
-    }
-}
+use super::GatewayError::{self, *};
+use std::{net::AddrParseError, sync};
 
 impl From<std::io::Error> for GatewayError {
     fn from(err: std::io::Error) -> Self {
         GatewayError::IoError(err)
+    }
+}
+
+impl From<regex::Error> for GatewayError {
+    fn from(err: regex::Error) -> Self {
+        ConfigurationFailure { message: "Could not compile regex!".into(), source: Box::new(err) }
+    }
+}
+
+impl From<http::method::InvalidMethod> for GatewayError {
+    fn from(err: http::method::InvalidMethod) -> Self {
+        ConfigurationFailure { message: "Invalid HTTP method".into(), source: Box::new(err) }
+    }
+}
+
+impl From<serde_yaml::Error> for GatewayError {
+    fn from(err: serde_yaml::Error) -> Self {
+        ConfigurationFailure { message: "Configuration parse error".into(), source: Box::new(err) }
+    }
+}
+
+impl From<serde_json::Error> for GatewayError {
+    fn from(err: serde_json::Error) -> Self {
+        ConfigurationFailure { message: "Configuration parse error".into(), source: Box::new(err) }
+    }
+}
+
+impl From<pest::error::Error<crate::expression::compiler::nodes::Rule>> for GatewayError {
+    fn from(err: pest::error::Error<crate::expression::compiler::nodes::Rule>) -> Self {
+        ConfigurationFailure { message: "Invalid expression".into(), source: Box::new(err) }
+    }
+}
+
+impl From<std::num::ParseIntError> for GatewayError {
+    fn from(err: std::num::ParseIntError) -> Self {
+        ConfigurationFailure { message: "Invalid number format".into(), source: Box::new(err) }
+    }
+}
+
+impl From<http::uri::InvalidUri> for GatewayError {
+    fn from(err: http::uri::InvalidUri) -> Self {
+        ConfigurationFailure { message: "Unable to parse URI".into(), source: Box::new(err) }
+    }
+}
+
+impl From<AddrParseError> for GatewayError {
+    fn from(err: AddrParseError) -> Self {
+        ConfigurationFailure {
+            message: "Unable to parse network address".into(),
+            source: Box::new(err),
+        }
+    }
+}
+
+impl<T: std::any::Any> From<sync::PoisonError<sync::RwLockWriteGuard<'_, T>>> for GatewayError {
+    fn from(err: sync::PoisonError<sync::RwLockWriteGuard<T>>) -> Self {
+        Critical {
+            message: "Internal lock poisoned!".into(),
+            source: Box::<GatewayError>::new(format!("{:?}", err).into()),
+        }
+    }
+}
+
+impl<T: std::any::Any> From<sync::PoisonError<sync::RwLockReadGuard<'_, T>>> for GatewayError {
+    fn from(err: sync::PoisonError<sync::RwLockReadGuard<T>>) -> Self {
+        Critical {
+            message: "Internal lock poisoned!".into(),
+            source: Box::<GatewayError>::new(format!("{:?}", err).into()),
+        }
+    }
+}
+
+impl From<&'static str> for GatewayError {
+    fn from(err: &'static str) -> Self {
+        Other(err.into())
+    }
+}
+
+impl From<String> for GatewayError {
+    fn from(err: String) -> Self {
+        Other(err)
     }
 }

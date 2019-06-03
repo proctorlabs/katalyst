@@ -1,5 +1,5 @@
 use crate::{app::Katalyst, context::*, modules::*};
-use futures::{future::*, stream::Stream, Future};
+use futures::{stream::Stream, Future};
 use hyper::{body::Body, Request};
 use serde::{Deserialize, Serialize};
 
@@ -36,12 +36,12 @@ pub struct HttpAuthenticator {
 }
 
 impl AuthenticatorModule for HttpAuthenticator {
-    fn authenticate(&self, mut ctx: Context) -> ModuleResult {
-        let client = ctx.katalyst.get_client();
+    fn authenticate(&self, guard: ContextGuard) -> AsyncResult<()> {
+        let client = ensure_fut!(guard.katalyst()).get_client();
         let mut request = Request::builder();
         request.uri(&self.url.to_string());
         let res = client.request(request.body(Body::empty()).unwrap());
-        Box::new(res.then(|response| match response {
+        Box::new(res.then(move |response| match response {
             Ok(resp) => {
                 let (_, body) = resp.into_parts();
                 let body = body
@@ -56,13 +56,9 @@ impl AuthenticatorModule for HttpAuthenticator {
                 debug!("{}", body);
                 let mut auth = KatalystAuthenticationInfo::default();
                 auth.add_claim("KatalystAuthenticator".to_string(), "http".to_string());
-                ctx = match ctx.set_authenticated(auth) {
-                    Ok(c) => c,
-                    Err(e) => return err(e),
-                };
-                ok(ctx)
+                guard.set_authenticated(auth)
             }
-            Err(_) => err(ctx.fail(GatewayError::Forbidden)),
+            Err(_) => Err(GatewayError::Forbidden),
         }))
     }
 }

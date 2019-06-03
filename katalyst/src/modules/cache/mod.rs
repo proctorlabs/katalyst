@@ -9,11 +9,11 @@ use std::{collections::HashMap, sync::Arc};
 pub use cache_handler::DefaultCacheHandler;
 pub use memory::MemoryCacheBuilder;
 
-pub fn default_cache() -> Arc<CacheProviderModule> {
+pub fn default_cache() -> Arc<CacheProviderModule + Send> {
     Arc::new(memory::MemoryCache::default())
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CachedObject {
     pub content: Vec<u8>,
     pub headers: HashMap<String, String>,

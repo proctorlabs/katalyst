@@ -35,11 +35,12 @@ pub struct Whitelist {
 }
 
 impl AuthenticatorModule for Whitelist {
-    fn authenticate(&self, ctx: Context) -> ModuleResult {
-        if self.ips.contains(&ctx.metadata.remote_ip) {
-            Box::new(ok(ctx))
+    fn authenticate(&self, guard: ContextGuard) -> ModuleResult {
+        let metadata = ensure_fut!(guard.metadata());
+        if self.ips.contains(&metadata.remote_ip) {
+            Box::new(ok(()))
         } else {
-            Box::new(err(ctx.fail(GatewayError::Unauthorized)))
+            Box::new(err(GatewayError::Unauthorized))
         }
     }
 }

@@ -1,5 +1,5 @@
 use super::*;
-use std::sync::RwLock;
+use parking_lot::Mutex;
 
 #[derive(Default, Debug)]
 pub struct RoundRobinBalancerBuilder;
@@ -14,21 +14,21 @@ impl KatalystBalancerBuilder for RoundRobinBalancerBuilder {
         for new_host in hosts.iter() {
             arc_hosts.push(Arc::new(new_host.to_string()));
         }
-        Ok(Arc::new(RoundRobinBalancer { hosts: arc_hosts, host_index: RwLock::new(0) }))
+        Ok(Arc::new(RoundRobinBalancer { hosts: arc_hosts, host_index: Mutex::new(0) }))
     }
 }
 
 #[derive(Default, Debug)]
 pub struct RoundRobinBalancer {
     hosts: Vec<Arc<String>>,
-    host_index: RwLock<usize>,
+    host_index: Mutex<usize>,
 }
 
 impl RoundRobinBalancer {
     fn get_next_index(&self) -> usize {
-        let mut index = self.host_index.write().unwrap();
-        *index += 1;
-        *index %= self.hosts.len();
+        let len = self.hosts.len();
+        let mut index = self.host_index.lock();
+        *index = (*index + 1) % len;
         *index
     }
 }

@@ -8,12 +8,10 @@ use hyper::{
     Body, Client,
 };
 use hyper_rustls::HttpsConnector;
+use parking_lot::RwLock;
 use rustls::ClientConfig;
 use signal_hook::{iterator::Signals, SIGINT, SIGQUIT, SIGTERM};
-use std::{
-    fmt,
-    sync::{Arc, RwLock},
-};
+use std::{fmt, sync::Arc};
 use tokio::runtime::Runtime;
 
 pub type HttpsClient = Client<HttpsConnector<HttpConnector<TokioThreadpoolGaiResolver>>, Body>;
@@ -86,7 +84,7 @@ impl ArcKatalystImpl for Arc<Katalyst> {
         for interface in instance.service.interfaces.iter() {
             let server = Server::new(interface)?;
             server.spawn(self)?;
-            let mut servers = self.servers.write().map_err(|_| GatewayError::InvalidResource)?;
+            let mut servers = self.servers.write();
             servers.push(server);
         }
         Ok(())
@@ -96,14 +94,14 @@ impl ArcKatalystImpl for Arc<Katalyst> {
 impl Katalyst {
     /// Update the running configuration of the API Gateway.
     pub fn update_instance(&self, new_instance: Instance) -> Result<()> {
-        let mut instance = self.instance.write()?;
+        let mut instance = self.instance.write();
         *instance = Arc::new(new_instance);
         Ok(())
     }
 
     /// Get a copy of the currently running API Gateway configuration.
     pub fn get_instance(&self) -> Result<Arc<Instance>> {
-        let instance = self.instance.read()?;
+        let instance = self.instance.read();
         Ok(instance.clone())
     }
 
@@ -128,7 +126,7 @@ impl Katalyst {
     }
 
     pub fn spawn<F: Future<Item = (), Error = ()> + Send + 'static>(&self, fut: F) -> Result<()> {
-        let mut rt = self.rt.write().unwrap();
+        let mut rt = self.rt.write();
         rt.spawn(fut);
         Ok(())
     }

@@ -16,45 +16,42 @@ impl ModuleProvider for DefaultCacheHandler {
 }
 
 impl CacheHandlerModule for DefaultCacheHandler {
-    fn check_cache(&self, mut ctx: Context) -> ModuleResult {
-        let instance = try_fut!(
-            ctx,
-            ctx.katalyst.get_instance().map_err(|_| GatewayError::InternalServerError)
-        );
-        Box::new(instance.clone().service.cache.get_key(&ctx.metadata.url.as_str()).then(
-            |r| match r {
+    fn check_cache(&self, guard: ContextGuard) -> ModuleResult {
+        let katalyst = ensure_fut!(guard.katalyst());
+        let metadata = ensure_fut!(guard.metadata());
+        if let Ok(instance) = katalyst.get_instance() {
+            let cache = instance.service.cache.clone();
+            Box::new(cache.get_key(metadata.url.as_str()).then(move |r| match r {
                 Ok(r) => {
-                    ctx.request = r.as_ref().clone().into_response();
-                    err!(ctx, GatewayError::Done)
+                    guard.set_http_request(r.as_ref().clone().into_response())?;
+                    Err(GatewayError::Done)
                 }
-                Err(_) => ok!(ctx),
-            },
-        ))
+                Err(_) => Ok(()),
+            }))
+        } else {
+            Ok(()).fut()
+        }
     }
 
-    fn update_cache(&self, ctx: Context) -> ModuleResult {
-        if !ctx.request.is_response() {
-            return ok!(ctx);
+    fn update_cache(&self, guard: ContextGuard) -> ModuleResult {
+        if !ensure_fut!(guard.is_response()) {
+            return Ok(()).fut();
         }
-        let cache = try_fut!(
-            ctx,
-            ctx.katalyst.get_instance().map_err(|_| GatewayError::InternalServerError)
-        )
-        .service
-        .cache
-        .clone();
-        Box::new(ctx.preload().and_then(move |mut ctx| {
-            ctx.request = match ctx.request {
+        let instance = ensure_fut!(ensure_fut!(guard.katalyst()).get_instance());
+        let cache = instance.service.cache.clone();
+        Box::new(guard.preload().and_then(move |_| {
+            let req = guard.take_http_request()?;
+            guard.set_http_request(match req {
                 HttpRequest::LoadedResponse(_) => {
                     cache.set_key(
-                        &ctx.metadata.url.as_str(),
-                        CachedObject::from_response(&ctx.request).unwrap(),
+                        guard.metadata()?.url.as_str(),
+                        CachedObject::from_response(&req).unwrap(),
                     );
-                    ctx.request
+                    req
                 }
-                _ => ctx.request,
-            };
-            Ok(ctx)
+                _ => req,
+            })?;
+            Ok(())
         }))
     }
 }

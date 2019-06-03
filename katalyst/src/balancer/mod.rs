@@ -39,9 +39,9 @@ pub trait KatalystBalancer: Send + Sync + Debug {
 pub(crate) fn all() -> BalancerDirectory {
     let mut result: BalancerDirectory = HashMap::new();
     let mut balancers: Vec<Arc<KatalystBalancerBuilder>> = vec![
-        round_robin::RoundRobinBalancerBuilder::arc(),
-        random::RandomBalancerBuilder::arc(),
-        least_connection::LeastConnectionBalancerBuilder::arc(),
+        Arc::new(round_robin::RoundRobinBalancerBuilder),
+        Arc::new(random::RandomBalancerBuilder),
+        Arc::new(least_connection::LeastConnectionBalancerBuilder),
     ];
     while let Some(balancer) = balancers.pop() {
         result.insert(balancer.name(), balancer);

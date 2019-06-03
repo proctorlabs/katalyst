@@ -1,10 +1,6 @@
 use crate::prelude::*;
-use futures::Future;
 use std::{fmt::Debug, sync::Arc};
 use unstructured::Document;
-
-pub type ModuleResultSync = std::result::Result<Context, ModuleError>;
-pub type ModuleResult = Box<Future<Item = Context, Error = ModuleError> + Send>;
 
 pub trait ModuleData {
     const MODULE_TYPE: ModuleType;
@@ -55,7 +51,7 @@ macro_rules! impl_module {
 
         $(
             #[derive(Debug)]
-            pub struct $name(pub Box<dyn $trait>);
+            pub struct $name(pub Box<dyn $trait + Send>);
 
             pub trait $trait: Send + Sync + Debug {
                 $(
@@ -67,8 +63,8 @@ macro_rules! impl_module {
                 }
             }
 
-            impl From<Box<$trait>> for $name {
-                fn from(module: Box<$trait>) -> Self {
+            impl From<Box<$trait + Send>> for $name {
+                fn from(module: Box<$trait + Send>) -> Self {
                     $name(module)
                 }
             }
@@ -87,28 +83,28 @@ macro_rules! impl_module {
 
 impl_module! {
     Authenticator, AuthenticatorModule {
-        ModuleResult: authenticate => ctx: Context
+        AsyncResult<()>: authenticate => guard: ContextGuard
     };
 
     Authorizer, AuthorizerModule {
-        ModuleResult: authorize => ctx: Context
+        AsyncResult<()>: authorize => guard: ContextGuard
     };
 
     CacheHandler, CacheHandlerModule {
-        ModuleResult: check_cache => ctx: Context;
-        ModuleResult: update_cache => ctx: Context
+        AsyncResult<()>: check_cache => guard: ContextGuard;
+        AsyncResult<()>: update_cache => guard: ContextGuard
     };
 
     CacheProvider, CacheProviderModule {
-        Box<Future<Item = Arc<CachedObject>, Error = GatewayError> + Send>: get_key => key: &str;
-        Box<Future<Item = (), Error = GatewayError> + Send>: set_key => key: &str, val: CachedObject
+        AsyncResult<Arc<CachedObject>>: get_key => key: &str;
+        AsyncResult<()>: set_key => key: &str, val: CachedObject
     };
 
     Plugin, PluginModule {
-        ModuleResult: run => ctx: Context
+        AsyncResult<()>: run => guard: ContextGuard
     };
 
     RequestHandler, RequestHandlerModule {
-        ModuleResult: dispatch => ctx: Context
+        AsyncResult<()>: dispatch => guard: ContextGuard
     }
 }

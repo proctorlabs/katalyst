@@ -1,14 +1,13 @@
-use crate::{
-    instance::Interface,
-    pipeline::{run, HyperResult},
-    prelude::*,
-};
+mod pipeline;
+
+use crate::{instance::Interface, prelude::*};
 use futures::{stream::Stream, Future};
 use hyper::{
     server::conn::AddrStream,
     service::{make_service_fn, service_fn},
     Body, Request,
 };
+use pipeline::{run, HyperResult};
 use rustls::internal::pemfile;
 use std::{fs, io, net::SocketAddr, sync::Arc};
 use tokio_rustls::TlsAcceptor;

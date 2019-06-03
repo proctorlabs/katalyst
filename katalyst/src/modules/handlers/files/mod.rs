@@ -45,15 +45,15 @@ pub struct FileServerDispatcher {
 }
 
 impl RequestHandlerModule for FileServerDispatcher {
-    fn dispatch(&self, ctx: Context) -> ModuleResult {
-        let path = try_fut!(ctx, self.selector.render(&ctx));
+    fn dispatch(&self, guard: ContextGuard) -> ModuleResult {
+        let path = ensure_fut!(self.selector.render(&guard));
         let mut full_path = PathBuf::from(&self.root_path);
         full_path.push(&path);
-        send_file(ctx, full_path)
+        send_file(guard.clone(), full_path)
     }
 }
 
-fn send_file(mut ctx: Context, file: PathBuf) -> ModuleResult {
+fn send_file(guard: ContextGuard, file: PathBuf) -> ModuleResult {
     let result = Box::new(
         tokio_fs::file::File::open(file.to_str().unwrap_or_default().to_string()).and_then(
             |file| {
@@ -72,9 +72,9 @@ fn send_file(mut ctx: Context, file: PathBuf) -> ModuleResult {
             let hdrs = r.headers_mut();
             let hdr_val = HeaderValue::from_str(mime).unwrap();
             hdrs.append("Content-Type", hdr_val);
-            ctx.request.set_response(r);
-            ok(ctx)
+            guard.set_response(r).unwrap_or_default();
+            ok(())
         }
-        Err(_) => err(ctx.fail(GatewayError::NotFound)),
+        Err(_) => err(GatewayError::NotFound),
     }))
 }

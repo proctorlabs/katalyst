@@ -16,7 +16,7 @@ impl Default for Interface {
 #[derive(Debug)]
 pub struct Service {
     pub interfaces: Vec<Interface>,
-    pub cache: Arc<CacheProviderModule>,
+    pub cache: Arc<dyn CacheProviderModule + Send>,
 }
 
 impl Default for Service {

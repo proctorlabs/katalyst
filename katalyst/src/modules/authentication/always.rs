@@ -1,5 +1,4 @@
-use crate::{app::Katalyst, context::*, modules::*};
-use futures::future::*;
+use crate::{app::Katalyst, context::*, modules::*, prelude::*};
 
 #[derive(Default, Debug)]
 pub struct AlwaysAuthenticator;
@@ -15,13 +14,9 @@ impl ModuleProvider for AlwaysAuthenticator {
 }
 
 impl AuthenticatorModule for AlwaysAuthenticator {
-    fn authenticate(&self, mut ctx: Context) -> ModuleResult {
+    fn authenticate(&self, guard: ContextGuard) -> AsyncResult<()> {
         let mut result = KatalystAuthenticationInfo::default();
         result.add_claim("KatalystAuthenticator".to_string(), "always".to_string());
-        ctx = match ctx.set_authenticated(result) {
-            Ok(c) => c,
-            Err(e) => return Box::new(err(e)),
-        };
-        Box::new(ok::<Context, ModuleError>(ctx))
+        guard.set_authenticated(result).fut()
     }
 }

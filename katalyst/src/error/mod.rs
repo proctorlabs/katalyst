@@ -3,10 +3,21 @@ Katalyst error types
 */
 
 mod from;
+mod result;
+
 use http::StatusCode;
+use std::error::Error;
+
+pub use result::*;
+
+type Source = Box<Error + Send>;
 
 #[derive(Debug, Display)]
 pub enum GatewayError {
+    #[display(fmt = "Configuration Failure: {}\nCaused by: {:?}", message, source)]
+    ConfigurationFailure { message: String, source: Source },
+    #[display(fmt = "Critical internal failure: {}\nCaused by: {:?}", message, source)]
+    Critical { message: String, source: Source },
     #[display(fmt = "Unable to update internal state")]
     StateUpdateFailure,
     #[display(fmt = "State is currently unavailable")]
@@ -43,7 +54,7 @@ pub enum GatewayError {
     InternalServerError,
     #[display(fmt = "Request finished early")]
     Done,
-    #[display(fmt = "IO Error occurred: {:?}", _0)]
+    #[display(fmt = "IO Error occurred")] //: {:?}", _0)]
     IoError(std::io::Error),
     #[display(fmt = "{}", _1)]
     RequestFailed(StatusCode, &'static str),
@@ -51,9 +62,7 @@ pub enum GatewayError {
     Other(String),
 }
 
-impl std::error::Error for GatewayError {}
-
-pub type Result<T> = std::result::Result<T, GatewayError>;
+impl Error for GatewayError {}
 
 impl GatewayError {
     pub fn status_code(&self) -> StatusCode {

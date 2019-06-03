@@ -29,13 +29,11 @@ extern crate lazy_static;
 #[macro_use]
 extern crate derive_more;
 
-#[macro_use]
-mod macros;
 mod app;
 mod instance;
-pub(crate) mod parser;
-mod pipeline;
 mod server;
+
+pub(crate) mod parser;
 
 pub mod balancer;
 pub mod config;
@@ -43,6 +41,7 @@ pub mod context;
 pub mod error;
 pub mod expression;
 pub mod modules;
+#[macro_use]
 pub mod prelude;
 
 pub use app::Katalyst;

@@ -5,17 +5,17 @@ use unstructured::Document;
 pub struct CompiledExpressionNode {
     pub name: String,
     pub result: ExpressionResultType,
-    pub args: Vec<Arc<CompiledExpression>>,
+    pub args: Vec<Arc<dyn CompiledExpression>>,
     pub render_fn: ExpressionRenderMethod,
 }
 
 impl CompiledExpression for CompiledExpressionNode {
-    fn render(&self, ctx: &Context) -> RenderResult {
-        Ok(self.result(ctx)?.to_string())
+    fn render(&self, guard: &ContextGuard) -> RenderResult {
+        Ok(self.result(guard)?.to_string())
     }
 
-    fn result(&self, ctx: &Context) -> ExpressionResult {
-        (self.render_fn)(ctx, &self.args)
+    fn result(&self, guard: &ContextGuard) -> ExpressionResult {
+        (self.render_fn)(guard, &&self.args)
     }
 
     fn result_type(&self) -> Document {
@@ -24,11 +24,11 @@ impl CompiledExpression for CompiledExpressionNode {
 }
 
 impl CompiledExpression for Document {
-    fn render(&self, _: &Context) -> RenderResult {
+    fn render(&self, _: &ContextGuard) -> RenderResult {
         Ok(self.to_string())
     }
 
-    fn result(&self, _: &Context) -> ExpressionResult {
+    fn result(&self, _: &ContextGuard) -> ExpressionResult {
         Ok(self.clone())
     }
 
@@ -38,11 +38,11 @@ impl CompiledExpression for Document {
 }
 
 impl CompiledExpression for String {
-    fn render(&self, _: &Context) -> RenderResult {
+    fn render(&self, _: &ContextGuard) -> RenderResult {
         Ok(self.to_string())
     }
 
-    fn result(&self, _: &Context) -> ExpressionResult {
+    fn result(&self, _: &ContextGuard) -> ExpressionResult {
         Ok(self.as_str().into())
     }
 
@@ -52,11 +52,11 @@ impl CompiledExpression for String {
 }
 
 impl CompiledExpression for i64 {
-    fn render(&self, _: &Context) -> RenderResult {
+    fn render(&self, _: &ContextGuard) -> RenderResult {
         Ok(self.to_string())
     }
 
-    fn result(&self, _: &Context) -> ExpressionResult {
+    fn result(&self, _: &ContextGuard) -> ExpressionResult {
         Ok((*self).into())
     }
 
@@ -66,11 +66,11 @@ impl CompiledExpression for i64 {
 }
 
 impl CompiledExpression for bool {
-    fn render(&self, _: &Context) -> RenderResult {
+    fn render(&self, _: &ContextGuard) -> RenderResult {
         Ok(self.to_string())
     }
 
-    fn result(&self, _: &Context) -> ExpressionResult {
+    fn result(&self, _: &ContextGuard) -> ExpressionResult {
         Ok((*self).into())
     }
 
