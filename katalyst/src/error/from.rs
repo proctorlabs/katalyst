@@ -1,5 +1,5 @@
 use super::GatewayError::{self, *};
-use std::{net::AddrParseError, sync};
+use std::net::AddrParseError;
 
 impl From<std::io::Error> for GatewayError {
     fn from(err: std::io::Error) -> Self {
@@ -54,24 +54,6 @@ impl From<AddrParseError> for GatewayError {
         ConfigurationFailure {
             message: "Unable to parse network address".into(),
             source: Box::new(err),
-        }
-    }
-}
-
-impl<T: std::any::Any> From<sync::PoisonError<sync::RwLockWriteGuard<'_, T>>> for GatewayError {
-    fn from(err: sync::PoisonError<sync::RwLockWriteGuard<T>>) -> Self {
-        Critical {
-            message: "Internal lock poisoned!".into(),
-            source: Box::<GatewayError>::new(format!("{:?}", err).into()),
-        }
-    }
-}
-
-impl<T: std::any::Any> From<sync::PoisonError<sync::RwLockReadGuard<'_, T>>> for GatewayError {
-    fn from(err: sync::PoisonError<sync::RwLockReadGuard<T>>) -> Self {
-        Critical {
-            message: "Internal lock poisoned!".into(),
-            source: Box::<GatewayError>::new(format!("{:?}", err).into()),
         }
     }
 }

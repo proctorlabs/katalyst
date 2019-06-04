@@ -1,9 +1,7 @@
 use super::*;
 use futures::future::*;
-use std::{
-    collections::HashMap,
-    sync::{Arc, RwLock},
-};
+use parking_lot::Mutex;
+use std::{collections::HashMap, sync::Arc};
 
 #[derive(Default, Debug)]
 pub struct MemoryCacheBuilder;
@@ -20,7 +18,7 @@ impl ModuleProvider for MemoryCacheBuilder {
 
 #[derive(Default, Debug)]
 pub struct MemoryCache {
-    cache: RwLock<HashMap<String, Arc<CachedObject>>>,
+    cache: Mutex<HashMap<String, Arc<CachedObject>>>,
 }
 
 impl CacheProviderModule for MemoryCache {
@@ -28,12 +26,10 @@ impl CacheProviderModule for MemoryCache {
         &self,
         key: &str,
     ) -> Box<Future<Item = Arc<CachedObject>, Error = GatewayError> + Send> {
-        Box::new(match self.cache.read() {
-            Ok(read) => match read.get(key) {
-                Some(r) => ok(r.clone()),
-                None => err(GatewayError::StateUnavailable),
-            },
-            Err(_) => err(GatewayError::StateUnavailable),
+        let cache = &self.cache.lock();
+        Box::new(match cache.get(key) {
+            Some(r) => ok(r.clone()),
+            None => err(GatewayError::StateUnavailable),
         })
     }
 
@@ -42,10 +38,7 @@ impl CacheProviderModule for MemoryCache {
         key: &str,
         val: CachedObject,
     ) -> Box<Future<Item = (), Error = GatewayError> + Send> {
-        let mut cache = match self.cache.write() {
-            Ok(s) => s,
-            Err(_) => return Box::new(err(GatewayError::StateUnavailable)),
-        };
+        let cache = &mut self.cache.lock();
         cache.insert(key.to_owned(), Arc::new(val));
         Box::new(ok(()))
     }
