@@ -3,7 +3,7 @@ mod data;
 mod requests;
 
 use crate::{app::Katalyst, instance::Route, prelude::*};
-pub use auth::KatalystAuthenticationInfo;
+pub use auth::Authentication;
 use data::ContextData;
 use hyper::{Body, Request};
 use parking_lot::Mutex;
@@ -65,7 +65,7 @@ impl ContextGuard {
         }
     }
 
-    pub fn set_authenticated(&self, info: KatalystAuthenticationInfo) -> Result<()> {
+    pub fn set_authenticated(&self, info: Authentication) -> Result<()> {
         let state: &mut RequestState = &mut self.context.state.lock();
         match state {
             RequestState::Matched(m) => {
@@ -139,7 +139,7 @@ pub struct MatchInfo {
 #[derive(Debug, Clone)]
 pub struct AuthInfo {
     pub matched: MatchInfo,
-    pub detail: KatalystAuthenticationInfo,
+    pub detail: Authentication,
 }
 
 impl Default for Context {

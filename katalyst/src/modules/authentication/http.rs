@@ -54,7 +54,7 @@ impl AuthenticatorModule for HttpAuthenticator {
                     .wait()
                     .unwrap();
                 debug!("{}", body);
-                let mut auth = KatalystAuthenticationInfo::default();
+                let mut auth = Authentication::Authenticated { claims: HashMap::default() };
                 auth.add_claim("KatalystAuthenticator".to_string(), "http".to_string());
                 guard.set_authenticated(auth)
             }

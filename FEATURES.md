@@ -40,7 +40,7 @@
 - [ ] Authentication modules: Login, Basic, HTTP
 - [ ] Authorization modules: Claim verifier
 - [ ] Load Python modules
-- [x] Register signals from OS *(Appliance)*
+- [x] Register signals from OS
 - [x] Server TLS termination
 - [ ] Health checks
 - [x] Caching module: In-Memory

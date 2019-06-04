@@ -15,7 +15,7 @@ impl ModuleProvider for AlwaysAuthenticator {
 
 impl AuthenticatorModule for AlwaysAuthenticator {
     fn authenticate(&self, guard: ContextGuard) -> AsyncResult<()> {
-        let mut result = KatalystAuthenticationInfo::default();
+        let mut result = Authentication::Authenticated { claims: HashMap::default() };
         result.add_claim("KatalystAuthenticator".to_string(), "always".to_string());
         guard.set_authenticated(result).fut()
     }
