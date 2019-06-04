@@ -4,17 +4,23 @@ use parking_lot::Mutex;
 #[derive(Default, Debug)]
 pub struct RoundRobinBalancerBuilder;
 
-impl KatalystBalancerBuilder for RoundRobinBalancerBuilder {
+impl ModuleProvider for RoundRobinBalancerBuilder {
     fn name(&self) -> &'static str {
         "round_robin"
     }
 
-    fn build(&self, hosts: Vec<String>) -> BalancerBuilderResult {
+    fn build(
+        &self,
+        _: ModuleType,
+        _: Arc<Katalyst>,
+        doc: &unstructured::Document,
+    ) -> Result<Module> {
+        let hosts: Vec<String> = doc["servers"].clone().try_into().unwrap_or_default();
         let mut arc_hosts = vec![];
         for new_host in hosts.iter() {
             arc_hosts.push(Arc::new(new_host.to_string()));
         }
-        Ok(Arc::new(RoundRobinBalancer { hosts: arc_hosts, host_index: Mutex::new(0) }))
+        Ok(RoundRobinBalancer { hosts: arc_hosts, host_index: Mutex::new(0) }.into_module())
     }
 }
 
@@ -33,7 +39,7 @@ impl RoundRobinBalancer {
     }
 }
 
-impl KatalystBalancer for RoundRobinBalancer {
+impl LoadBalancerModule for RoundRobinBalancer {
     fn lease(&self) -> BalancerLease {
         Ok(self.hosts[self.get_next_index()].clone())
     }

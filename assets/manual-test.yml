@@ -10,7 +10,7 @@ service:
 
 hosts:
   httpbin:
-    balancer: round_robin
+    type: round_robin
     servers:
       - "http://httpbin.org"
 

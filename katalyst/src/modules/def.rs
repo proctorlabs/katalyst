@@ -4,6 +4,7 @@ use unstructured::Document;
 
 pub trait ModuleData {
     const MODULE_TYPE: ModuleType;
+    type RUST_TYPE;
 }
 
 pub trait ModuleProvider: Send + Sync + Debug {
@@ -46,6 +47,7 @@ macro_rules! impl_module {
 
             impl ModuleData for $name {
                 const MODULE_TYPE: ModuleType = ModuleType::$name;
+                type RUST_TYPE = $name;
             }
         )*
 
@@ -81,7 +83,10 @@ macro_rules! impl_module {
     };
 }
 
+pub type BalancerLease = Result<Arc<String>>;
+
 impl_module! {
+
     Authenticator, AuthenticatorModule {
         AsyncResult<()>: authenticate => guard: ContextGuard
     };
@@ -106,5 +111,10 @@ impl_module! {
 
     RequestHandler, RequestHandlerModule {
         AsyncResult<()>: dispatch => guard: ContextGuard
+    };
+
+    LoadBalancer, LoadBalancerModule {
+        BalancerLease: lease =>
     }
+
 }

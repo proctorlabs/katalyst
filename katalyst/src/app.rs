@@ -1,6 +1,5 @@
 use crate::{
-    balancer, config::parsers, error::*, instance::Instance, modules::ModuleRegistry, prelude::*,
-    server::*,
+    config::parsers, error::*, instance::Instance, modules::ModuleRegistry, prelude::*, server::*,
 };
 use hyper::{
     client::{connect::dns::TokioThreadpoolGaiResolver, HttpConnector},
@@ -21,7 +20,6 @@ pub struct Katalyst {
     instance: RwLock<Arc<Instance>>,
     servers: RwLock<Vec<Server>>,
     client: Arc<HttpsClient>,
-    balancers: Arc<balancer::BalancerDirectory>,
     compiler: Arc<Compiler>,
     modules: ModuleRegistry,
     rt: RwLock<Runtime>,
@@ -45,7 +43,6 @@ impl Default for Katalyst {
             instance: RwLock::default(),
             servers: RwLock::default(),
             client: Arc::new(builder.build(HttpsConnector::from((http_connector, tls)))),
-            balancers: Arc::new(balancer::all()),
             compiler: Arc::new(Compiler::default()),
             modules: ModuleRegistry::default(),
             rt: RwLock::new(Runtime::new().unwrap()),
@@ -103,11 +100,6 @@ impl Katalyst {
     pub fn get_instance(&self) -> Result<Arc<Instance>> {
         let instance = self.instance.read();
         Ok(instance.clone())
-    }
-
-    #[inline]
-    pub(crate) fn get_balancers(&self) -> Arc<balancer::BalancerDirectory> {
-        self.balancers.clone()
     }
 
     #[inline]

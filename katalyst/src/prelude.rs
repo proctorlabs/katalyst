@@ -22,3 +22,13 @@ macro_rules! ensure_fut {
         }
     };
 }
+
+#[macro_export]
+macro_rules! module_unwrap {
+    ($name:ident, $mt:expr) => {
+        Arc::new(match $mt {
+            Module::$name(mtch) => mtch,
+            _ => return Err(GatewayError::FeatureUnavailable),
+        })
+    };
+}

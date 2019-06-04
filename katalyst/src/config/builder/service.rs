@@ -45,15 +45,6 @@ pub struct ServiceBuilder {
     pub cache: ModuleBuilder<CacheProvider>,
 }
 
-macro_rules! module {
-    ($name:ident, $mt:expr) => {
-        Arc::new(match $mt {
-            Module::$name(mtch) => mtch,
-            _ => return Err(GatewayError::FeatureUnavailable),
-        })
-    };
-}
-
 impl Builder<Service> for ServiceBuilder {
     fn build(&self, instance: Arc<Katalyst>) -> Result<Service> {
         Ok(Service {
@@ -62,7 +53,7 @@ impl Builder<Service> for ServiceBuilder {
                 .iter()
                 .map(|i| i.make_interface())
                 .collect::<Result<Vec<Interface>>>()?,
-            cache: module!(CacheProvider, self.cache.build(instance.clone())?),
+            cache: module_unwrap!(CacheProvider, self.cache.build(instance.clone())?),
         })
     }
 }

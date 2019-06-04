@@ -40,5 +40,8 @@ register_modules! {
     authentication::WhitelistBuilder;
     plugins::ContentPlugin;
     cache::DefaultCacheHandler;
-    cache::MemoryCacheBuilder
+    cache::MemoryCacheBuilder;
+    balancer::LeastConnectionBalancerBuilder;
+    balancer::RandomBalancerBuilder;
+    balancer::RoundRobinBalancerBuilder
 }

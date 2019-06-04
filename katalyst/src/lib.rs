@@ -35,7 +35,6 @@ mod server;
 
 pub(crate) mod parser;
 
-pub mod balancer;
 pub mod config;
 pub mod context;
 pub mod error;

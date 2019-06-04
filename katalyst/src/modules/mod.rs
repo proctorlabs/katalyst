@@ -9,6 +9,7 @@ mod result;
 use crate::prelude::*;
 use std::{collections::HashMap, sync::Arc};
 
+pub(crate) mod balancer;
 pub(crate) mod cache;
 pub use cache::CachedObject;
 pub use def::*;
