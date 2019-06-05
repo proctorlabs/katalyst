@@ -35,7 +35,7 @@ pub struct Whitelist {
 }
 
 impl AuthenticatorModule for Whitelist {
-    fn authenticate(&self, guard: ContextGuard) -> ModuleResult {
+    fn authenticate(&self, guard: RequestContext) -> ModuleResult {
         let metadata = ensure_fut!(guard.metadata());
         if self.ips.contains(&metadata.remote_ip) {
             Box::new(ok(()))

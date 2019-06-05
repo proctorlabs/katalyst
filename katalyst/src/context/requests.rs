@@ -1,9 +1,8 @@
+use crate::internal::*;
 use crate::prelude::*;
 use futures::{future::*, stream::Stream, Future};
 use http::request::Parts;
 use hyper::{Body, Request, Response};
-use parking_lot::Mutex;
-use std::mem::replace;
 use unstructured::Document;
 
 #[derive(Debug)]
@@ -17,7 +16,13 @@ pub enum HttpRequest {
     ParsedResponse(Box<(http::response::Parts, Vec<u8>, Document)>),
 }
 
-impl ContextGuard {
+impl Default for HttpRequest {
+    fn default() -> Self {
+        HttpRequest::Empty
+    }
+}
+
+impl RequestContext {
     pub fn preload(&self) -> ModuleResult {
         let guard = self.clone();
         let req = ensure_fut!(guard.take_http_request());
@@ -77,18 +82,16 @@ impl ContextGuard {
         }))
     }
 
-    pub fn get_http_request(&self) -> Result<Arc<Mutex<HttpRequest>>> {
-        Ok(self.context.request.clone())
+    pub fn get_http_request(&self) -> Result<Resource<HttpRequest>> {
+        Ok(self.request.get())
     }
 
     pub fn take_http_request(&self) -> Result<HttpRequest> {
-        let req = &mut self.context.request.lock();
-        Ok(replace(req, HttpRequest::Empty))
+        Ok(self.request.take())
     }
 
     pub fn set_http_request(&self, inreq: HttpRequest) -> Result<HttpRequest> {
-        let req = &mut self.context.request.lock();
-        Ok(replace(req, inreq))
+        Ok(self.request.set(inreq))
     }
 
     pub fn take_request(&self) -> Result<Request<Body>> {
@@ -112,7 +115,7 @@ impl ContextGuard {
     }
 
     pub fn method(&self) -> http::Method {
-        let req: &HttpRequest = &self.context.request.lock();
+        let req: &HttpRequest = &self.request.get();
         match req {
             HttpRequest::RawRequest(r) => r.0.method.clone(),
             HttpRequest::LoadedRequest(r) => r.0.method.clone(),
@@ -122,7 +125,7 @@ impl ContextGuard {
     }
 
     pub fn header(&self, key: &str) -> Option<String> {
-        let req: &HttpRequest = &self.context.request.lock();
+        let req: &HttpRequest = &self.request.get();
         let prts = match req {
             HttpRequest::RawRequest(r) => &r.0,
             HttpRequest::LoadedRequest(r) => &r.0,
@@ -142,7 +145,7 @@ impl ContextGuard {
     }
 
     pub fn is_request(&self) -> Result<bool> {
-        let req: &HttpRequest = &self.context.request.lock();
+        let req: &HttpRequest = &self.request.get();
         Ok(match req {
             HttpRequest::RawRequest(_)
             | HttpRequest::LoadedRequest(_)
@@ -152,7 +155,7 @@ impl ContextGuard {
     }
 
     pub fn is_response(&self) -> Result<bool> {
-        let req: &HttpRequest = &self.context.request.lock();
+        let req: &HttpRequest = &self.request.get();
         Ok(match req {
             HttpRequest::RawResponse(_)
             | HttpRequest::LoadedResponse(_)

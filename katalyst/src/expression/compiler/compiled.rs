@@ -10,11 +10,11 @@ pub struct CompiledExpressionNode {
 }
 
 impl CompiledExpression for CompiledExpressionNode {
-    fn render(&self, guard: &ContextGuard) -> RenderResult {
+    fn render(&self, guard: &RequestContext) -> RenderResult {
         Ok(self.result(guard)?.to_string())
     }
 
-    fn result(&self, guard: &ContextGuard) -> ExpressionResult {
+    fn result(&self, guard: &RequestContext) -> ExpressionResult {
         (self.render_fn)(guard, &&self.args)
     }
 
@@ -24,11 +24,11 @@ impl CompiledExpression for CompiledExpressionNode {
 }
 
 impl CompiledExpression for Document {
-    fn render(&self, _: &ContextGuard) -> RenderResult {
+    fn render(&self, _: &RequestContext) -> RenderResult {
         Ok(self.to_string())
     }
 
-    fn result(&self, _: &ContextGuard) -> ExpressionResult {
+    fn result(&self, _: &RequestContext) -> ExpressionResult {
         Ok(self.clone())
     }
 
@@ -38,11 +38,11 @@ impl CompiledExpression for Document {
 }
 
 impl CompiledExpression for String {
-    fn render(&self, _: &ContextGuard) -> RenderResult {
+    fn render(&self, _: &RequestContext) -> RenderResult {
         Ok(self.to_string())
     }
 
-    fn result(&self, _: &ContextGuard) -> ExpressionResult {
+    fn result(&self, _: &RequestContext) -> ExpressionResult {
         Ok(self.as_str().into())
     }
 
@@ -52,11 +52,11 @@ impl CompiledExpression for String {
 }
 
 impl CompiledExpression for i64 {
-    fn render(&self, _: &ContextGuard) -> RenderResult {
+    fn render(&self, _: &RequestContext) -> RenderResult {
         Ok(self.to_string())
     }
 
-    fn result(&self, _: &ContextGuard) -> ExpressionResult {
+    fn result(&self, _: &RequestContext) -> ExpressionResult {
         Ok((*self).into())
     }
 
@@ -66,11 +66,11 @@ impl CompiledExpression for i64 {
 }
 
 impl CompiledExpression for bool {
-    fn render(&self, _: &ContextGuard) -> RenderResult {
+    fn render(&self, _: &RequestContext) -> RenderResult {
         Ok(self.to_string())
     }
 
-    fn result(&self, _: &ContextGuard) -> ExpressionResult {
+    fn result(&self, _: &RequestContext) -> ExpressionResult {
         Ok((*self).into())
     }
 

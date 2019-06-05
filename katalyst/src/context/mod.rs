@@ -1,125 +1,44 @@
 mod auth;
 mod data;
+mod matched;
 mod requests;
 
-use crate::{app::Katalyst, instance::Route, prelude::*};
-pub use auth::Authentication;
+use crate::{
+    app::Katalyst,
+    instance::Route,
+    internal::{LockedResource, Resource},
+    prelude::*,
+};
 use data::ContextData;
 use hyper::{Body, Request};
 use parking_lot::Mutex;
+use std::{any::Any, net::SocketAddr, time::Instant};
+
+pub use auth::Authentication;
+pub use matched::Match;
 pub use requests::*;
-use std::{any::Any, collections::HashMap, net::SocketAddr, time::Instant};
 
 #[derive(Debug, Default, Clone)]
-pub struct ContextGuard {
+pub struct RequestContext {
     context: Arc<Context>,
-    katalyst: Arc<Katalyst>,
 }
 
-impl ContextGuard {
-    pub fn new(request: Request<Body>, katalyst: Arc<Katalyst>, remote_addr: SocketAddr) -> Self {
-        let uri = request.uri();
-        let path = format!(
-            "{scheme}://{host}{path}",
-            scheme = &uri.scheme_str().unwrap_or("http"),
-            host = &uri.host().unwrap_or("localhost"),
-            path = &uri
-        );
-        ContextGuard {
-            context: Arc::new(Context {
-                request: Arc::new(Mutex::new(HttpRequest::new(request))),
-                metadata: Arc::new(Metadata {
-                    remote_ip: remote_addr.ip().to_string(),
-                    url: url::Url::parse(&path).unwrap(),
-                    balancer_lease: Mutex::new(None),
-                    started: Instant::now(),
-                }),
-                state: Arc::new(Mutex::new(RequestState::New)),
-                data: Mutex::new(ContextData::default()),
-            }),
-            katalyst: katalyst.clone(),
-        }
-    }
+impl std::ops::Deref for RequestContext {
+    type Target = Arc<Context>;
 
-    pub fn katalyst(&self) -> Result<Arc<Katalyst>> {
-        Ok(self.katalyst.clone())
-    }
-
-    pub fn state(&self) -> Result<Arc<Mutex<RequestState>>> {
-        Ok(self.context.state.clone())
-    }
-
-    pub fn metadata(&self) -> Result<Arc<Metadata>> {
-        Ok(self.context.metadata.clone())
-    }
-
-    pub fn context(&self) -> Result<Arc<Context>> {
-        Ok(self.context.clone())
-    }
-
-    pub fn get_authenticated(&self) -> Result<AuthInfo> {
-        let state: &mut RequestState = &mut self.context.state.lock();
-        match state {
-            RequestState::Authenticated(ref a) => Ok(a.clone()),
-            _ => Err(GatewayError::StateUnavailable),
-        }
-    }
-
-    pub fn set_authenticated(&self, info: Authentication) -> Result<()> {
-        let state: &mut RequestState = &mut self.context.state.lock();
-        match state {
-            RequestState::Matched(m) => {
-                *state = RequestState::Authenticated(AuthInfo { matched: m.clone(), detail: info })
-            }
-            _ => return Err(GatewayError::StateUpdateFailure),
-        };
-        Ok(())
-    }
-
-    pub fn get_matched(&self) -> Result<MatchInfo> {
-        let state: &mut RequestState = &mut self.context.state.lock();
-        match state {
-            RequestState::Matched(ref m) => Ok(m.clone()),
-            RequestState::Authenticated(ref a) => Ok(a.matched.clone()),
-            _ => Err(GatewayError::StateUnavailable),
-        }
-    }
-
-    pub fn set_match(&self, matched: MatchInfo) -> Result<()> {
-        let state: &mut RequestState = &mut self.context.state.lock();
-        match state {
-            RequestState::New => {
-                *state = RequestState::Matched(matched);
-                Ok(())
-            }
-            _ => Err(GatewayError::StateUpdateFailure),
-        }
-    }
-
-    pub fn get_extension_data<T: Any + Send + Sync>(&self) -> Result<Arc<T>> {
-        self.context.data.lock().get().ok_or_else(|| GatewayError::InternalServerError)
-    }
-
-    pub fn set_extension_data<T: Any + Send + Sync>(&self, data: T) -> Result<()> {
-        self.context.data.lock().set(data);
-        Ok(())
+    fn deref(&self) -> &Self::Target {
+        &self.context
     }
 }
 
 #[derive(Debug)]
 pub struct Context {
-    request: Arc<Mutex<HttpRequest>>,
+    request: LockedResource<HttpRequest>,
     metadata: Arc<Metadata>,
-    state: Arc<Mutex<RequestState>>,
+    authentication: LockedResource<Authentication>,
+    matched: LockedResource<Match>,
     data: Mutex<ContextData>,
-}
-
-#[derive(Debug)]
-pub enum RequestState {
-    New,
-    Matched(MatchInfo),
-    Authenticated(AuthInfo),
-    Response(HttpRequest),
+    katalyst: Arc<Katalyst>,
 }
 
 #[derive(Debug)]
@@ -130,30 +49,87 @@ pub struct Metadata {
     pub balancer_lease: Mutex<Option<Arc<String>>>,
 }
 
-#[derive(Debug, Clone)]
-pub struct MatchInfo {
-    pub route: Arc<Route>,
-    pub captures: HashMap<String, String>,
-}
-
-#[derive(Debug, Clone)]
-pub struct AuthInfo {
-    pub matched: MatchInfo,
-    pub detail: Authentication,
-}
-
 impl Default for Context {
     fn default() -> Self {
         *Box::new(Context {
-            request: Arc::new(Mutex::new(HttpRequest::Empty)),
+            request: LockedResource::new(HttpRequest::Empty),
             metadata: Arc::new(Metadata {
                 remote_ip: String::default(),
                 url: url::Url::parse("http://localhost/").unwrap(),
                 balancer_lease: Mutex::new(None),
                 started: Instant::now(),
             }),
-            state: Arc::new(Mutex::new(RequestState::New)),
+            matched: LockedResource::new(Match::Unmatched),
+            authentication: LockedResource::new(Authentication::Anonymous),
             data: Mutex::new(ContextData::default()),
+            katalyst: Arc::new(Katalyst::default()),
         })
+    }
+}
+
+impl RequestContext {
+    pub fn new(request: Request<Body>, katalyst: Arc<Katalyst>, remote_addr: SocketAddr) -> Self {
+        let uri = request.uri();
+        let path = format!(
+            "{scheme}://{host}{path}",
+            scheme = &uri.scheme_str().unwrap_or("http"),
+            host = &uri.host().unwrap_or("localhost"),
+            path = &uri
+        );
+        RequestContext {
+            context: Arc::new(Context {
+                request: LockedResource::new(HttpRequest::new(request)),
+                metadata: Arc::new(Metadata {
+                    remote_ip: remote_addr.ip().to_string(),
+                    url: url::Url::parse(&path).unwrap(),
+                    balancer_lease: Mutex::new(None),
+                    started: Instant::now(),
+                }),
+                matched: LockedResource::new(Match::Unmatched),
+                authentication: LockedResource::new(Authentication::Anonymous),
+                data: Mutex::new(ContextData::default()),
+                katalyst: katalyst.clone(),
+            }),
+        }
+    }
+
+    pub fn katalyst(&self) -> Result<Arc<Katalyst>> {
+        Ok(self.katalyst.clone())
+    }
+
+    pub fn metadata(&self) -> Result<Arc<Metadata>> {
+        Ok(self.metadata.clone())
+    }
+
+    pub fn get_authentication(&self) -> Result<Resource<Authentication>> {
+        Ok(self.authentication.get())
+    }
+
+    pub fn set_authentication(&self, info: Authentication) -> Result<()> {
+        self.authentication.set(info);
+        Ok(())
+    }
+
+    pub fn get_match(&self) -> Result<Resource<Match>> {
+        Ok(self.matched.get())
+    }
+
+    pub fn get_route(&self) -> Result<Arc<Route>> {
+        let resource = self.get_match()?;
+        Ok(resource.route()?.clone())
+    }
+
+    pub fn set_match(&self, matched: Match) -> Result<()> {
+        self.matched.set(matched);
+        Ok(())
+    }
+
+    pub fn get_extension<T: Any + Send + Sync>(&self) -> Result<Arc<T>> {
+        self.data.lock().get().ok_or_else(|| GatewayError::InternalServerError)
+    }
+
+    pub fn set_extension<T: Any + Send + Sync>(&self, data: T) -> Result<()> {
+        self.data.lock().set(data);
+        Ok(())
     }
 }

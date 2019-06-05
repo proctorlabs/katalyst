@@ -88,16 +88,16 @@ pub type BalancerLease = Result<Arc<String>>;
 impl_module! {
 
     Authenticator, AuthenticatorModule {
-        AsyncResult<()>: authenticate => guard: ContextGuard
+        AsyncResult<()>: authenticate => guard: RequestContext
     };
 
     Authorizer, AuthorizerModule {
-        AsyncResult<()>: authorize => guard: ContextGuard
+        AsyncResult<()>: authorize => guard: RequestContext
     };
 
     CacheHandler, CacheHandlerModule {
-        AsyncResult<()>: check_cache => guard: ContextGuard;
-        AsyncResult<()>: update_cache => guard: ContextGuard
+        AsyncResult<()>: check_cache => guard: RequestContext;
+        AsyncResult<()>: update_cache => guard: RequestContext
     };
 
     CacheProvider, CacheProviderModule {
@@ -106,11 +106,11 @@ impl_module! {
     };
 
     Plugin, PluginModule {
-        AsyncResult<()>: run => guard: ContextGuard
+        AsyncResult<()>: run => guard: RequestContext
     };
 
     RequestHandler, RequestHandlerModule {
-        AsyncResult<()>: dispatch => guard: ContextGuard
+        AsyncResult<()>: dispatch => guard: RequestContext
     };
 
     LoadBalancer, LoadBalancerModule {

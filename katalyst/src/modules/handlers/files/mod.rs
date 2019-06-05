@@ -45,7 +45,7 @@ pub struct FileServerDispatcher {
 }
 
 impl RequestHandlerModule for FileServerDispatcher {
-    fn dispatch(&self, guard: ContextGuard) -> ModuleResult {
+    fn dispatch(&self, guard: RequestContext) -> ModuleResult {
         let path = ensure_fut!(self.selector.render(&guard));
         let mut full_path = PathBuf::from(&self.root_path);
         full_path.push(&path);
@@ -53,7 +53,7 @@ impl RequestHandlerModule for FileServerDispatcher {
     }
 }
 
-fn send_file(guard: ContextGuard, file: PathBuf) -> ModuleResult {
+fn send_file(guard: RequestContext, file: PathBuf) -> ModuleResult {
     let result = Box::new(
         tokio_fs::file::File::open(file.to_str().unwrap_or_default().to_string()).and_then(
             |file| {

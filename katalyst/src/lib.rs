@@ -31,6 +31,7 @@ extern crate derive_more;
 
 mod app;
 mod instance;
+mod internal;
 mod server;
 
 pub(crate) mod parser;

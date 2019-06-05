@@ -12,12 +12,12 @@ use std::{collections::HashMap, net::SocketAddr, sync::Arc};
 
 pub(crate) use mapper::HyperResult;
 
-pub type PipelineResultSync = std::result::Result<ContextGuard, ModuleError>;
-pub type PipelineResult = Box<Future<Item = ContextGuard, Error = ModuleError> + Send>;
+pub type PipelineResultSync = std::result::Result<RequestContext, ModuleError>;
+pub type PipelineResult = Box<Future<Item = RequestContext, Error = ModuleError> + Send>;
 
 macro_rules! pipe {
     ($ty:path) => {
-        |ctx: ContextGuard| {
+        |ctx: RequestContext| {
             $ty(ctx.clone()).then(|res| match res {
                 Ok(_) => Ok(ctx),
                 Err(e) => Err(ModuleError { error: e, context: ctx }),
@@ -32,7 +32,7 @@ pub(crate) fn run(
     engine: Arc<Katalyst>,
 ) -> HyperResult {
     Box::new(
-        ok(ContextGuard::new(request, engine, remote_addr))
+        ok(RequestContext::new(request, engine, remote_addr))
             .and_then(pipe!(logger::log_request))
             .and_then(pipe!(matcher::matcher))
             .and_then(pipe!(auth::authenticate))
@@ -51,7 +51,7 @@ pub(crate) fn run(
 pub fn map_early_finish(res: PipelineResultSync) -> PipelineResult {
     match res {
         Err(ModuleError { error: GatewayError::Done, context }) => {
-            Box::new(ok::<ContextGuard, ModuleError>(context))
+            Box::new(ok::<RequestContext, ModuleError>(context))
         }
         other => Box::new(futures::future::result(other)),
     }

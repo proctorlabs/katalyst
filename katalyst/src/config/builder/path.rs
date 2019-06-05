@@ -35,7 +35,7 @@ impl Builder<String> for PathBuilder {
                 let mut result = String::new();
                 result.push_str("^");
                 let cmp = compiler.compile_template(Some(template))?;
-                let ctx = ContextGuard::default();
+                let ctx = RequestContext::default();
                 let rnd = cmp.render(&ctx).map_err(|_| {
                     GatewayError::InvalidExpressionArgs("Path template could not be rendered")
                 })?;

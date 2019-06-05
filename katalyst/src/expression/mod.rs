@@ -18,7 +18,7 @@ pub type ExpressionArgs = Vec<Arc<CompiledExpression>>;
 pub type Expression = Vec<Arc<CompiledExpression>>;
 
 impl CompiledExpression for Expression {
-    fn render(&self, guard: &ContextGuard) -> RenderResult {
+    fn render(&self, guard: &RequestContext) -> RenderResult {
         let mut result = String::new();
         for part in self.iter() {
             result.push_str(&part.render(guard)?);
@@ -26,7 +26,7 @@ impl CompiledExpression for Expression {
         Ok(result)
     }
 
-    fn result(&self, guard: &ContextGuard) -> ExpressionResult {
+    fn result(&self, guard: &RequestContext) -> ExpressionResult {
         let mut res = vec![];
         for exp in self.iter() {
             res.push(exp.result(guard)?);

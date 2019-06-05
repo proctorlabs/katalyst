@@ -1,11 +1,11 @@
 use super::*;
 use crate::prelude::*;
 
-pub fn matcher(guard: ContextGuard) -> AsyncResult<()> {
+pub fn matcher(guard: RequestContext) -> AsyncResult<()> {
     match_int(guard).fut()
 }
 
-fn match_int(guard: ContextGuard) -> Result<()> {
+fn match_int(guard: RequestContext) -> Result<()> {
     let metadata = guard.metadata()?;
     let config = guard.katalyst()?.get_instance()?;
     let method = guard.method();
@@ -31,7 +31,7 @@ fn match_int(guard: ContextGuard) -> Result<()> {
                     );
                 }
             }
-            guard.set_match(MatchInfo { route: route.clone(), captures: cap_map })?;
+            guard.set_match(Match::Matched { route: route.clone(), captures: cap_map })?;
             debug!("Request has been matched to route!");
             return Ok(());
         }

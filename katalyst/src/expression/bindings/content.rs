@@ -6,11 +6,11 @@ use unstructured::Document;
 pub struct Content;
 
 impl Content {
-    fn val(guard: &ContextGuard, args: &[ExpressionArg]) -> ExpressionResult {
+    fn val(guard: &RequestContext, args: &[ExpressionArg]) -> ExpressionResult {
         let key = args[0].render(guard)?;
         let key = Document::String(key);
         let req = guard.get_http_request()?;
-        let http_req: &HttpRequest = &req.lock();
+        let http_req: &HttpRequest = &req;
         if let HttpRequest::ParsedRequest(d) = http_req {
             let val = &d.2;
             let res = match val {

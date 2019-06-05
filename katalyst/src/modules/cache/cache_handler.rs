@@ -16,7 +16,7 @@ impl ModuleProvider for DefaultCacheHandler {
 }
 
 impl CacheHandlerModule for DefaultCacheHandler {
-    fn check_cache(&self, guard: ContextGuard) -> ModuleResult {
+    fn check_cache(&self, guard: RequestContext) -> ModuleResult {
         let katalyst = ensure_fut!(guard.katalyst());
         let metadata = ensure_fut!(guard.metadata());
         if let Ok(instance) = katalyst.get_instance() {
@@ -33,7 +33,7 @@ impl CacheHandlerModule for DefaultCacheHandler {
         }
     }
 
-    fn update_cache(&self, guard: ContextGuard) -> ModuleResult {
+    fn update_cache(&self, guard: RequestContext) -> ModuleResult {
         if !ensure_fut!(guard.is_response()) {
             return Ok(()).fut();
         }

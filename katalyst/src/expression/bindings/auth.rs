@@ -5,7 +5,7 @@ use crate::{expression::*, prelude::*};
 pub struct Auth;
 
 impl Auth {
-    fn claim(guard: &ContextGuard, args: &[ExpressionArg]) -> ExpressionResult {
-        Ok(guard.get_authenticated()?.detail.get_claim(args[0].render(guard)?).into())
+    fn claim(guard: &RequestContext, args: &[ExpressionArg]) -> ExpressionResult {
+        Ok(guard.get_authentication()?.get_claim(args[0].render(guard)?).into())
     }
 }

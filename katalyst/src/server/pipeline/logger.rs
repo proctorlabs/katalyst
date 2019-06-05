@@ -1,13 +1,13 @@
 use crate::prelude::*;
 use std::time::Instant;
 
-pub fn log_request(guard: ContextGuard) -> AsyncResult<()> {
+pub fn log_request(guard: RequestContext) -> AsyncResult<()> {
     let ctx = ensure_fut!(guard.metadata());
     info!("Request started to {:?}", ctx.url);
     Ok(()).fut()
 }
 
-pub fn log_result(guard: ContextGuard) -> ContextGuard {
+pub fn log_result(guard: RequestContext) -> RequestContext {
     if let Ok(ctx) = guard.metadata() {
         let duration = Instant::now().duration_since(ctx.started);
         let total_ms = u64::from(duration.subsec_millis()) + (duration.as_secs() * 1000);

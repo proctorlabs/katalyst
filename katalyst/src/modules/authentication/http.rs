@@ -36,7 +36,7 @@ pub struct HttpAuthenticator {
 }
 
 impl AuthenticatorModule for HttpAuthenticator {
-    fn authenticate(&self, guard: ContextGuard) -> AsyncResult<()> {
+    fn authenticate(&self, guard: RequestContext) -> AsyncResult<()> {
         let client = ensure_fut!(guard.katalyst()).get_client();
         let mut request = Request::builder();
         request.uri(&self.url.to_string());
@@ -56,7 +56,7 @@ impl AuthenticatorModule for HttpAuthenticator {
                 debug!("{}", body);
                 let mut auth = Authentication::Authenticated { claims: HashMap::default() };
                 auth.add_claim("KatalystAuthenticator".to_string(), "http".to_string());
-                guard.set_authenticated(auth)
+                guard.set_authentication(auth)
             }
             Err(_) => Err(GatewayError::Forbidden),
         }))

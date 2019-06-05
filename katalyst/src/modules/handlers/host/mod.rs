@@ -79,7 +79,7 @@ impl ModuleProvider for HostModule {
 }
 
 impl RequestHandlerModule for HostDispatcher {
-    fn dispatch(&self, guard: ContextGuard) -> ModuleResult {
+    fn dispatch(&self, guard: RequestContext) -> ModuleResult {
         let guard2 = guard.clone();
         Box::new(
             result(self.prepare(guard.clone()))
@@ -92,7 +92,7 @@ impl RequestHandlerModule for HostDispatcher {
 impl HostDispatcher {
     pub fn transformer(
         &self,
-        guard: ContextGuard,
+        guard: RequestContext,
         lease_str: String,
     ) -> Result<DownstreamTransformer> {
         let mut uri = lease_str;

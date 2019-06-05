@@ -3,7 +3,7 @@ use crate::context::*;
 use futures::{future::*, Future};
 
 impl HostDispatcher {
-    pub fn prepare(&self, guard: ContextGuard) -> ModuleResultSync {
+    pub fn prepare(&self, guard: RequestContext) -> ModuleResultSync {
         let config = guard.katalyst()?;
         let metadata = guard.metadata()?;
 
@@ -27,7 +27,7 @@ impl HostDispatcher {
         Ok(())
     }
 
-    pub fn send(guard: ContextGuard) -> ModuleResult {
+    pub fn send(guard: RequestContext) -> ModuleResult {
         let dsr = ensure_fut!(guard.take_request());
         let client = ensure_fut!(guard.katalyst()).get_client();
         let res = client.request(dsr);
@@ -43,7 +43,7 @@ impl HostDispatcher {
         }))
     }
 
-    pub fn clean_response(guard: ContextGuard) -> Result<()> {
+    pub fn clean_response(guard: RequestContext) -> Result<()> {
         let mut req = guard.take_http_request()?;
         if let HttpRequest::RawResponse(res) = &mut req {
             strip_hop_headers(&mut res.0.headers);
