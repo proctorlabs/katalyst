@@ -1,5 +1,5 @@
-use crate::internal::*;
 use crate::prelude::*;
+use crate::util::*;
 use futures::{future::*, stream::Stream, Future};
 use http::request::Parts;
 use hyper::{Body, Request, Response};

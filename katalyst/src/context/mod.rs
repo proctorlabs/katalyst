@@ -6,8 +6,8 @@ mod requests;
 use crate::{
     app::Katalyst,
     instance::Route,
-    internal::{LockedResource, Resource},
     prelude::*,
+    util::{LockedResource, Resource},
 };
 use data::ContextData;
 use hyper::{Body, Request};
