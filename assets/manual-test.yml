@@ -54,7 +54,8 @@ routes:
         header: "{{ http.header('user-agent') }}"
     authenticators:
       - type: http
-        url: "https://postman-echo.com/get?thing=something"
+        host: httpbin
+        path: "/ip"
 
   - path:
       type: exact

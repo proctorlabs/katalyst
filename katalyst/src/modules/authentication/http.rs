@@ -1,13 +1,11 @@
-use crate::{app::Katalyst, context::*, modules::*};
-use futures::{stream::Stream, Future};
-use hyper::{body::Body, Request};
-use serde::{Deserialize, Serialize};
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-struct HttpConfig {
-    url: String,
-}
+use crate::{
+    app::Katalyst,
+    config::builder::Builder,
+    context::*,
+    modules::*,
+    util::{ClientRequestBuilder, CompiledClientRequest},
+};
+use futures::Future;
 
 #[derive(Default, Debug)]
 pub struct HttpAuthenticatorBuilder;
@@ -20,40 +18,27 @@ impl ModuleProvider for HttpAuthenticatorBuilder {
     fn build(
         &self,
         _: ModuleType,
-        _: Arc<Katalyst>,
+        kat: Arc<Katalyst>,
         config: &unstructured::Document,
     ) -> Result<Module> {
-        let c: HttpConfig = config.clone().try_into().map_err(|_| {
+        let request: ClientRequestBuilder = config.clone().try_into().map_err(|_| {
             GatewayError::ConfigNotParseable("Host module configuration failed".into())
         })?;
-        Ok(HttpAuthenticator { url: c.url }.into_module())
+        Ok(HttpAuthenticator { request: request.build(kat)? }.into_module())
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct HttpAuthenticator {
-    url: String,
+    request: CompiledClientRequest,
 }
 
 impl AuthenticatorModule for HttpAuthenticator {
     fn authenticate(&self, guard: RequestContext) -> AsyncResult<()> {
+        let request = ensure_fut!(self.request.prepare_request(&guard));
         let client = ensure_fut!(guard.katalyst()).get_client();
-        let mut request = Request::builder();
-        request.uri(&self.url.to_string());
-        let res = client.request(request.body(Body::empty()).unwrap());
-        Box::new(res.then(move |response| match response {
-            Ok(resp) => {
-                let (_, body) = resp.into_parts();
-                let body = body
-                    .map_err(|_| ())
-                    .fold(vec![], |mut acc, chunk| {
-                        acc.extend_from_slice(&chunk);
-                        Ok(acc)
-                    })
-                    .and_then(|v| String::from_utf8(v).map_err(|_| ()))
-                    .wait()
-                    .unwrap();
-                debug!("{}", body);
+        Box::new(request.send_parse(&client).then(move |response| match response {
+            Ok(_) => {
                 let mut auth = Authentication::Authenticated { claims: HashMap::default() };
                 auth.add_claim("KatalystAuthenticator".to_string(), "http".to_string());
                 guard.set_authentication(auth)

@@ -1,13 +1,18 @@
-use crate::{config::builder::Builder, expression::*, prelude::*};
-use http::Method;
+use crate::{app::HttpsClient, config::builder::Builder, expression::*, prelude::*};
+use futures::{future::*, Future};
+use http::{
+    header::{HeaderMap, HeaderName, HeaderValue},
+    request::Builder as RequestBuilder,
+    Method, Request, Response, StatusCode,
+};
 use hyper::Body;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, str::FromStr, sync::Arc};
+use unstructured::Document;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 #[serde(default, rename_all = "snake_case")]
 pub struct ClientRequestBuilder {
-    pub scheme: String,
     pub host: String,
     pub path: String,
     pub method: Option<String>,
@@ -35,7 +40,6 @@ impl Builder<CompiledClientRequest> for ClientRequestBuilder {
         };
 
         Ok(CompiledClientRequest {
-            scheme: self.scheme.to_owned(),
             host: self.host.to_owned(),
             path: compiler.compile_template(Some(self.path.as_str()))?,
             method,
@@ -48,7 +52,6 @@ impl Builder<CompiledClientRequest> for ClientRequestBuilder {
 
 #[derive(Debug)]
 pub struct CompiledClientRequest {
-    scheme: String,
     host: String,
     path: Expression,
     method: Option<Method>,
@@ -58,7 +61,7 @@ pub struct CompiledClientRequest {
 }
 
 impl CompiledClientRequest {
-    pub fn prepare_request(&self, ctx: &RequestContext) -> Result<ClientRequest> {
+    pub fn prepare_request(&self, ctx: &RequestContext) -> Result<HttpData> {
         let mut path = self.path.render(ctx)?;
 
         if let Some(query) = &self.query {
@@ -72,10 +75,15 @@ impl CompiledClientRequest {
 
         let headers = if let Some(hdrs) = &self.headers {
             hdrs.iter()
-                .map(|(k, v)| Ok((k.to_string(), v.render(ctx)?)))
-                .collect::<Result<HashMap<String, String>>>()?
+                .map(|(k, v)| {
+                    Ok((
+                        HeaderName::from_str(k).unwrap(),
+                        HeaderValue::from_str(&v.render(ctx)?).unwrap(),
+                    ))
+                })
+                .collect::<Result<HeaderMap<HeaderValue>>>()?
         } else {
-            HashMap::default()
+            HeaderMap::default()
         };
 
         let host = ctx
@@ -90,21 +98,109 @@ impl CompiledClientRequest {
         let body =
             if let Some(body) = &self.body { Body::from(body.render(ctx)?) } else { Body::empty() };
 
-        Ok(ClientRequest {
-            url: format!("{}://{}/{}", self.scheme, host, path),
-            method: self.method.as_ref().cloned().unwrap_or(Method::GET),
+        Ok(HttpData {
+            request_type: HttpAction::Request(
+                format!("{}{}", host, path),
+                self.method.as_ref().cloned().unwrap_or(Method::GET),
+            ),
             headers,
-            body,
+            body: HttpContent::Raw(body),
         })
     }
 }
 
 #[derive(Debug)]
-pub struct ClientRequest {
-    url: String,
-    method: Method,
-    headers: HashMap<String, String>,
-    body: Body,
+pub enum HttpContent {
+    Raw(Body),
+    Bytes(Vec<u8>),
+    Parsed(Document),
 }
 
-impl ClientRequest {}
+impl HttpContent {
+    pub fn into_body(self) -> Body {
+        match self {
+            HttpContent::Raw(body) => body,
+            HttpContent::Bytes(bytes) => Body::from(bytes),
+            HttpContent::Parsed(doc) => Body::from(serde_json::to_vec(&doc).unwrap()),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum HttpAction {
+    Request(String, Method),
+    Response(StatusCode),
+}
+
+#[derive(Debug)]
+pub struct HttpData {
+    pub request_type: HttpAction,
+    pub headers: HeaderMap<HeaderValue>,
+    pub body: HttpContent,
+}
+
+impl From<Request<Body>> for HttpData {
+    fn from(req: Request<Body>) -> HttpData {
+        let (parts, body) = req.into_parts();
+        HttpData {
+            request_type: HttpAction::Request(parts.uri.to_string(), parts.method),
+            headers: parts.headers,
+            body: HttpContent::Raw(body),
+        }
+    }
+}
+
+impl From<Response<Body>> for HttpData {
+    fn from(req: Response<Body>) -> HttpData {
+        let (parts, body) = req.into_parts();
+        HttpData {
+            request_type: HttpAction::Response(parts.status),
+            headers: parts.headers,
+            body: HttpContent::Raw(body),
+        }
+    }
+}
+
+impl HttpData {
+    pub fn send(self, client: &HttpsClient) -> AsyncResult<HttpData> {
+        if let HttpAction::Request(uri, method) = self.request_type {
+            info!("{}", uri);
+            let mut request = RequestBuilder::new();
+            request.method(method);
+            request.uri(uri);
+            *request.headers_mut().unwrap() = self.headers;
+            let req = request.body(self.body.into_body()).unwrap();
+            let res = client.request(req);
+            Box::new(res.then(move |response| match response {
+                Ok(r) => ok::<HttpData, GatewayError>(HttpData::from(r)),
+                Err(e) => {
+                    warn!("Error sending request: {:?}", e);
+                    err(GatewayError::GatewayTimeout)
+                }
+            }))
+        } else {
+            Box::new(err::<HttpData, GatewayError>(GatewayError::Other(
+                "Response type cannot be sent".into(),
+            )))
+        }
+    }
+
+    pub fn send_parse(self, client: &HttpsClient) -> AsyncResult<HttpData> {
+        Box::new(self.send(client).and_then(|mut resp| {
+            let content_type = resp.headers.get("Content-Type").map(|m| m.to_str().unwrap());
+            let format = Format::content_type(content_type);
+            if let HttpContent::Raw(body) = resp.body {
+                resp.body = HttpContent::Bytes(vec![]);
+                return Box::new(Either::A(body.concat2().then(move |r| {
+                    let doc = match r {
+                        Ok(d) => format.parse(&d).unwrap_or_default(),
+                        Err(_) => Document::Unit,
+                    };
+                    resp.body = HttpContent::Parsed(doc);
+                    Box::new(ok::<HttpData, GatewayError>(resp))
+                })));
+            }
+            Box::new(Either::B(ok(resp)))
+        }))
+    }
+}
