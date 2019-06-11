@@ -1,6 +1,4 @@
-use crate::{
-    config::parsers, error::*, instance::Instance, modules::ModuleRegistry, prelude::*, server::*,
-};
+use crate::{config::parsers, instance::Instance, modules::ModuleRegistry, prelude::*, server::*};
 use hyper::{
     client::{connect::dns::TokioThreadpoolGaiResolver, HttpConnector},
     rt::Future,

@@ -1,4 +1,4 @@
-use crate::{app::Katalyst, context::*, modules::*};
+use crate::{app::Katalyst, modules::*};
 use futures::future::err;
 
 #[derive(Default, Debug)]
@@ -16,6 +16,6 @@ impl ModuleProvider for NeverAuthenticator {
 
 impl AuthenticatorModule for NeverAuthenticator {
     fn authenticate(&self, _: RequestContext) -> ModuleResult {
-        Box::new(err(GatewayError::Unauthorized))
+        fail!(:FORBIDDEN, "This module always rejects requests")
     }
 }

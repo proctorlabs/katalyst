@@ -2,7 +2,7 @@ use crate::prelude::*;
 use futures::future::*;
 
 pub fn authenticate(guard: RequestContext) -> AsyncResult<()> {
-    let route = ensure_fut!(guard.get_route());
+    let route = ensure!(:guard.get_route());
     match &route.authenticators {
         Some(state_authenticators) => {
             let authenticators = state_authenticators.clone();
@@ -21,7 +21,7 @@ pub fn authenticate(guard: RequestContext) -> AsyncResult<()> {
 }
 
 pub fn authorize(guard: RequestContext) -> AsyncResult<()> {
-    let route = ensure_fut!(guard.get_route());
+    let route = ensure!(:guard.get_route());
     let mut result: AsyncResult<()> = Ok(()).fut();
     if let Some(authorizers) = &route.authorizers {
         for auth in authorizers.iter() {

@@ -40,7 +40,7 @@ impl CachedObject {
                     .map(|(k, v)| (k.to_string(), v.to_str().unwrap_or("").to_string()))
                     .collect(),
             }),
-            _ => Err(GatewayError::NotFound),
+            _ => fail!(NOT_FOUND),
         }
     }
 

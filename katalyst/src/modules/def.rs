@@ -13,7 +13,7 @@ pub trait ModuleProvider: Send + Sync + Debug {
 }
 
 macro_rules! impl_module {
-    ($($name:ident, $trait:ident { $( $ret:ty: $method:ident => $($argname:ident : $argtype:ty),*);* });+) => {
+    ($($name:ident, $trait:ident { $( $ret:ty: $method:ident => ( $($argname:ident : $argtype:ty),* ) )* })+) => {
         #[derive(PartialEq, Debug)]
         pub enum ModuleType {
             $($name,)*
@@ -86,35 +86,33 @@ macro_rules! impl_module {
 pub type BalancerLease = Result<Arc<String>>;
 
 impl_module! {
-
     Authenticator, AuthenticatorModule {
-        AsyncResult<()>: authenticate => guard: RequestContext
-    };
-
-    Authorizer, AuthorizerModule {
-        AsyncResult<()>: authorize => guard: RequestContext
-    };
-
-    CacheHandler, CacheHandlerModule {
-        AsyncResult<()>: check_cache => guard: RequestContext;
-        AsyncResult<()>: update_cache => guard: RequestContext
-    };
-
-    CacheProvider, CacheProviderModule {
-        AsyncResult<Arc<CachedObject>>: get_key => key: &str;
-        AsyncResult<()>: set_key => key: &str, val: CachedObject
-    };
-
-    Plugin, PluginModule {
-        AsyncResult<()>: run => guard: RequestContext
-    };
-
-    RequestHandler, RequestHandlerModule {
-        AsyncResult<()>: dispatch => guard: RequestContext
-    };
-
-    LoadBalancer, LoadBalancerModule {
-        BalancerLease: lease =>
+        AsyncResult<()>: authenticate => (guard: RequestContext)
     }
 
+    Authorizer, AuthorizerModule {
+        AsyncResult<()>: authorize => (guard: RequestContext)
+    }
+
+    CacheHandler, CacheHandlerModule {
+        AsyncResult<()>: check_cache => (guard: RequestContext)
+        AsyncResult<()>: update_cache => (guard: RequestContext)
+    }
+
+    CacheProvider, CacheProviderModule {
+        AsyncResult<Arc<CachedObject>>: get_key => (key: &str)
+        AsyncResult<()>: set_key => (key: &str, val: CachedObject)
+    }
+
+    Plugin, PluginModule {
+        AsyncResult<()>: run => (guard: RequestContext)
+    }
+
+    RequestHandler, RequestHandlerModule {
+        AsyncResult<()>: dispatch => (guard: RequestContext)
+    }
+
+    LoadBalancer, LoadBalancerModule {
+        BalancerLease: lease => ()
+    }
 }

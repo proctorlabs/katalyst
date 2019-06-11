@@ -25,7 +25,7 @@ impl Default for HttpRequest {
 impl RequestContext {
     pub fn preload(&self) -> ModuleResult {
         let guard = self.clone();
-        let req = ensure_fut!(guard.take_http_request());
+        let req = ensure!(:guard.take_http_request());
         match req {
             HttpRequest::RawRequest(r) => {
                 let (data, body) = (r.0, r.1);
@@ -35,7 +35,7 @@ impl RequestContext {
                         guard.set_http_request(HttpRequest::LoadedRequest(res))?;
                         Ok(())
                     }
-                    Err(_) => Err(GatewayError::InternalServerError),
+                    Err(e) => fail!(INTERNAL_SERVER_ERROR, "Error occurred loading request", e),
                 }))
             }
             HttpRequest::RawResponse(r) => {
@@ -46,11 +46,11 @@ impl RequestContext {
                         guard.set_http_request(HttpRequest::LoadedResponse(res))?;
                         Ok(())
                     }
-                    Err(_) => Err(GatewayError::InternalServerError),
+                    Err(e) => fail!(INTERNAL_SERVER_ERROR, "Error occurred loading response", e),
                 }))
             }
             _ => {
-                ensure_fut!(guard.set_http_request(req));
+                ensure!(:guard.set_http_request(req));
                 Box::new(ok(()))
             }
         }

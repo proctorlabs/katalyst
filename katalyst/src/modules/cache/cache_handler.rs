@@ -17,8 +17,8 @@ impl ModuleProvider for DefaultCacheHandler {
 
 impl CacheHandlerModule for DefaultCacheHandler {
     fn check_cache(&self, guard: RequestContext) -> ModuleResult {
-        let katalyst = ensure_fut!(guard.katalyst());
-        let metadata = ensure_fut!(guard.metadata());
+        let katalyst = ensure!(:guard.katalyst());
+        let metadata = ensure!(:guard.metadata());
         if let Ok(instance) = katalyst.get_instance() {
             let cache = instance.service.cache.clone();
             Box::new(cache.get_key(metadata.url.as_str()).then(move |r| match r {
@@ -34,10 +34,10 @@ impl CacheHandlerModule for DefaultCacheHandler {
     }
 
     fn update_cache(&self, guard: RequestContext) -> ModuleResult {
-        if !ensure_fut!(guard.is_response()) {
+        if !ensure!(:guard.is_response()) {
             return Ok(()).fut();
         }
-        let instance = ensure_fut!(ensure_fut!(guard.katalyst()).get_instance());
+        let instance = ensure!(:ensure!(:guard.katalyst()).get_instance());
         let cache = instance.service.cache.clone();
         Box::new(guard.preload().and_then(move |_| {
             let req = guard.take_http_request()?;

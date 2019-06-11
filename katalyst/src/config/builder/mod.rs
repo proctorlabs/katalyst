@@ -9,7 +9,7 @@ pub use path::PathBuilder;
 pub use routes::RouteBuilder;
 pub use service::ServiceBuilder;
 
-use crate::{app::Katalyst, error::GatewayError, modules::*, prelude::*};
+use crate::{app::Katalyst, error::GatewayError, prelude::*};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, sync::Arc};
 

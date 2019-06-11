@@ -50,8 +50,8 @@ impl ModuleProvider for HostModule {
         engine: Arc<Katalyst>,
         config: &unstructured::Document,
     ) -> Result<Module> {
-        let c: HostConfig = config.clone().try_into().map_err(|_| {
-            GatewayError::ConfigNotParseable("Host module configuration failed".into())
+        let c: HostConfig = config.clone().try_into().map_err(|e| {
+            err!(ConfigurationFailure, "Failed to parse host proxy module configuration", e)
         })?;
         let providers = engine.get_compiler();
         let method = match c.method {

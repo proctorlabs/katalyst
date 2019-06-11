@@ -40,7 +40,10 @@ impl ExpressionMetadata {
                             result: ExpressionResultType::Text,
                         }))
                     }
-                    None => Err(GatewayError::ExpressionItemNotFound(module)),
+                    None => Err(err!(
+                        ConfigurationFailure,
+                        format!("Could not find expression module named {}", module)
+                    )),
                 }
             }
             ExpressionMetadata::Raw(text) | ExpressionMetadata::Text(text) => Ok(Arc::new(text)),
@@ -78,8 +81,9 @@ fn parse_tokens(
             Rule::object_call => result.push(parse_object(pair.into_inner())?),
             Rule::EOI => return Ok(result),
             _ => {
-                return Err(GatewayError::ExpressionLexicalError(
-                    "Unexpected element found!".into(),
+                return Err(err!(
+                    ConfigurationFailure,
+                    format!("Unexpected element when parsing expression {}", pair)
                 ))
             }
         }

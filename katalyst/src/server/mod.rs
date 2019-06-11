@@ -118,17 +118,16 @@ impl HttpsServer {
     fn load_certs(&self, filename: &str) -> Result<Vec<rustls::Certificate>> {
         let certfile = fs::File::open(filename)?;
         let mut reader = io::BufReader::new(certfile);
-        pemfile::certs(&mut reader)
-            .map_err(|_| GatewayError::Other("Failed to load certificate".into()))
+        pemfile::certs(&mut reader).map_err(|_| err!(Critical, "Failed to load certificate"))
     }
 
     fn load_private_key(&self, filename: &str) -> Result<rustls::PrivateKey> {
         let keyfile = fs::File::open(filename)?;
         let mut reader = io::BufReader::new(keyfile);
         let mut keys = pemfile::rsa_private_keys(&mut reader)
-            .map_err(|_| GatewayError::Other("Failed to load private key".into()))?;
+            .map_err(|_| err!(Critical, "Failed to load private key"))?;
         if keys.len() != 1 {
-            return Err(GatewayError::Other("Expected a single private key".into()));
+            return Err(err!(Critical, "Expected a single private key"));
         }
         Ok(keys.pop().unwrap())
     }

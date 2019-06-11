@@ -1,4 +1,4 @@
-use crate::{app::Katalyst, context::*, modules::*};
+use crate::{app::Katalyst, modules::*};
 use futures::future::*;
 use serde::{Deserialize, Serialize};
 
@@ -22,8 +22,12 @@ impl ModuleProvider for WhitelistBuilder {
         _: Arc<Katalyst>,
         config: &unstructured::Document,
     ) -> Result<Module> {
-        let c: WhitelistConfig = config.clone().try_into().map_err(|_| {
-            GatewayError::ConfigNotParseable("Host module configuration failed".into())
+        let c: WhitelistConfig = config.clone().try_into().map_err(|e| {
+            err!(
+                ConfigurationFailure,
+                "Failed to parse Whitelist authentication module configuration",
+                e
+            )
         })?;
         Ok(Whitelist { ips: c.ips }.into_module())
     }
@@ -36,11 +40,11 @@ pub struct Whitelist {
 
 impl AuthenticatorModule for Whitelist {
     fn authenticate(&self, guard: RequestContext) -> ModuleResult {
-        let metadata = ensure_fut!(guard.metadata());
+        let metadata = ensure!(:guard.metadata());
         if self.ips.contains(&metadata.remote_ip) {
             Box::new(ok(()))
         } else {
-            Box::new(err(GatewayError::Unauthorized))
+            fail!(:FORBIDDEN)
         }
     }
 }

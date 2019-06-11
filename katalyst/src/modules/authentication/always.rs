@@ -1,4 +1,4 @@
-use crate::{app::Katalyst, context::*, modules::*, prelude::*};
+use crate::{app::Katalyst, modules::*, prelude::*};
 
 #[derive(Default, Debug)]
 pub struct AlwaysAuthenticator;

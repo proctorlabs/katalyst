@@ -25,6 +25,7 @@ parking_lot = "0.8"
 # HTTP
 hyper = "0.12"
 rustls = "0.15"
+cookie = { version = "0.12", features = ["secure"] }
 hyper-rustls = "0.16"
 webpki-roots = "0.16"
 tokio = "0.1"
@@ -67,7 +68,7 @@ path = "src/lib.rs"
 
 [[bin]]
 name = "katalyst"
-path = "src/app/main.rs"
+path = "src/main.rs"
 required-features = ["cli"]
 
 [badges]

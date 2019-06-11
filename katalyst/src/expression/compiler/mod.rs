@@ -3,7 +3,7 @@ pub(crate) mod nodes;
 
 use crate::expression::*;
 use compiled::*;
-use std::{collections::HashMap, sync::Arc};
+use std::collections::HashMap;
 
 type BuilderDirectory = HashMap<&'static str, Box<ExpressionBinding>>;
 
@@ -43,12 +43,9 @@ impl Compiler {
         }
     }
 
-    pub fn compile_template(&self, raw_str: Option<&str>) -> Result<Expression> {
-        if let Some(raw) = raw_str {
-            Ok(nodes::parse_template(raw, &self.builders)?)
-        } else {
-            Err(GatewayError::ElementExpected("template"))
-        }
+    pub fn compile_template(&self, template: Option<&str>) -> Result<Expression> {
+        let tmpl = req!(template);
+        Ok(nodes::parse_template(tmpl, &self.builders)?)
     }
 }
 

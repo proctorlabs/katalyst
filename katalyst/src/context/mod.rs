@@ -125,7 +125,7 @@ impl RequestContext {
     }
 
     pub fn get_extension<T: Any + Send + Sync>(&self) -> Result<Arc<T>> {
-        self.data.lock().get().ok_or_else(|| GatewayError::InternalServerError)
+        self.data.lock().get().ok_or_else(|| fail!(_ INTERNAL_SERVER_ERROR, "Attempted to retrieve a module that does not exist!"))
     }
 
     pub fn set_extension<T: Any + Send + Sync>(&self, data: T) -> Result<()> {

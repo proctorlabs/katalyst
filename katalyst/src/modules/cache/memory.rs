@@ -27,10 +27,10 @@ impl CacheProviderModule for MemoryCache {
         key: &str,
     ) -> Box<Future<Item = Arc<CachedObject>, Error = GatewayError> + Send> {
         let cache = &self.cache.lock();
-        Box::new(match cache.get(key) {
-            Some(r) => ok(r.clone()),
-            None => err(GatewayError::StateUnavailable),
-        })
+        match cache.get(key) {
+            Some(r) => Box::new(ok(r.clone())),
+            None => fail!(:NOT_FOUND),
+        }
     }
 
     fn set_key(

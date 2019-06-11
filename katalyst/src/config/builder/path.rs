@@ -36,8 +36,12 @@ impl Builder<String> for PathBuilder {
                 result.push_str("^");
                 let cmp = compiler.compile_template(Some(template))?;
                 let ctx = RequestContext::default();
-                let rnd = cmp.render(&ctx).map_err(|_| {
-                    GatewayError::InvalidExpressionArgs("Path template could not be rendered")
+                let rnd = cmp.render(&ctx).map_err(|e| {
+                    err!(
+                        ConfigurationFailure,
+                        format!("Unable to parse path template {}", template),
+                        e
+                    )
                 })?;
                 result.push_str(&rnd);
                 result

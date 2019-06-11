@@ -1,4 +1,4 @@
-use crate::{app::Katalyst, context::*, expression::*, modules::*, *};
+use crate::{app::Katalyst, expression::*, modules::*};
 use futures::future::*;
 use http::header::HeaderValue;
 use hyper::{Body, Response};
@@ -27,8 +27,8 @@ impl ModuleProvider for FileServerModule {
         engine: Arc<Katalyst>,
         config: &unstructured::Document,
     ) -> Result<Module> {
-        let c: FileServerConfig = config.clone().try_into().map_err(|_| {
-            GatewayError::ConfigNotParseable("Host module configuration failed".into())
+        let c: FileServerConfig = config.clone().try_into().map_err(|e| {
+            err!(ConfigurationFailure, "Failed to parse File Server module configuration", e)
         })?;
         Ok(FileServerDispatcher {
             root_path: c.root_path,
@@ -46,7 +46,7 @@ pub struct FileServerDispatcher {
 
 impl RequestHandlerModule for FileServerDispatcher {
     fn dispatch(&self, guard: RequestContext) -> ModuleResult {
-        let path = ensure_fut!(self.selector.render(&guard));
+        let path = ensure!(:self.selector.render(&guard));
         let mut full_path = PathBuf::from(&self.root_path);
         full_path.push(&path);
         send_file(guard.clone(), full_path)
@@ -73,8 +73,8 @@ fn send_file(guard: RequestContext, file: PathBuf) -> ModuleResult {
             let hdr_val = HeaderValue::from_str(mime).unwrap();
             hdrs.append("Content-Type", hdr_val);
             guard.set_response(r).unwrap_or_default();
-            ok(())
+            Ok(())
         }
-        Err(_) => err(GatewayError::NotFound),
+        Err(_) => fail!(NOT_FOUND),
     }))
 }

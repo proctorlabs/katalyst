@@ -17,15 +17,16 @@ fn match_int(guard: RequestContext) -> Result<()> {
         let path = metadata.url.path();
         if method_match && route.pattern.is_match(path) {
             let mut cap_map = HashMap::new();
-            let caps =
-                route.pattern.captures(path).ok_or_else(|| GatewayError::InternalServerError)?;
+            let caps = route.pattern.captures(path).ok_or_else(
+                || fail!(_ INTERNAL_SERVER_ERROR, format!("Captures not found for path {}", path)),
+            )?;
             for name_option in route.pattern.capture_names() {
                 if name_option.is_some() {
-                    let name = name_option.ok_or_else(|| GatewayError::InternalServerError)?;
+                    let name = name_option.ok_or_else(|| fail!(_ INTERNAL_SERVER_ERROR))?;
                     cap_map.insert(
                         name.to_string(),
                         caps.name(name)
-                            .ok_or_else(|| GatewayError::InternalServerError)?
+                            .ok_or_else(|| fail!(_ INTERNAL_SERVER_ERROR, format!("Route {} has no placeholder for {}", path, name)))?
                             .as_str()
                             .to_string(),
                     );
@@ -36,5 +37,5 @@ fn match_int(guard: RequestContext) -> Result<()> {
             return Ok(());
         }
     }
-    Err(NotFound)
+    fail!(NOT_FOUND)
 }

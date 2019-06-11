@@ -1,3 +1,5 @@
+#![recursion_limit = "128"]
+
 extern crate quote;
 #[macro_use]
 extern crate syn;

@@ -2,7 +2,6 @@ use super::*;
 use crate::{
     app::Katalyst,
     instance::{Interface, Service},
-    modules::*,
     prelude::*,
 };
 use serde::{Deserialize, Serialize};
@@ -21,18 +20,25 @@ impl InterfaceBuilder {
     fn make_interface(&self) -> Result<Interface> {
         Ok(if self.ssl {
             Interface::Https {
-                addr: self.address.parse().map_err(|_| {
-                    GatewayError::InvalidAddress("Service listener address is invalid")
+                addr: self.address.parse().map_err(|e| {
+                    err!(
+                        ConfigurationFailure,
+                        format!("Failed to parse the listener address {}", self.address),
+                        e
+                    )
                 })?,
                 cert: self.ssl_cert.clone(),
                 key: self.ssl_key.clone(),
             }
         } else {
             Interface::Http {
-                addr: self
-                    .address
-                    .parse()
-                    .map_err(|_| InvalidAddress("Service listener address is invalid"))?,
+                addr: self.address.parse().map_err(|e| {
+                    err!(
+                        ConfigurationFailure,
+                        format!("Failed to parse the listener address {}", self.address),
+                        e
+                    )
+                })?,
             }
         })
     }

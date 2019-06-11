@@ -2,7 +2,7 @@ use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Katalyst", rename_all = "kebab_case")]
-pub struct Opt {
+pub struct Args {
     /// Config file
     #[structopt(short, long, help = "Config file", default_value = "katalyst.yaml")]
     pub config: String,
@@ -23,8 +23,8 @@ pub enum Command {
     Run,
 }
 
-impl Opt {
+impl Args {
     pub fn new() -> Self {
-        Opt::from_args()
+        Args::from_args()
     }
 }

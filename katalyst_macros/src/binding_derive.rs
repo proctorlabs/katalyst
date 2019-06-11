@@ -62,7 +62,7 @@ pub fn impl_derive_expression_binding(ast: &syn::DeriveInput) -> TokenStream {
     let name = &metadata.object_name;
 
     let gen = quote! {
-        impl From<#ident> for Box<ExpressionBinding> {
+        impl From<#ident> for Box<dyn ExpressionBinding> {
             fn from(item: #ident) -> Self {
                 Box::new(item)
             }
@@ -76,7 +76,7 @@ pub fn impl_derive_expression_binding(ast: &syn::DeriveInput) -> TokenStream {
             fn make_fn(&self, name: &str, args: &[ExpressionArg]) -> Result<ExpressionRenderMethod> {
                 match name {
                     #(#match_options)*
-                    _ => Err(GatewayError::ExpressionItemNotFound(name.to_string()))
+                    _ => Err(err!(ConfigurationFailure, format!("Expression {} has no member {}", #name, name))),
                 }
             }
         }

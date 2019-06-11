@@ -1,4 +1,4 @@
-use crate::{app::Katalyst, context::*, modules::*};
+use crate::{app::Katalyst, modules::*};
 
 #[derive(Debug)]
 pub struct ContentPlugin;

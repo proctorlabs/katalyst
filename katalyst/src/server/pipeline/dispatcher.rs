@@ -3,7 +3,7 @@ use futures::future::*;
 
 pub fn run_plugins(guard: RequestContext) -> ModuleResult {
     let mut result: ModuleResult = Ok(()).fut();
-    let route = ensure_fut!(guard.get_route());
+    let route = ensure!(:guard.get_route());
     if let Some(plugins) = &route.plugins {
         for plugin in plugins.iter() {
             let p = plugin.clone();
@@ -15,6 +15,6 @@ pub fn run_plugins(guard: RequestContext) -> ModuleResult {
 }
 
 pub fn run_handler(guard: RequestContext) -> ModuleResult {
-    let route = ensure_fut!(guard.get_route());
+    let route = ensure!(:guard.get_route());
     route.handler.dispatch(guard.clone())
 }

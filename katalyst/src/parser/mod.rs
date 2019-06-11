@@ -44,10 +44,12 @@ pub struct Parser;
 impl Parser {
     pub fn from_str<T: serde::de::DeserializeOwned>(ser: &str, f: Format) -> Result<T> {
         match f {
-            Format::Json | Format::Default => {
-                serde_json::from_str(ser).map_err(|_| GatewayError::FeatureUnavailable)
-            }
-            Format::Yaml => serde_yaml::from_str(ser).map_err(|_| GatewayError::FeatureUnavailable),
+            Format::Json | Format::Default => serde_json::from_str(ser).map_err(|e| {
+                err!(ConfigurationFailure, "Failed to parse JSON configuration file", e)
+            }),
+            Format::Yaml => serde_yaml::from_str(ser).map_err(|e| {
+                err!(ConfigurationFailure, "Failed to parse YAML configuration file", e)
+            }),
         }
     }
 }

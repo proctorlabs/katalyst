@@ -91,7 +91,7 @@ impl CompiledClientRequest {
             .get_instance()?
             .hosts
             .get(&self.host)
-            .ok_or_else(|| GatewayError::NotFound)?
+            .ok_or_else(|| fail!(_ NOT_FOUND))?
             .servers
             .lease()?;
 
@@ -164,24 +164,20 @@ impl From<Response<Body>> for HttpData {
 impl HttpData {
     pub fn send(self, client: &HttpsClient) -> AsyncResult<HttpData> {
         if let HttpAction::Request(uri, method) = self.request_type {
-            info!("{}", uri);
             let mut request = RequestBuilder::new();
             request.method(method);
-            request.uri(uri);
+            request.uri(&uri);
             *request.headers_mut().unwrap() = self.headers;
             let req = request.body(self.body.into_body()).unwrap();
             let res = client.request(req);
             Box::new(res.then(move |response| match response {
                 Ok(r) => ok::<HttpData, GatewayError>(HttpData::from(r)),
                 Err(e) => {
-                    warn!("Error sending request: {:?}", e);
-                    err(GatewayError::GatewayTimeout)
+                    err(fail!(_ GATEWAY_TIMEOUT, format!("Error sending request to {}", uri), e))
                 }
             }))
         } else {
-            Box::new(err::<HttpData, GatewayError>(GatewayError::Other(
-                "Response type cannot be sent".into(),
-            )))
+            Box::new(err::<HttpData, GatewayError>(err!(Other, "Response type cannot be sent")))
         }
     }
 

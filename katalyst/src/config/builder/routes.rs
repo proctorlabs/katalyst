@@ -1,5 +1,5 @@
 use super::*;
-use crate::{app::Katalyst, instance::Route, modules::*};
+use crate::{app::Katalyst, instance::Route};
 use http::Method;
 use regex::Regex;
 use serde::{Deserialize, Serialize};

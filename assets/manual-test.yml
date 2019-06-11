@@ -77,7 +77,7 @@ routes:
     methods:
       - get
     authenticators:
-      - type: always
+      - type: never
         opts:
           - "127.0.0.2"
           - "127.0.0.1"

@@ -20,16 +20,16 @@ impl Match {
     pub fn route(&self) -> Result<Arc<Route>> {
         match self {
             Match::Matched { route, .. } => Ok(route.clone()),
-            _ => Err(GatewayError::NotFound),
+            _ => fail!(NOT_FOUND),
         }
     }
 
     pub fn get_value(&self, key: &str) -> Result<String> {
         match self {
             Match::Matched { captures, .. } => {
-                Ok(captures.get(key).ok_or_else(|| GatewayError::NotFound)?.to_string())
+                Ok(captures.get(key).ok_or_else(|| fail!(_ NOT_FOUND))?.to_string())
             }
-            _ => Err(GatewayError::NotFound),
+            _ => fail!(NOT_FOUND),
         }
     }
 }

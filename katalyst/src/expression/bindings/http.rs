@@ -1,4 +1,4 @@
-use crate::{expression::*, prelude::*};
+use crate::prelude::*;
 
 #[derive(ExpressionBinding)]
 #[expression(name = "http", bind = method)]
@@ -31,13 +31,17 @@ impl Http {
         let metadata = guard.metadata()?;
         let name = args[0].render(guard)?;
         let res = metadata.url.query_pairs().find(|q| q.0 == name);
-        res.map_or_else(|| Err(GatewayError::InternalServerError), |v| Ok(v.1.to_string().into()))
+        res.map_or_else(
+            || fail!(BAD_REQUEST, format!("Expected query parameter {}", name)),
+            |v| Ok(v.1.to_string().into()),
+        )
     }
 
     fn header(guard: &RequestContext, args: &[ExpressionArg]) -> ExpressionResult {
+        let arg = &args[0].render(guard)?;
         let hdr = guard
-            .header(&args[0].render(guard)?)
-            .ok_or_else(|| GatewayError::InternalServerError)?;
+            .header(arg)
+            .ok_or_else(|| fail!(_ BAD_REQUEST, format!("Expected header parameter {}", arg)))?;
         Ok(hdr.into())
     }
 

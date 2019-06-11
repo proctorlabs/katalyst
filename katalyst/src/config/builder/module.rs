@@ -1,5 +1,5 @@
 use super::*;
-use crate::{app::Katalyst, modules::*};
+use crate::app::Katalyst;
 use serde::{Deserialize, Serialize};
 use std::{marker::PhantomData, string::String, sync::Arc};
 

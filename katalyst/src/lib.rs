@@ -29,6 +29,9 @@ extern crate lazy_static;
 #[macro_use]
 extern crate derive_more;
 
+#[macro_use]
+pub mod prelude;
+
 mod app;
 mod instance;
 mod server;
@@ -41,8 +44,5 @@ pub mod context;
 pub mod error;
 pub mod expression;
 pub mod modules;
-#[macro_use]
-pub mod prelude;
-
 pub use app::Katalyst;
 pub use katalyst_macros::ExpressionBinding;
