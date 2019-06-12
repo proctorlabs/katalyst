@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use futures::future::*;
 
-pub fn authenticate(guard: RequestContext) -> AsyncResult<()> {
+pub(crate) fn authenticate(guard: RequestContext) -> AsyncResult<()> {
     let route = ensure!(:guard.get_route());
     match &route.authenticators {
         Some(state_authenticators) => {
@@ -20,7 +20,7 @@ pub fn authenticate(guard: RequestContext) -> AsyncResult<()> {
     }
 }
 
-pub fn authorize(guard: RequestContext) -> AsyncResult<()> {
+pub(crate) fn authorize(guard: RequestContext) -> AsyncResult<()> {
     let route = ensure!(:guard.get_route());
     let mut result: AsyncResult<()> = Ok(()).fut();
     if let Some(authorizers) = &route.authorizers {

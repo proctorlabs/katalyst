@@ -5,6 +5,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, string::String, sync::Arc};
 
+/// Builder for instance routes
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct RouteBuilder {
     path: PathBuilder,

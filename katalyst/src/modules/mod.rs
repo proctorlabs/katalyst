@@ -1,3 +1,7 @@
+/*!
+Module traits and built in modules
+*/
+
 mod authentication;
 mod authorization;
 mod def;
@@ -13,6 +17,5 @@ pub(crate) mod balancer;
 pub(crate) mod cache;
 pub use cache::CachedObject;
 pub use def::*;
-pub use plugins::*;
 pub use registry::ModuleRegistry;
 pub use result::*;

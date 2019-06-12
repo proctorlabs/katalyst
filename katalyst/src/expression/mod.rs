@@ -1,6 +1,6 @@
 /*!
 Katalyst configuration is based around expressions. Expressions are a syntax for templating and
-customization from within the configuration file.
+customization from within the configuration.
 */
 
 mod bindings;
@@ -14,7 +14,9 @@ use std::sync::Arc;
 pub use traits::*;
 use unstructured::Document;
 
+/// Arguments passed to an expression
 pub type ExpressionArgs = Vec<Arc<CompiledExpression>>;
+/// The base expression
 pub type Expression = Vec<Arc<CompiledExpression>>;
 
 impl CompiledExpression for Expression {

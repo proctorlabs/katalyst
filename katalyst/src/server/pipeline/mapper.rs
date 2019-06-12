@@ -2,9 +2,9 @@ use super::*;
 use futures::future::*;
 use hyper::{Body, Error, Response};
 
-pub type HyperResult = Box<Future<Item = Response<Body>, Error = Error> + Send>;
+pub(crate) type HyperResult = Box<Future<Item = Response<Body>, Error = Error> + Send>;
 
-pub fn map_result_to_hyper(res: PipelineResultSync) -> HyperResult {
+pub(crate) fn map_result_to_hyper(res: PipelineResultSync) -> HyperResult {
     Box::new(match res {
         Ok(ctx) => ok::<Response<Body>, Error>(ctx.take_response().unwrap()),
         Err(e) => ok::<Response<Body>, Error>({

@@ -12,8 +12,8 @@ use std::{collections::HashMap, net::SocketAddr, sync::Arc};
 
 pub(crate) use mapper::HyperResult;
 
-pub type PipelineResultSync = std::result::Result<RequestContext, ModuleError>;
-pub type PipelineResult = Box<Future<Item = RequestContext, Error = ModuleError> + Send>;
+pub(crate) type PipelineResultSync = std::result::Result<RequestContext, ModuleError>;
+pub(crate) type PipelineResult = Box<Future<Item = RequestContext, Error = ModuleError> + Send>;
 
 macro_rules! pipe {
     ($ty:path) => {
@@ -48,7 +48,7 @@ pub(crate) fn run(
     )
 }
 
-pub fn map_early_finish(res: PipelineResultSync) -> PipelineResult {
+pub(crate) fn map_early_finish(res: PipelineResultSync) -> PipelineResult {
     match res {
         Err(ModuleError { error: GatewayError::Done, context }) => {
             Box::new(ok::<RequestContext, ModuleError>(context))

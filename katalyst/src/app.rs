@@ -1,4 +1,10 @@
-use crate::{config::parsers, instance::Instance, modules::ModuleRegistry, prelude::*, server::*};
+use crate::{
+    config::{builder::Builder, parsers},
+    instance::Instance,
+    modules::ModuleRegistry,
+    prelude::*,
+    server::*,
+};
 use hyper::{
     client::{connect::dns::TokioThreadpoolGaiResolver, HttpConnector},
     rt::Future,
@@ -115,12 +121,15 @@ impl Katalyst {
         self.modules.get(name)
     }
 
+    /// Spawn a future on the runtime backing Katalyst
     pub fn spawn<F: Future<Item = (), Error = ()> + Send + 'static>(&self, fut: F) -> Result<()> {
         let mut rt = self.rt.write();
         rt.spawn(fut);
         Ok(())
     }
 
+    /// Register OS signals and respond to them. This method will not return unless
+    /// a SIGINT, SIGTERM, or SIGQUIT is received.
     pub fn wait(&self) -> Result<()> {
         let signals = Signals::new(&[SIGINT, SIGTERM, SIGQUIT])?;
         for sig in signals.forever() {
@@ -134,7 +143,8 @@ impl Katalyst {
     }
 
     /// This is a convenience method to start an instance of Katalyst from a configuration file.
-    /// This will load the configuration from the specified file and run the gateway.
+    /// This will load the configuration from the specified file and run the gateway until an OS
+    /// signal is received.
     pub fn start(config_file: &str) -> Result<Arc<Katalyst>> {
         let mut app = Arc::new(Katalyst::default());
         app.load(config_file)?;

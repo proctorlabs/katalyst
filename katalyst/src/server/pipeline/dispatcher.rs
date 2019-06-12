@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use futures::future::*;
 
-pub fn run_plugins(guard: RequestContext) -> ModuleResult {
+pub(crate) fn run_plugins(guard: RequestContext) -> ModuleResult {
     let mut result: ModuleResult = Ok(()).fut();
     let route = ensure!(:guard.get_route());
     if let Some(plugins) = &route.plugins {
@@ -14,7 +14,7 @@ pub fn run_plugins(guard: RequestContext) -> ModuleResult {
     result
 }
 
-pub fn run_handler(guard: RequestContext) -> ModuleResult {
+pub(crate) fn run_handler(guard: RequestContext) -> ModuleResult {
     let route = ensure!(:guard.get_route());
     route.handler.dispatch(guard.clone())
 }

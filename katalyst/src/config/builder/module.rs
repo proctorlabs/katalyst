@@ -3,15 +3,16 @@ use crate::app::Katalyst;
 use serde::{Deserialize, Serialize};
 use std::{marker::PhantomData, string::String, sync::Arc};
 
+/// Builder for any implementation of ModuleProvider
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct ModuleBuilder<T: ModuleData> {
     #[serde(skip)]
     __module_type: PhantomData<T>,
     #[serde(rename = "type")]
-    pub module: String,
+    module: String,
     #[serde(flatten)]
-    pub config: unstructured::Document,
+    config: unstructured::Document,
 }
 
 impl<T: ModuleData> Default for ModuleBuilder<T> {

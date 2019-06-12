@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub fn check_cache(guard: RequestContext) -> ModuleResult {
+pub(crate) fn check_cache(guard: RequestContext) -> ModuleResult {
     let route = ensure!(:guard.get_route());
     if let Some(cache) = &route.cache {
         Box::new(cache.check_cache(guard.clone()))
@@ -9,7 +9,7 @@ pub fn check_cache(guard: RequestContext) -> ModuleResult {
     }
 }
 
-pub fn update_cache(guard: RequestContext) -> ModuleResult {
+pub(crate) fn update_cache(guard: RequestContext) -> ModuleResult {
     let route = ensure!(:guard.get_route());
     if let Some(cache) = &route.cache {
         Box::new(cache.update_cache(guard.clone()))

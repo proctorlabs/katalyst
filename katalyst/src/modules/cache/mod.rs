@@ -13,13 +13,17 @@ pub fn default_cache() -> Arc<CacheProviderModule + Send> {
     Arc::new(memory::MemoryCache::default())
 }
 
+/// Container for a cached response object
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CachedObject {
+    /// Raw content of a cached response
     pub content: Vec<u8>,
+    /// Headers of a cached response
     pub headers: HashMap<String, String>,
 }
 
 impl CachedObject {
+    /// Generate a cached object from a response object
     pub fn from_response(req: &HttpRequest) -> Result<Self> {
         match req {
             HttpRequest::LoadedResponse(r) => Ok(CachedObject {
@@ -44,6 +48,7 @@ impl CachedObject {
         }
     }
 
+    /// Generate a response from a cached object
     pub fn into_response(self) -> HttpRequest {
         let mut builder = Response::builder();
         for (k, v) in self.headers.into_iter() {

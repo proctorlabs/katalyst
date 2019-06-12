@@ -6,16 +6,24 @@ lazy_static! {
     static ref DEF_STRING: String = String::default();
 }
 
+/// The result type of rendering an expression
 pub type RenderResult = Result<String>;
+/// The result type of calling an expression
 pub type ExpressionResult = Result<Document>;
+/// A single expression argument
 pub type ExpressionArg = Arc<CompiledExpression>;
+/// The method on an expression used to render the result
 pub type ExpressionRenderMethod =
     Arc<Fn(&RequestContext, &[ExpressionArg]) -> ExpressionResult + Send + Sync>;
 
+/// Metadata indicating the type of result from this expression
 #[derive(Clone)]
 pub enum ExpressionResultType {
+    /// String result
     Text,
+    /// Numeric result
     Number,
+    /// Boolean result
     Boolean,
 }
 
@@ -31,10 +39,8 @@ pub trait ExpressionBinding: Send + Sync {
 pub trait CompiledExpression: Send + Sync + Debug {
     /// Render processes the compiled expression and returns a string rendering of the contents regardless of underlying types
     fn render(&self, guard: &RequestContext) -> RenderResult;
-
     /// Get the direct result of evaluating the expression
     fn result(&self, guard: &RequestContext) -> ExpressionResult;
-
     /// Return a document shell indicating the type
     fn result_type(&self) -> Document;
 }

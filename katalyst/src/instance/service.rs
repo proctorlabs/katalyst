@@ -1,10 +1,23 @@
 use crate::prelude::*;
 use std::{net::SocketAddr, sync::Arc};
 
+/// This instance's interface description
 #[derive(Debug)]
 pub enum Interface {
-    Http { addr: SocketAddr },
-    Https { addr: SocketAddr, cert: String, key: String },
+    /// An HTTP interface
+    Http {
+        /// The binding address for this interface
+        addr: SocketAddr,
+    },
+    /// An HTTPS interface
+    Https {
+        /// The binding address for this interface
+        addr: SocketAddr,
+        /// The certifacte path
+        cert: String,
+        /// The certificate key path
+        key: String,
+    },
 }
 
 impl Default for Interface {
@@ -13,9 +26,12 @@ impl Default for Interface {
     }
 }
 
+/// The API Gateway service metadata
 #[derive(Debug)]
 pub struct Service {
+    /// Array of interfaces for this service
     pub interfaces: Vec<Interface>,
+    /// The cache provider for this service
     pub cache: Arc<dyn CacheProviderModule + Send>,
 }
 

@@ -1,7 +1,7 @@
 use super::*;
 use crate::prelude::*;
 
-pub fn matcher(guard: RequestContext) -> AsyncResult<()> {
+pub(crate) fn matcher(guard: RequestContext) -> AsyncResult<()> {
     match_int(guard).fut()
 }
 

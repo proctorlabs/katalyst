@@ -11,6 +11,7 @@ use std::error::Error;
 pub use result::*;
 
 type Source = Option<Box<SourceError + 'static>>;
+#[doc(hidden)]
 pub trait SourceError: Error + std::fmt::Display + Send {}
 impl<T: Error + Send + std::fmt::Display> SourceError for T {}
 
@@ -22,8 +23,11 @@ fn add_source(source: &Source) -> String {
     }
 }
 
+/// All Katalyst library methods will return a variant of GatewayError
 #[derive(Debug, Display)]
 pub enum GatewayError {
+    /// This is the primary type that is returned when there is some error that occurs
+    /// while processing a request.
     #[display(
         fmt = "[{} -> {}:{}] <{}> {}{}",
         module_path,
@@ -34,23 +38,48 @@ pub enum GatewayError {
         "add_source(source)"
     )]
     RequestFailed {
+        #[doc(hidden)]
         status: StatusCode,
+        #[doc(hidden)]
         message: String,
+        #[doc(hidden)]
         source: Source,
+        #[doc(hidden)]
         module_path: &'static str,
+        #[doc(hidden)]
         line: u32,
+        #[doc(hidden)]
         col: u32,
     },
+    /// Error that occurs when configuration could not be parsed or built
     #[display(fmt = "[{} -> {}:{}] {}{}", module_path, line, col, message, "add_source(source)")]
     ConfigurationFailure {
+        #[doc(hidden)]
         message: String,
+        #[doc(hidden)]
         source: Source,
+        #[doc(hidden)]
         module_path: &'static str,
+        #[doc(hidden)]
         line: u32,
+        #[doc(hidden)]
         col: u32,
     },
+    /// Catastrohpic/fatal error
     #[display(fmt = "[{} -> {}:{}] {}{}", module_path, line, col, message, "add_source(source)")]
-    Critical { message: String, source: Source, module_path: &'static str, line: u32, col: u32 },
+    Critical {
+        #[doc(hidden)]
+        message: String,
+        #[doc(hidden)]
+        source: Source,
+        #[doc(hidden)]
+        module_path: &'static str,
+        #[doc(hidden)]
+        line: u32,
+        #[doc(hidden)]
+        col: u32,
+    },
+    /// A dependency that was expected is not available
     #[display(
         fmt = "[{} -> {}:{}] Component {}: {}{}",
         module_path,
@@ -61,17 +90,48 @@ pub enum GatewayError {
         "add_source(source)"
     )]
     RequiredComponent {
+        #[doc(hidden)]
         name: String,
+        #[doc(hidden)]
         message: String,
+        #[doc(hidden)]
         source: Source,
+        #[doc(hidden)]
         module_path: &'static str,
+        #[doc(hidden)]
         line: u32,
+        #[doc(hidden)]
         col: u32,
     },
+    /// An IO Error, check the source error for more detail
     #[display(fmt = "[{} -> {}:{}] {}{}", module_path, line, col, message, "add_source(source)")]
-    IoError { message: String, source: Source, module_path: &'static str, line: u32, col: u32 },
+    IoError {
+        #[doc(hidden)]
+        message: String,
+        #[doc(hidden)]
+        source: Source,
+        #[doc(hidden)]
+        module_path: &'static str,
+        #[doc(hidden)]
+        line: u32,
+        #[doc(hidden)]
+        col: u32,
+    },
+    /// Other uncategorized/general error
     #[display(fmt = "[{} -> {}:{}] {}{}", module_path, line, col, message, "add_source(source)")]
-    Other { message: String, source: Source, module_path: &'static str, line: u32, col: u32 },
+    Other {
+        #[doc(hidden)]
+        message: String,
+        #[doc(hidden)]
+        source: Source,
+        #[doc(hidden)]
+        module_path: &'static str,
+        #[doc(hidden)]
+        line: u32,
+        #[doc(hidden)]
+        col: u32,
+    },
+    /// Used in some circumstance to return from the request pipeline early
     #[display(fmt = "Request finished early")]
     Done,
 }
@@ -79,7 +139,7 @@ pub enum GatewayError {
 impl Error for GatewayError {}
 
 impl GatewayError {
-    pub fn status_code(&self) -> StatusCode {
+    pub(crate) fn status_code(&self) -> StatusCode {
         match *self {
             GatewayError::RequestFailed { status, .. } => status,
             GatewayError::Done => StatusCode::OK,

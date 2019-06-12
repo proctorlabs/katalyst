@@ -1,3 +1,7 @@
+/*!
+This module contains the request context information used by modules and the request
+processing pipeline.
+*/
 mod auth;
 mod data;
 mod matched;
@@ -18,6 +22,7 @@ pub use auth::Authentication;
 pub use matched::Match;
 pub use requests::*;
 
+/// The base Katalyst request context supplied to all modules and expressions
 #[derive(Debug, Default, Clone)]
 pub struct RequestContext {
     context: Arc<Context>,
@@ -31,6 +36,7 @@ impl std::ops::Deref for RequestContext {
     }
 }
 
+/// The main request context
 #[derive(Debug)]
 pub struct Context {
     request: LockedResource<HttpRequest>,
@@ -41,11 +47,16 @@ pub struct Context {
     katalyst: Arc<Katalyst>,
 }
 
+/// Metadata for this request context
 #[derive(Debug)]
 pub struct Metadata {
+    /// Requeset processing start time
     pub started: Instant,
+    /// Remote IP address of the client
     pub remote_ip: String,
+    /// The parsed URL for this request
     pub url: url::Url,
+    /// Holds the current load balancer lease for this request
     pub balancer_lease: Mutex<Option<Arc<String>>>,
 }
 
@@ -68,6 +79,7 @@ impl Default for Context {
 }
 
 impl RequestContext {
+    /// Create a new RequestContext with the supplied arguments
     pub fn new(request: Request<Body>, katalyst: Arc<Katalyst>, remote_addr: SocketAddr) -> Self {
         let uri = request.uri();
         let path = format!(
@@ -93,41 +105,50 @@ impl RequestContext {
         }
     }
 
+    /// Get the base katalyst instance associated with this request
     pub fn katalyst(&self) -> Result<Arc<Katalyst>> {
         Ok(self.katalyst.clone())
     }
 
+    /// This request's metadata
     pub fn metadata(&self) -> Result<Arc<Metadata>> {
         Ok(self.metadata.clone())
     }
 
+    /// Get authentication state of this request
     pub fn get_authentication(&self) -> Result<Resource<Authentication>> {
         Ok(self.authentication.get())
     }
 
+    /// Change the authentication state for this request
     pub fn set_authentication(&self, info: Authentication) -> Result<()> {
         self.authentication.set(info);
         Ok(())
     }
 
+    /// Get the match for this request
     pub fn get_match(&self) -> Result<Resource<Match>> {
         Ok(self.matched.get())
     }
 
+    /// Get the matched route for this request
     pub fn get_route(&self) -> Result<Arc<Route>> {
         let resource = self.get_match()?;
         Ok(resource.route()?.clone())
     }
 
+    /// Set the match for this request
     pub fn set_match(&self, matched: Match) -> Result<()> {
         self.matched.set(matched);
         Ok(())
     }
 
+    /// Get custom extension data of type T
     pub fn get_extension<T: Any + Send + Sync>(&self) -> Result<Arc<T>> {
         self.data.lock().get().ok_or_else(|| fail!(_ INTERNAL_SERVER_ERROR, "Attempted to retrieve a module that does not exist!"))
     }
 
+    /// Set custom extension data of type T
     pub fn set_extension<T: Any + Send + Sync>(&self, data: T) -> Result<()> {
         self.data.lock().set(data);
         Ok(())

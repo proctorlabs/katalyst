@@ -1,16 +1,19 @@
 use super::*;
 
+/// The ModuleRegistry holds all of the modules that are registered with this
+/// instance of Katalyst.
 #[derive(Debug)]
 pub struct ModuleRegistry {
     modules: HashMap<String, Arc<dyn ModuleProvider>>,
 }
 
 impl ModuleRegistry {
+    /// Register a new module to this instance
     pub fn register(&mut self, module: Arc<dyn ModuleProvider>) {
         self.modules.insert(module.name().to_string(), module);
     }
 
-    pub fn get(&self, name: &str) -> Result<Arc<dyn ModuleProvider>> {
+    pub(crate) fn get(&self, name: &str) -> Result<Arc<dyn ModuleProvider>> {
         Ok(self
             .modules
             .get(name)

@@ -3,18 +3,26 @@ use crate::{app::Katalyst, prelude::*};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
+/// A PathBuilder for building path strings from configuration
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum PathBuilder {
+    /// A regex path
     Regex {
+        /// The regex match string for this path
         pattern: String,
     },
+    /// An expression templated path
     Template {
+        /// The expression based template for this path
         template: String,
     },
+    /// Exact match only path
     Exact {
+        /// The exact path that should match
         path: String,
+        /// Boolean indicating if the path should be case sensitive
         #[serde(default)]
         sensitive: bool,
     },

@@ -1,3 +1,8 @@
+/*!
+This module holds all the builders that can be used for building a new Katalyst instance
+configuration.
+*/
+
 mod module;
 mod path;
 mod routes;
@@ -7,16 +12,20 @@ pub use crate::instance::*;
 pub use module::ModuleBuilder;
 pub use path::PathBuilder;
 pub use routes::RouteBuilder;
+pub use service::InterfaceBuilder;
 pub use service::ServiceBuilder;
 
 use crate::{app::Katalyst, error::GatewayError, prelude::*};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, sync::Arc};
 
+/// All builders must implement this trait
 pub trait Builder<T> {
+    /// Build an instance configuration using the supplied base Katalyst instance
     fn build(&self, engine: Arc<Katalyst>) -> Result<T>;
 }
 
+/// The base builder for building a new Katalyst Instance
 #[derive(Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct KatalystBuilder {
@@ -25,8 +34,8 @@ pub struct KatalystBuilder {
     service: ServiceBuilder,
 }
 
-impl KatalystBuilder {
-    pub fn build(self, engine: Arc<Katalyst>) -> Result<Instance> {
+impl Builder<Instance> for KatalystBuilder {
+    fn build(&self, engine: Arc<Katalyst>) -> Result<Instance> {
         //build routes...
         let mut all_routes = vec![];
         for route in self.routes.iter() {

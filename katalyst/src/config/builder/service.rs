@@ -7,13 +7,14 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
+/// Builder for an interface attached to this service
 #[derive(Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct InterfaceBuilder {
-    pub address: String,
-    pub ssl: bool,
-    pub ssl_cert: String,
-    pub ssl_key: String,
+    address: String,
+    ssl: bool,
+    ssl_cert: String,
+    ssl_key: String,
 }
 
 impl InterfaceBuilder {
@@ -44,11 +45,12 @@ impl InterfaceBuilder {
     }
 }
 
+/// Builder for a Katalyst service instance
 #[derive(Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct ServiceBuilder {
-    pub interfaces: Vec<InterfaceBuilder>,
-    pub cache: ModuleBuilder<CacheProvider>,
+    interfaces: Vec<InterfaceBuilder>,
+    cache: ModuleBuilder<CacheProvider>,
 }
 
 impl Builder<Service> for ServiceBuilder {
