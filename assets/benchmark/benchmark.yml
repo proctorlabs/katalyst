@@ -1,16 +1,24 @@
-listener:
-  interface: "0.0.0.0:8000"
+service:
+  interfaces:
+    - address: "0.0.0.0:8000"
+  cache:
+    type: memory_cache
 
 hosts:
   nginx:
-    balancer: round_robin
+    type: round_robin
     servers:
       - "http://127.0.0.1:9999"
 
 routes:
-  - pattern: "^/$"
+  - path:
+      type: regex
+      pattern: "^/$"
     methods:
       - get
-    downstream:
+    handler:
+      type: host
       host: nginx
       path: "/"
+    cache:
+      type: cache_response

@@ -20,12 +20,12 @@ description = "Build the project"
 command = "cargo"
 args = ["build"]
 
-[tasks.test]
-description = "Run the unit tests"
-command = "cargo"
-args = ["test"]
-
 [tasks.build-release]
 description = "Build the project with optimizations"
 command = "cargo"
 args = ["build", "--release"]
+
+[tasks.test]
+description = "Run the unit tests"
+command = "cargo"
+args = ["test"]

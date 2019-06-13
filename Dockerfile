@@ -5,7 +5,7 @@ FROM rust:latest as builder
 ADD Cargo.toml .
 ADD katalyst/Cargo.toml katalyst/
 ADD katalyst_macros/Cargo.toml katalyst_macros/
-RUN mkdir -p katalyst/src/app katalyst_macros/src && touch katalyst/src/lib.rs && touch katalyst/src/app/main.rs && touch katalyst_macros/src/lib.rs && \
+RUN mkdir -p katalyst/src katalyst_macros/src && touch katalyst/src/lib.rs && touch katalyst/src/main.rs && touch katalyst_macros/src/lib.rs && \
     (cargo build --release >> /dev/null || true)
 
 #Now we add the actual source and build the app/library itself
