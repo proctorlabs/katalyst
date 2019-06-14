@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub use futures::future::{done, err, ok};
+pub(crate) use futures::future::{done, err, ok};
 
 /// Katalyst result type
 pub type Result<T> = std::result::Result<T, GatewayError>;

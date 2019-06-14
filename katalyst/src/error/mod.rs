@@ -1,5 +1,6 @@
 /*!
-Katalyst error types
+This module space contains the enum `GatewayError` which is the error type produced by
+the internal Katalyst libraries.
 */
 
 mod from;
@@ -51,7 +52,7 @@ pub enum GatewayError {
         #[doc(hidden)]
         col: u32,
     },
-    /// Error that occurs when configuration could not be parsed or built
+    /// Error that occurs when there is a configuration failure
     #[display(fmt = "[{} -> {}:{}] {}{}", module_path, line, col, message, "add_source(source)")]
     ConfigurationFailure {
         #[doc(hidden)]
@@ -65,7 +66,8 @@ pub enum GatewayError {
         #[doc(hidden)]
         col: u32,
     },
-    /// Catastrohpic/fatal error
+
+    /// Catastrophic and fatal errors
     #[display(fmt = "[{} -> {}:{}] {}{}", module_path, line, col, message, "add_source(source)")]
     Critical {
         #[doc(hidden)]
@@ -79,6 +81,7 @@ pub enum GatewayError {
         #[doc(hidden)]
         col: u32,
     },
+
     /// A dependency that was expected is not available
     #[display(
         fmt = "[{} -> {}:{}] Component {}: {}{}",
@@ -103,6 +106,7 @@ pub enum GatewayError {
         #[doc(hidden)]
         col: u32,
     },
+
     /// An IO Error, check the source error for more detail
     #[display(fmt = "[{} -> {}:{}] {}{}", module_path, line, col, message, "add_source(source)")]
     IoError {
@@ -117,6 +121,7 @@ pub enum GatewayError {
         #[doc(hidden)]
         col: u32,
     },
+
     /// Other uncategorized/general error
     #[display(fmt = "[{} -> {}:{}] {}{}", module_path, line, col, message, "add_source(source)")]
     Other {
@@ -131,6 +136,7 @@ pub enum GatewayError {
         #[doc(hidden)]
         col: u32,
     },
+
     /// Used in some circumstance to return from the request pipeline early
     #[display(fmt = "Request finished early")]
     Done,

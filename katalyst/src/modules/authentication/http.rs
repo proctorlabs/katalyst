@@ -1,6 +1,6 @@
 use crate::{
     app::Katalyst,
-    config::builder::Builder,
+    config::Builder,
     modules::*,
     util::{ClientRequestBuilder, CompiledClientRequest},
 };

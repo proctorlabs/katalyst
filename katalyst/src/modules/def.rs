@@ -17,35 +17,27 @@ pub trait ModuleProvider: Send + Sync + Debug {
 }
 
 macro_rules! impl_module {
-    ($($name:ident, $trait:ident { $( $ret:ty: $method:ident => ( $($argname:ident : $argtype:ty),* ) )* })+) => {
-        #[doc(hidden)]
+    ($($sname:expr, $name:ident, $trait:ident { $( $ret:ty: $method:ident => ( $($argname:ident : $argtype:ty),* ) )* })+) => {
+        /// Variants corresponding to each module type.
         #[derive(PartialEq, Debug)]
         pub enum ModuleType {
-            $($name,)*
-        }
-
-        /// Container type for any module
-        #[derive(Debug)]
-        pub enum Module {
             $(
-                #[doc(hidden)]
-                $name($name),
+                #[doc = $sname]
+                #[doc = " module type."]
+                $name,
             )*
         }
 
-        // impl Module {
-        //     pub(crate) fn get_type(&self) -> ModuleType {
-        //         match self {
-        //             $(
-        //                 Module::$name(_) => ModuleType::$name,
-        //             )*
-        //         }
-        //     }
-
-        //     pub(crate) fn is_type(&self, t: ModuleType) -> bool {
-        //         t == self.get_type()
-        //     }
-        // }
+        /// This enum is a container for all module types.
+        #[derive(Debug)]
+        pub enum Module {
+            $(
+                #[doc = "Variant containing "]
+                #[doc = $sname]
+                #[doc = " modules."]
+                $name($name),
+            )*
+        }
 
         $(
             impl From<$name> for Module {
@@ -61,18 +53,23 @@ macro_rules! impl_module {
         )*
 
         $(
-            /// Container for modules implementing the corresponding trait
+            #[doc = $sname]
+            #[doc = " container."]
             #[derive(Debug)]
             pub struct $name(pub Box<dyn $trait + Send>);
 
-            /// Trait required to implement this module
+            #[doc = "Implement this trait when building "]
+            #[doc = $sname]
+            #[doc = " modules."]
             pub trait $trait: Send + Sync + Debug {
                 $(
-                    /// Implementation of module
+                    #[doc = "Method implementation for "]
+                    #[doc = $sname]
+                    #[doc = " modules."]
                     fn $method(&self, $($argname: $argtype , )*) -> $ret;
                 )*
 
-                /// Map this implementation into the module container
+                /// Box this module into the Module enum.
                 fn into_module(self) -> Module where Self: 'static + Sized {
                     Module::$name($name(Box::new(self)))
                 }
@@ -100,33 +97,33 @@ macro_rules! impl_module {
 pub type BalancerLease = Result<Arc<String>>;
 
 impl_module! {
-    Authenticator, AuthenticatorModule {
+    "Authenticator", Authenticator, AuthenticatorModule {
         AsyncResult<()>: authenticate => (guard: RequestContext)
     }
 
-    Authorizer, AuthorizerModule {
+    "Authorizer", Authorizer, AuthorizerModule {
         AsyncResult<()>: authorize => (guard: RequestContext)
     }
 
-    CacheHandler, CacheHandlerModule {
+    "CacheHandler", CacheHandler, CacheHandlerModule {
         AsyncResult<()>: check_cache => (guard: RequestContext)
         AsyncResult<()>: update_cache => (guard: RequestContext)
     }
 
-    CacheProvider, CacheProviderModule {
+    "CacheProvider", CacheProvider, CacheProviderModule {
         AsyncResult<Arc<CachedObject>>: get_key => (key: &str)
         AsyncResult<()>: set_key => (key: &str, val: CachedObject)
     }
 
-    Plugin, PluginModule {
+    "Plugin", Plugin, PluginModule {
         AsyncResult<()>: run => (guard: RequestContext)
     }
 
-    RequestHandler, RequestHandlerModule {
+    "RequestHandler", RequestHandler, RequestHandlerModule {
         AsyncResult<()>: dispatch => (guard: RequestContext)
     }
 
-    LoadBalancer, LoadBalancerModule {
+    "LoadBalancer", LoadBalancer, LoadBalancerModule {
         BalancerLease: lease => ()
     }
 }

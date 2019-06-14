@@ -2,5 +2,7 @@
 Configuration of Katalyst is available in YAML and JSON formats.
 */
 
-pub mod builder;
+mod builder;
 pub(crate) mod parsers;
+
+pub use builder::*;

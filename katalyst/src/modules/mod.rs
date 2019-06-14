@@ -18,4 +18,4 @@ pub(crate) mod cache;
 pub use cache::CachedObject;
 pub use def::*;
 pub use registry::ModuleRegistry;
-pub use result::*;
+pub(crate) use result::*;

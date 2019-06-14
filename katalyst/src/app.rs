@@ -1,5 +1,5 @@
 use crate::{
-    config::{builder::Builder, parsers},
+    config::{parsers, Builder},
     instance::Instance,
     modules::ModuleRegistry,
     prelude::*,
