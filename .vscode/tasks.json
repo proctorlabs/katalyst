@@ -1,0 +1,32 @@
+{
+    "version": "2.0.0",
+    "problemMatcher": [
+        "$rustc"
+    ],
+    "tasks": [
+        {
+            "label": "Run Katalyst",
+            "type": "shell",
+            "command": "cargo make run",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Run Katalyst and Watch for Changes",
+            "type": "shell",
+            "command": "cargo make watch"
+        },
+        {
+            "label": "Build Katalyst",
+            "type": "shell",
+            "command": "cargo make build"
+        },
+        {
+            "label": "Initial Environment Setup",
+            "type": "shell",
+            "command": "cargo make setup"
+        }
+    ]
+}

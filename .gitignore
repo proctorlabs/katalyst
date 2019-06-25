@@ -1,4 +1,6 @@
 target
 Cargo.lock
 
-.vscode
+# When using VSCode, we want to keep most user settings hidden but allow the tasks.json to be shared
+/.vscode/*
+!/.vscode/tasks.json

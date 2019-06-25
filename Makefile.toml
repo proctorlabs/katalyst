@@ -2,6 +2,13 @@
 CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = "true"
 CARGO_MAKE_WORKSPACE_SKIP_MEMBERS = "katalyst_macros"
 
+[tasks.deb]
+[tasks.run]
+[tasks.watch]
+[tasks.build]
+[tasks.build-release]
+[tasks.test]
+
 [tasks.setup]
 description = "Setup the repo with hooks to automatically clean when needed"
 script = [
