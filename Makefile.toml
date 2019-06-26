@@ -32,16 +32,23 @@ command = "docker"
 args = ["run", "-it", "--rm", "-v", "${PWD}/assets/benchmark/benchmark.yml:/config.yml:ro", "-p", "8000:8000", "katalyst-build", "-c", "/config.yml"]
 workspace = false
 
-[tasks.readme]
-description = "Regenerate the README.md from the doc notes in lib.rs"
+[tasks.readme-config]
+description = "Regenerate the CONFIG.md from the doc notes in config/mod.rs"
 install_crate = "cargo-readme"
 command = "cargo"
-args = ["readme", "-r", "katalyst", "-i", "src/main.rs", "-o", "../README.md"]
+args = ["readme", "-r", "katalyst", "-i", "src/config/mod.rs", "-t", "../CONFIG.tpl", "-o", "../CONFIG.md"]
+workspace = false
+
+[tasks.readme-main]
+description = "Regenerate the README.md from the doc notes in main.rs"
+install_crate = "cargo-readme"
+command = "cargo"
+args = ["readme", "-r", "katalyst", "-i", "src/main.rs", "-t", "../README.tpl", "-o", "../README.md"]
 workspace = false
 
 [tasks.commit-hook]
 description = "Methods for the pre-commit hook"
-dependencies = ["format", "readme"]
+dependencies = ["format", "readme-main", "readme-config"]
 workspace = false
 
 [tasks.start-nginx-host]

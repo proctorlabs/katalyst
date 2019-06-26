@@ -1,6 +1,6 @@
 [package]
 name = "katalyst"
-description = "The high performance and low memory API Gateway"
+description = "High performance, modular API Gateway"
 repository = "https://github.com/proctorlabs/katalyst"
 version = "0.2.0"
 authors = ["Phil Proctor <philliptproctor@gmail.com>"]

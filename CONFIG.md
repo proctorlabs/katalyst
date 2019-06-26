@@ -1,8 +1,9 @@
-/*!
+# Configuration
+
 Configuration of Katalyst is available in YAML and JSON formats. When running katalyst as a binary,
 the configuration is generally loaded from a file specified with the -c option.
 
-# Configuration Format
+## Configuration Format
 
 Although Katalyst supports both JSON and YAML formats, YAML is generally preferred and works better
 with the expression syntax in the configuration files. As such, all examples here will be in the YAML
@@ -40,7 +41,7 @@ This example configuration is for a server that listens on port 8080, has one do
 configured with one server (httpbin.org), and has one route configured that will match requests to / and
 route them to http://httpbin.org/ip
 
-# Expressions
+## Expressions
 
 Many configuration sections support configuration through "expressions". These expressions allow adding
 custom logic and dynamic behavior within the configuration itself. In addition, the expression syntax allows
@@ -64,7 +65,7 @@ the state of the incoming request.
 
 TODO: Document the built in expressions
 
-# Modules
+## Modules
 
 Throughout the configuration, custom modules can be used with specialized configuration. The only universal
 configuration option for a module is the 'type' field, all other fields are determined by the module itself.
@@ -72,7 +73,7 @@ When a module section of the configuration is parsed, that section of the config
 `unstructured::Document` so that the module can define as simple or complex of a configuration as required.
 Documentation for the individual modules should contain information about configuration specific to those modules.
 
-# Configuration Sections
+## Configuration Sections
 
 As demonstrated in the basic configuration above, these configuration sections are available:
 
@@ -80,11 +81,11 @@ As demonstrated in the basic configuration above, these configuration sections a
 * **hosts**: This defines "host groups" which are simply groups of servers that can be referred to by name and are load balanced
 * **routes**: The list of routes that exist on this server. Incoming requests are matched to a route by a pattern and sent to a handler.
 
-# Service Configuration Options
+## Service Configuration Options
 
 TODO: **WIP**
 
-## interfaces
+### interfaces
 
 ```yaml
   interfaces:
@@ -97,14 +98,14 @@ TODO: **WIP**
       ssl_key: "key.rsa"
 ```
 
-## cache
+### cache
 
 ```yaml
   cache: # This is a 'cache' module
     type: memory_cache
 ```
 
-# Host Configuration Options
+## Host Configuration Options
 
 TODO: **WIP**
 
@@ -116,7 +117,7 @@ hosts:
       - "http://httpbin.org"
 ```
 
-# Route Configuration Options
+## Route Configuration Options
 
 TODO: **WIP**
 
@@ -133,9 +134,3 @@ routes:
       type: cache_response
     # Other module types currently supported here: authenticator, authorizer, plugin
 ```
-*/
-
-mod builder;
-pub(crate) mod parsers;
-
-pub use builder::*;
