@@ -76,4 +76,4 @@ SUBCOMMANDS:
 
 ## Configuration
 
-Refer to the documentation [here](CONFIG)
+Refer to the documentation [here](CONFIG.md)
