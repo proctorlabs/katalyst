@@ -3,6 +3,11 @@ name = "katalyst_macros"
 version = "0.2.0"
 authors = ["Phil Proctor <philliptproctor@gmail.com>"]
 edition = "2018"
+description = "Procedural macros for katalyst"
+repository = "https://github.com/proctorlabs/katalyst"
+keywords = ["http", "api", "gateway"]
+categories = ["network-programming", "web-programming::http-server", "web-programming"]
+license = "MIT"
 
 [dependencies]
 proc-macro2 = "0.4"
