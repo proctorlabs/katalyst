@@ -3,8 +3,8 @@ service:
     - address: "0.0.0.0:8080"
     - address: "0.0.0.0:8443"
       ssl: true
-      ssl_cert: "../assets/test.crt"
-      ssl_key: "../assets/test.rsa"
+      ssl_cert: "assets/test.crt"
+      ssl_key: "assets/test.rsa"
   cache:
     type: memory_cache
 

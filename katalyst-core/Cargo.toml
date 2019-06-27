@@ -9,10 +9,11 @@ keywords = ["http", "api", "gateway"]
 categories = ["network-programming", "web-programming::http-server", "web-programming"]
 license = "MIT"
 readme = "README.md"
+workspace = ".."
 
 [dependencies]
 # Base
-katalyst_macros = { version = "0.2", path = "../katalyst_macros" }
+katalyst-macros = { path = "../katalyst-macros" }
 
 #Utility
 log = "0.4"
@@ -48,15 +49,6 @@ serde_json = "1.0"
 pest = { version = "2.1" }
 pest_derive = { version = "2.1" }
 
-# CLI
-simple_logger = { version = "1.3", optional = true }
-clap = { version = "2.33", optional = true }
-structopt = { version = "0.2", optional = true }
-
-[features]
-default = ["cli"]
-cli = ["simple_logger", "clap", "structopt"]
-
 [dev-dependencies]
 simple_logger = "1.3"
 
@@ -65,11 +57,6 @@ simple_logger = "1.3"
 [lib]
 name = "katalyst"
 path = "src/lib.rs"
-
-[[bin]]
-name = "katalyst"
-path = "src/main.rs"
-required-features = ["cli"]
 
 [badges]
 maintenance = { status = "actively-developed" }

@@ -1,13 +1,40 @@
-[env]
-CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = "true"
-CARGO_MAKE_WORKSPACE_SKIP_MEMBERS = "katalyst_macros"
-
 [tasks.deb]
+description = "Create a debian package"
+install_crate = "cargo-deb"
+command = "cargo"
+args = ["deb"]
+workspace = false
+
 [tasks.run]
+description = "Run Katalyst"
+command = "cargo"
+args = ["run", "--", "-c", "assets/manual-test.yml"]
+workspace = false
+
 [tasks.watch]
+description = "Run Katalyst and watch for changes"
+install_crate = "cargo-watch"
+command = "cargo"
+args = ["watch", "-x", "run -- -c assets/manual-test.yml"]
+workspace = false
+
 [tasks.build]
+description = "Build the project"
+command = "cargo"
+args = ["build"]
+workspace = false
+
 [tasks.build-release]
+description = "Build the project with optimizations"
+command = "cargo"
+args = ["build", "--release"]
+workspace = false
+
 [tasks.test]
+description = "Run the unit tests"
+command = "cargo"
+args = ["test"]
+workspace = false
 
 [tasks.setup]
 description = "Setup the repo with hooks to automatically clean when needed"
@@ -19,6 +46,7 @@ script = [
     "EOF",
     "chmod +x $(git rev-parse --show-toplevel)/.git/hooks/pre-commit"
 ]
+workspace = false
 
 [tasks.docker-build]
 description = "Build Docker container with katalyst"
@@ -32,23 +60,18 @@ command = "docker"
 args = ["run", "-it", "--rm", "-v", "${PWD}/assets/benchmark/benchmark.yml:/config.yml:ro", "-p", "8000:8000", "katalyst-build", "-c", "/config.yml"]
 workspace = false
 
-[tasks.readme-config]
+[tasks.readme]
 description = "Regenerate the CONFIG.md from the doc notes in config/mod.rs"
-install_crate = "cargo-readme"
-command = "cargo"
-args = ["readme", "-r", "katalyst", "-i", "src/config/mod.rs", "-t", "../CONFIG.tpl", "-o", "../CONFIG.md"]
-workspace = false
-
-[tasks.readme-main]
-description = "Regenerate the README.md from the doc notes in main.rs"
-install_crate = "cargo-readme"
-command = "cargo"
-args = ["readme", "-r", "katalyst", "-i", "src/main.rs", "-t", "../README.tpl", "-o", "../README.md"]
+#install_crate = "cargo-readme"
+script = ['''
+cargo readme -r katalyst-core -i src/config/mod.rs -t ../CONFIG.tpl -o ../CONFIG.md
+cargo readme -i katalyst-bin/main.rs -t README.tpl -o README.md
+''']
 workspace = false
 
 [tasks.commit-hook]
 description = "Methods for the pre-commit hook"
-dependencies = ["format", "readme-main", "readme-config"]
+dependencies = ["format", "readme"]
 workspace = false
 
 [tasks.start-nginx-host]

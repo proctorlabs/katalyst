@@ -1,5 +1,5 @@
 [package]
-name = "katalyst_macros"
+name = "katalyst-macros"
 version = "0.2.0"
 authors = ["Phil Proctor <philliptproctor@gmail.com>"]
 edition = "2018"
@@ -8,6 +8,7 @@ repository = "https://github.com/proctorlabs/katalyst"
 keywords = ["http", "api", "gateway"]
 categories = ["network-programming", "web-programming::http-server", "web-programming"]
 license = "MIT"
+workspace = ".."
 
 [dependencies]
 proc-macro2 = "0.4"
