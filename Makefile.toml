@@ -30,6 +30,12 @@ command = "cargo"
 args = ["build", "--release"]
 workspace = false
 
+[tasks.build-docker]
+description = "Build Docker container with katalyst"
+command = "docker"
+args = ["build", "-t", "katalyst-build", "."]
+workspace = false
+
 [tasks.test]
 description = "Run the unit tests"
 command = "cargo"
@@ -38,20 +44,14 @@ workspace = false
 
 [tasks.setup]
 description = "Setup the repo with hooks to automatically clean when needed"
-script = [
-    "cat <<EOF > $(git rev-parse --show-toplevel)/.git/hooks/pre-commit",
-    "#!/bin/bash",
-    "cargo make commit-hook",
-    "git add \\$(git rev-parse --show-toplevel)/README.md",
-    "EOF",
-    "chmod +x $(git rev-parse --show-toplevel)/.git/hooks/pre-commit"
-]
-workspace = false
-
-[tasks.docker-build]
-description = "Build Docker container with katalyst"
-command = "docker"
-args = ["build", "-t", "katalyst-build", "."]
+script = ['''
+cat <<EOF > $(git rev-parse --show-toplevel)/.git/hooks/pre-commit
+#!/bin/bash
+cargo make commit-hook
+git add \\$(git rev-parse --show-toplevel)/README.md
+EOF
+chmod +x $(git rev-parse --show-toplevel)/.git/hooks/pre-commit
+''']
 workspace = false
 
 [tasks.docker-run]
@@ -74,60 +74,18 @@ description = "Methods for the pre-commit hook"
 dependencies = ["format", "readme"]
 workspace = false
 
-[tasks.start-nginx-host]
-description = "Run nginx in a docker container"
-script = [
-    "docker run -d --name nginx-test -v $(pwd)/assets/benchmark/nginx.conf:/etc/nginx/conf.d/default.conf:ro -p 9999:80 nginx"
-]
+[tasks.docker-bench]
+description = "Docker benchmark workflow"
+script = ['''
+docker run -d --name nginx-test -v $(pwd)/assets/benchmark/nginx.conf:/etc/nginx/conf.d/default.conf:ro -p 9999:80 nginx
+docker run -d --name katalyst-test --net host -v $(pwd)/target/release/katalyst:/opt/katalyst:ro -v $(pwd)/assets/benchmark/benchmark.yml:/opt/config.yml:ro debian:stable-slim /opt/katalyst -c /opt/config.yml -l error
+docker build -t bench-client -f assets/benchmark/bencher.dockerfile assets/
+mkdir -p target/reports
+docker run -it --rm --net=host -u $(id -u $USER):$(id -u $USER) bench-client -c 100 -n 300000 -k -G 16 -r http://127.0.0.1:9999 | tee target/reports/baseline.txt
+echo 'running benchmark against katalyst host'
+docker run -it --rm --net=host -u $(id -u $USER):$(id -u $USER) bench-client -c 100 -n 300000 -k -G 16 -r http://127.0.0.1:8000 | tee target/reports/katalyst.txt
+docker stop katalyst-test nginx-test
+docker rm katalyst-test nginx-test
+''']
 workspace = false
-
-[tasks.stop-nginx-host]
-description = "Stop nginx container"
-script = [
-    "docker stop nginx-test || true",
-    "docker rm nginx-test || true"
-]
-workspace = false
-
-[tasks.start-katalyst-host]
-description = "Start katalyst in container"
-dependencies = [
-    "build-release"
-]
-script = [
-    "docker run -d --name katalyst-test --net host -v $(pwd)/target/release/katalyst:/opt/katalyst:ro -v $(pwd)/assets/benchmark/benchmark.yml:/opt/config.yml:ro debian:stable-slim /opt/katalyst -c /opt/config.yml -l error"
-]
-workspace = false
-
-[tasks.stop-katalyst-host]
-description = "Stop katalyst container"
-script = [
-    "docker stop katalyst-test || true",
-    "docker rm katalyst-test || true"
-]
-workspace = false
-
-[tasks.run-benchmark-client]
-description = "Build/Run the benchmark client"
-script = [
-    "docker build -t bench-client -f assets/benchmark/bencher.dockerfile assets/",
-    "mkdir -p target/reports",
-    "echo 'running benchmark against nginx host'",
-    "docker run -it --rm --net=host -u $(id -u $USER):$(id -u $USER) bench-client -c 100 -n 300000 -k -G 16 -r http://127.0.0.1:9999 | tee target/reports/baseline.txt",
-    "cat target/reports/baseline.txt",
-    "echo 'running benchmark against katalyst host'",
-    "docker run -it --rm --net=host -u $(id -u $USER):$(id -u $USER) bench-client -c 100 -n 300000 -k -G 16 -r http://127.0.0.1:8000 | tee target/reports/katalyst.txt",
-    "cat target/reports/katalyst.txt"
-]
-workspace = false
-
-[tasks.benchmark]
-description = "Run the full benchmark workflow"
-dependencies = [
-    "start-nginx-host",
-    "start-katalyst-host",
-    "run-benchmark-client",
-    "stop-katalyst-host",
-    "stop-nginx-host"
-]
-workspace = false
+dependencies = ["build-release"]
