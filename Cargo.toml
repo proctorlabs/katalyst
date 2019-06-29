@@ -12,6 +12,7 @@ readme = "README.md"
 
 [workspace]
 members = [
+    "htpasswd",
     "katalyst-macros",
     "katalyst-core",
 ]

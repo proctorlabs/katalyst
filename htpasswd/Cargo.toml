@@ -1,0 +1,11 @@
+[package]
+name = "htpasswd"
+version = "0.1.0"
+authors = ["Phil Proctor <philliptproctor@gmail.com>"]
+edition = "2018"
+workspace = ".."
+
+[dependencies]
+pest = "2.1"
+pest_derive = "2.1"
+bcrypt = "0.4"
