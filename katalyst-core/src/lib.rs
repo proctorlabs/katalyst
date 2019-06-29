@@ -29,5 +29,5 @@ pub mod context;
 pub mod error;
 pub mod expression;
 pub mod modules;
-pub use app::Katalyst;
+pub use app::{ArcKatalystImpl, Katalyst};
 pub use katalyst_macros::ExpressionBinding;

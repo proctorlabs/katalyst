@@ -30,7 +30,7 @@ routes:
       pattern: "^/files/(?P<file>.*)$"
     handler:
       type: file_server
-      root_path: "../assets/"
+      root_path: "assets/"
       selector: "{{ http.matched('file') }}"
 
   - path:

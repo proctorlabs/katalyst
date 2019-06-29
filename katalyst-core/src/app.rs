@@ -35,25 +35,7 @@ impl std::fmt::Debug for Katalyst {
     }
 }
 
-impl Default for Katalyst {
-    fn default() -> Self {
-        let builder = Client::builder();
-        let mut http_connector = HttpConnector::new_with_tokio_threadpool_resolver();
-        http_connector.enforce_http(false);
-        let mut tls = ClientConfig::new();
-        tls.root_store.add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
-
-        Katalyst {
-            instance: RwLock::default(),
-            servers: RwLock::default(),
-            client: Arc::new(builder.build(HttpsConnector::from((http_connector, tls)))),
-            compiler: Arc::new(Compiler::default()),
-            modules: ModuleRegistry::default(),
-            rt: RwLock::new(Runtime::new().unwrap()),
-        }
-    }
-}
-
+/// Katalyst methods that require an Arc container
 pub trait ArcKatalystImpl {
     /// Update the Katalyst instance with the configuration from the specified file.
     fn load(&self, config_file: &str) -> Result<()>;
@@ -61,18 +43,35 @@ pub trait ArcKatalystImpl {
     /// Run the Katalyst instance. This thread will block and run the async runtime.
     fn run(&mut self) -> Result<()>;
 
+    /// Start the Katalyst services
     fn run_service(&mut self) -> Result<()>;
+
+    /// Update the Katalyst instance with the configuration from the provided YAML
+    fn load_yaml(&self, raw: &str) -> Result<()>;
+
+    /// Update the Katalyst instance with the configuration from the provided JSON
+    fn load_json(&self, raw: &str) -> Result<()>;
 }
 
 impl ArcKatalystImpl for Arc<Katalyst> {
-    /// Update the Katalyst instance with the configuration from the specified file.
     fn load(&self, config_file: &str) -> Result<()> {
         let config = parsers::parse_file(config_file)?;
         self.update_instance(config.build(self.clone())?)?;
         Ok(())
     }
 
-    /// Run the Katalyst instance. This thread will block and run the async runtime.
+    fn load_yaml(&self, raw: &str) -> Result<()> {
+        let config = parsers::parse_yaml(raw)?;
+        self.update_instance(config.build(self.clone())?)?;
+        Ok(())
+    }
+
+    fn load_json(&self, raw: &str) -> Result<()> {
+        let config = parsers::parse_json(raw)?;
+        self.update_instance(config.build(self.clone())?)?;
+        Ok(())
+    }
+
     #[inline]
     fn run(&mut self) -> Result<()> {
         self.run_service()?;
@@ -93,6 +92,24 @@ impl ArcKatalystImpl for Arc<Katalyst> {
 }
 
 impl Katalyst {
+    /// Create a new Katalyst instance
+    pub fn new() -> Result<Arc<Katalyst>> {
+        let builder = Client::builder();
+        let mut http_connector = HttpConnector::new_with_tokio_threadpool_resolver();
+        http_connector.enforce_http(false);
+        let mut tls = ClientConfig::new();
+        tls.root_store.add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
+
+        Ok(Arc::new(Katalyst {
+            instance: RwLock::default(),
+            servers: RwLock::default(),
+            client: Arc::new(builder.build(HttpsConnector::from((http_connector, tls)))),
+            compiler: Arc::new(Compiler::default()),
+            modules: ModuleRegistry::default(),
+            rt: RwLock::new(Runtime::new().unwrap()),
+        }))
+    }
+
     /// Update the running configuration of the API Gateway.
     pub fn update_instance(&self, new_instance: Instance) -> Result<()> {
         let mut instance = self.instance.write();
@@ -146,7 +163,7 @@ impl Katalyst {
     /// This will load the configuration from the specified file and run the gateway until an OS
     /// signal is received.
     pub fn start(config_file: &str) -> Result<Arc<Katalyst>> {
-        let mut app = Arc::new(Katalyst::default());
+        let mut app = Katalyst::new()?;
         app.load(config_file)?;
         app.run()?;
         Ok(app)

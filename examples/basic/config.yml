@@ -1,0 +1,21 @@
+---
+service:
+  interfaces:
+    - address: "0.0.0.0:5000"
+  cache:
+    type: memory_cache
+
+hosts:
+  local:
+    type: round_robin
+    servers:
+      - "http://localhost"
+
+routes:
+  - path:
+      type: regex
+      pattern: "^/$"
+    handler:
+      type: host
+      host: local
+      path: "/"

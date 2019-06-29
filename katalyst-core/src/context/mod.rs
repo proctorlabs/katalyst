@@ -73,7 +73,7 @@ impl Default for Context {
             matched: LockedResource::new(Match::Unmatched),
             authentication: LockedResource::new(Authentication::Anonymous),
             data: Mutex::new(ContextData::default()),
-            katalyst: Arc::new(Katalyst::default()),
+            katalyst: Katalyst::new().unwrap(),
         })
     }
 }
