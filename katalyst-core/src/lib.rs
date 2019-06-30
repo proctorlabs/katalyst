@@ -1,5 +1,5 @@
 /*!
-This is the base module for the KatalystCore API Gateway library.
+This is the base module for the Katalyst API Gateway library.
 */
 
 #![warn(missing_docs)]
@@ -29,6 +29,7 @@ pub mod config;
 pub mod context;
 pub mod error;
 pub mod expression;
+pub mod extensions;
 pub mod modules;
 pub use app::Katalyst;
 pub use client::ProxyClient;
