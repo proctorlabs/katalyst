@@ -22,7 +22,7 @@ pub struct ClientRequestBuilder {
 }
 
 impl Builder<CompiledClientRequest> for ClientRequestBuilder {
-    fn build(&self, katalyst: Arc<Katalyst>) -> Result<CompiledClientRequest> {
+    fn build(&self, katalyst: Arc<KatalystCore>) -> Result<CompiledClientRequest> {
         let compiler = katalyst.get_compiler();
 
         let method = match &self.method {

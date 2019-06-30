@@ -11,7 +11,7 @@ impl ModuleProvider for LeastConnectionBalancerBuilder {
     fn build(
         &self,
         _: ModuleType,
-        _: Arc<Katalyst>,
+        _: Arc<KatalystCore>,
         doc: &unstructured::Document,
     ) -> Result<Module> {
         let hosts: Vec<String> = doc["servers"].clone().try_into().unwrap_or_default();

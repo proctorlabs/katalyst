@@ -6,7 +6,7 @@
 [![MIT License](https://img.shields.io/github/license/proctorlabs/katalyst.svg)](LICENSE)
 [![Maintenance](https://img.shields.io/badge/maintenance-experimental-blue.svg)](https://crates.io/crates/katalyst)
 
-Katalyst is a high performance and low memory API Gateway. It can be used as either an
+KatalystCore is a high performance and low memory API Gateway. It can be used as either an
 appliance through Docker or it can be used as a library. This project is currently under
 heavy development and will likely experience many changes and issues as we work towards the
 1.0 release.
@@ -39,7 +39,7 @@ cargo install katalyst
 
 ## Usage
 
-Once installed, starting Katalyst is easy. Use the -c option to specify the config file.
+Once installed, starting KatalystCore is easy. Use the -c option to specify the config file.
 {{version}}
 
 ```bash

@@ -9,27 +9,27 @@ pub use routes::RouteBuilder;
 pub use service::InterfaceBuilder;
 pub use service::ServiceBuilder;
 
-use crate::{app::Katalyst, error::GatewayError, instance::*, prelude::*};
+use crate::{app::KatalystCore, error::GatewayError, instance::*, prelude::*};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, sync::Arc};
 
-/// A configuration builder for an instance of Katalyst
+/// A configuration builder for an instance of KatalystCore
 pub trait Builder<T> {
-    /// Build an instance configuration using the supplied base Katalyst instance
-    fn build(&self, engine: Arc<Katalyst>) -> Result<T>;
+    /// Build an instance configuration using the supplied base KatalystCore instance
+    fn build(&self, engine: Arc<KatalystCore>) -> Result<T>;
 }
 
-/// The base builder for building a new Katalyst Instance
+/// The base builder for building a new KatalystCore Instance
 #[derive(Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
-pub struct KatalystBuilder {
+pub struct KatalystCoreBuilder {
     hosts: HashMap<String, ModuleBuilder<LoadBalancer>>,
     routes: Vec<RouteBuilder>,
     service: ServiceBuilder,
 }
 
-impl Builder<Instance> for KatalystBuilder {
-    fn build(&self, engine: Arc<Katalyst>) -> Result<Instance> {
+impl Builder<Instance> for KatalystCoreBuilder {
+    fn build(&self, engine: Arc<KatalystCore>) -> Result<Instance> {
         //build routes...
         let mut all_routes = vec![];
         for route in self.routes.iter() {

@@ -13,7 +13,7 @@ pub trait ModuleProvider: Send + Sync + Debug {
     /// The name of the module, matched to the "type" field in configuration
     fn name(&self) -> &'static str;
     /// The method used to build a module.
-    fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &Document) -> Result<Module>;
+    fn build(&self, _: ModuleType, _: Arc<KatalystCore>, _: &Document) -> Result<Module>;
 }
 
 macro_rules! impl_module {

@@ -1,9 +1,9 @@
 /*!
-This module provides a "prelude" useful for extending Katalyst functionality
+This module provides a "prelude" useful for extending KatalystCore functionality
 */
 
 pub use crate::{
-    app::Katalyst,
+    app::KatalystCore,
     context::*,
     error::{GatewayError::*, *},
     expression::*,

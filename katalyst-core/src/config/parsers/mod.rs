@@ -1,17 +1,17 @@
-use crate::{config::builder::KatalystBuilder, prelude::*};
+use crate::{config::builder::KatalystCoreBuilder, prelude::*};
 use std::{ffi::OsStr, fs::File, io::prelude::*, path::Path};
 
-pub(crate) fn parse_file(file_path: &str) -> Result<KatalystBuilder> {
+pub(crate) fn parse_file(file_path: &str) -> Result<KatalystCoreBuilder> {
     let path = Path::new(file_path);
     let contents = load_file(path)?;
     Ok(Parser::from_str(&contents, Format::ext(path.extension().and_then(OsStr::to_str)))?)
 }
 
-pub(crate) fn parse_yaml(yaml: &str) -> Result<KatalystBuilder> {
+pub(crate) fn parse_yaml(yaml: &str) -> Result<KatalystCoreBuilder> {
     Ok(Parser::from_str(yaml, Format::Yaml)?)
 }
 
-pub(crate) fn parse_json(yaml: &str) -> Result<KatalystBuilder> {
+pub(crate) fn parse_json(yaml: &str) -> Result<KatalystCoreBuilder> {
     Ok(Parser::from_str(yaml, Format::Json)?)
 }
 

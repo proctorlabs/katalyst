@@ -1,7 +1,7 @@
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
-#[structopt(name = "Katalyst", rename_all = "kebab_case")]
+#[structopt(name = "KatalystCore", rename_all = "kebab_case")]
 pub struct Args {
     /// Config file
     #[structopt(short, long, help = "Config file", default_value = "katalyst.yaml")]

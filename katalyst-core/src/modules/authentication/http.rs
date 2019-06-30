@@ -1,5 +1,5 @@
 use crate::{
-    app::Katalyst,
+    app::KatalystCore,
     config::Builder,
     modules::*,
     util::{ClientRequestBuilder, CompiledClientRequest},
@@ -17,7 +17,7 @@ impl ModuleProvider for HttpAuthenticatorBuilder {
     fn build(
         &self,
         _: ModuleType,
-        kat: Arc<Katalyst>,
+        kat: Arc<KatalystCore>,
         config: &unstructured::Document,
     ) -> Result<Module> {
         let request: ClientRequestBuilder = config.clone().try_into().map_err(|e| {
@@ -43,7 +43,7 @@ impl AuthenticatorModule for HttpAuthenticator {
         Box::new(request.send_parse(&client).then(move |response| match response {
             Ok(_) => {
                 let mut auth = Authentication::Authenticated { claims: HashMap::default() };
-                auth.add_claim("KatalystAuthenticator".to_string(), "http".to_string());
+                auth.add_claim("KatalystCoreAuthenticator".to_string(), "http".to_string());
                 guard.set_authentication(auth)
             }
             Err(e) => fail!(FORBIDDEN, "Access rejected due to downstream authenticator error", e),

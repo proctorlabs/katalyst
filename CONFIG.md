@@ -1,11 +1,11 @@
 # Configuration
 
-Configuration of Katalyst is available in YAML and JSON formats. When running katalyst as a binary,
+Configuration of KatalystCore is available in YAML and JSON formats. When running katalyst as a binary,
 the configuration is generally loaded from a file specified with the -c option.
 
 ## Configuration Format
 
-Although Katalyst supports both JSON and YAML formats, YAML is generally preferred and works better
+Although KatalystCore supports both JSON and YAML formats, YAML is generally preferred and works better
 with the expression syntax in the configuration files. As such, all examples here will be in the YAML
 format.
 

@@ -1,6 +1,6 @@
 use super::*;
 use crate::{
-    app::Katalyst,
+    app::KatalystCore,
     instance::{Interface, Service},
     prelude::*,
 };
@@ -45,7 +45,7 @@ impl InterfaceBuilder {
     }
 }
 
-/// Builder for a Katalyst service instance
+/// Builder for a KatalystCore service instance
 #[derive(Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct ServiceBuilder {
@@ -54,7 +54,7 @@ pub struct ServiceBuilder {
 }
 
 impl Builder<Service> for ServiceBuilder {
-    fn build(&self, instance: Arc<Katalyst>) -> Result<Service> {
+    fn build(&self, instance: Arc<KatalystCore>) -> Result<Service> {
         Ok(Service {
             interfaces: self
                 .interfaces

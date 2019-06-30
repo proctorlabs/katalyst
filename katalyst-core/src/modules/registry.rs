@@ -1,7 +1,7 @@
 use super::*;
 
 /// The ModuleRegistry holds all of the modules that are registered with this
-/// instance of Katalyst.
+/// instance of KatalystCore.
 #[derive(Debug)]
 pub struct ModuleRegistry {
     modules: HashMap<String, Arc<dyn ModuleProvider>>,

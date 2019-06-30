@@ -1,5 +1,5 @@
 use super::Builder;
-use crate::{app::Katalyst, prelude::*};
+use crate::{app::KatalystCore, prelude::*};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -35,7 +35,7 @@ impl Default for PathBuilder {
 }
 
 impl Builder<String> for PathBuilder {
-    fn build(&self, e: Arc<Katalyst>) -> Result<String> {
+    fn build(&self, e: Arc<KatalystCore>) -> Result<String> {
         match self {
             PathBuilder::Regex { pattern } => Ok(pattern.to_string()),
             PathBuilder::Template { template } => Ok({

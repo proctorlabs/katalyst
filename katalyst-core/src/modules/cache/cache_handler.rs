@@ -10,7 +10,12 @@ impl ModuleProvider for DefaultCacheHandler {
         "cache_response"
     }
 
-    fn build(&self, _: ModuleType, _: Arc<Katalyst>, _: &unstructured::Document) -> Result<Module> {
+    fn build(
+        &self,
+        _: ModuleType,
+        _: Arc<KatalystCore>,
+        _: &unstructured::Document,
+    ) -> Result<Module> {
         Ok(DefaultCacheHandler.into_module())
     }
 }

@@ -1,5 +1,5 @@
 use super::*;
-use crate::app::Katalyst;
+use crate::app::KatalystCore;
 use serde::{Deserialize, Serialize};
 use std::{marker::PhantomData, string::String, sync::Arc};
 
@@ -29,7 +29,7 @@ impl<T> Builder<Module> for ModuleBuilder<T>
 where
     T: ModuleData,
 {
-    fn build(&self, engine: Arc<Katalyst>) -> Result<Module> {
+    fn build(&self, engine: Arc<KatalystCore>) -> Result<Module> {
         let module = engine.get_module(&self.module)?;
         Ok(module.build(T::MODULE_TYPE, engine.clone(), &self.config)?)
     }

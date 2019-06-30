@@ -1,6 +1,6 @@
 /*!
 This module space contains the enum `GatewayError` which is the error type produced by
-the internal Katalyst libraries.
+the internal KatalystCore libraries.
 */
 
 mod from;
@@ -24,7 +24,7 @@ fn add_source(source: &Source) -> String {
     }
 }
 
-/// All Katalyst library methods will return a variant of GatewayError
+/// All KatalystCore library methods will return a variant of GatewayError
 #[derive(Debug, Display)]
 pub enum GatewayError {
     /// This is the primary type that is returned when there is some error that occurs

@@ -1,4 +1,4 @@
-use crate::{app::Katalyst, modules::*};
+use crate::{app::KatalystCore, modules::*};
 use futures::future::*;
 use serde::{Deserialize, Serialize};
 
@@ -19,7 +19,7 @@ impl ModuleProvider for WhitelistBuilder {
     fn build(
         &self,
         _: ModuleType,
-        _: Arc<Katalyst>,
+        _: Arc<KatalystCore>,
         config: &unstructured::Document,
     ) -> Result<Module> {
         let c: WhitelistConfig = config.clone().try_into().map_err(|e| {

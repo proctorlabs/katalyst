@@ -8,7 +8,7 @@ mod matched;
 mod requests;
 
 use crate::{
-    app::Katalyst,
+    app::KatalystCore,
     instance::Route,
     prelude::*,
     util::{LockedResource, Resource},
@@ -22,7 +22,7 @@ pub use auth::Authentication;
 pub use matched::Match;
 pub use requests::*;
 
-/// The base Katalyst request context supplied to all modules and expressions
+/// The base KatalystCore request context supplied to all modules and expressions
 #[derive(Debug, Default, Clone)]
 pub struct RequestContext {
     context: Arc<Context>,
@@ -44,7 +44,7 @@ pub struct Context {
     authentication: LockedResource<Authentication>,
     matched: LockedResource<Match>,
     data: Mutex<ContextData>,
-    katalyst: Arc<Katalyst>,
+    katalyst: Arc<KatalystCore>,
 }
 
 /// Metadata for this request context
@@ -73,14 +73,18 @@ impl Default for Context {
             matched: LockedResource::new(Match::Unmatched),
             authentication: LockedResource::new(Authentication::Anonymous),
             data: Mutex::new(ContextData::default()),
-            katalyst: Katalyst::new().unwrap(),
+            katalyst: crate::app::Katalyst::new().unwrap().core,
         })
     }
 }
 
 impl RequestContext {
     /// Create a new RequestContext with the supplied arguments
-    pub fn new(request: Request<Body>, katalyst: Arc<Katalyst>, remote_addr: SocketAddr) -> Self {
+    pub fn new(
+        request: Request<Body>,
+        katalyst: Arc<KatalystCore>,
+        remote_addr: SocketAddr,
+    ) -> Self {
         let uri = request.uri();
         let path = format!(
             "{scheme}://{host}{path}",
@@ -106,7 +110,7 @@ impl RequestContext {
     }
 
     /// Get the base katalyst instance associated with this request
-    pub fn katalyst(&self) -> Result<Arc<Katalyst>> {
+    pub fn katalyst(&self) -> Result<Arc<KatalystCore>> {
         Ok(self.katalyst.clone())
     }
 

@@ -1,7 +1,7 @@
 /*!
-This module provides all of the built in load balancers for Katalyst.
+This module provides all of the built in load balancers for KatalystCore.
 
-There are three major load balancer types for Katalyst:
+There are three major load balancer types for KatalystCore:
 
 - **least_connection**: Route requests to the service with the least amount of connections currently leased
 - **random**: Simply route requests to hosts at random

@@ -1,5 +1,5 @@
 /*!
-Katalyst configuration is based around expressions. Expressions are a syntax for templating and
+KatalystCore configuration is based around expressions. Expressions are a syntax for templating and
 customization from within the configuration.
 */
 

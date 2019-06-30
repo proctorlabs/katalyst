@@ -1,5 +1,5 @@
 /*!
-This is the base module for the Katalyst API Gateway library.
+This is the base module for the KatalystCore API Gateway library.
 */
 
 #![warn(missing_docs)]
@@ -29,5 +29,5 @@ pub mod context;
 pub mod error;
 pub mod expression;
 pub mod modules;
-pub use app::{ArcKatalystImpl, Katalyst};
+pub use app::Katalyst;
 pub use katalyst_macros::ExpressionBinding;
