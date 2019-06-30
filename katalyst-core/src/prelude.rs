@@ -3,11 +3,11 @@ This module provides a "prelude" useful for extending KatalystCore functionality
 */
 
 pub use crate::{
-    app::KatalystCore,
     context::*,
     error::{GatewayError::*, *},
     expression::*,
     modules::*,
+    Katalyst, ProxyClient,
 };
 pub(crate) use crate::{parser::*, *};
 pub(crate) use futures::prelude::*;

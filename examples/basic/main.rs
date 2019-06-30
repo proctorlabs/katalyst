@@ -1,4 +1,4 @@
-use katalyst::{prelude::*, *};
+use katalyst::{error::*, Katalyst};
 use log::Level;
 
 fn main() -> Result<()> {

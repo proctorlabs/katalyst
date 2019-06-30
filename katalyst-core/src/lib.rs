@@ -18,6 +18,7 @@ extern crate derive_more;
 pub mod prelude;
 
 mod app;
+mod client;
 mod instance;
 mod server;
 mod util;
@@ -30,4 +31,5 @@ pub mod error;
 pub mod expression;
 pub mod modules;
 pub use app::Katalyst;
+pub use client::ProxyClient;
 pub use katalyst_macros::ExpressionBinding;

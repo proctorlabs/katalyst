@@ -1,4 +1,4 @@
-use crate::{app::KatalystCore, modules::*};
+use crate::{modules::*, Katalyst};
 
 #[derive(Debug)]
 pub struct ContentPlugin;
@@ -8,12 +8,7 @@ impl ModuleProvider for ContentPlugin {
         "parse-content"
     }
 
-    fn build(
-        &self,
-        _: ModuleType,
-        _: Arc<KatalystCore>,
-        _: &unstructured::Document,
-    ) -> Result<Module> {
+    fn build(&self, _: ModuleType, _: Katalyst, _: &unstructured::Document) -> Result<Module> {
         Ok(ContentPlugin.into_module())
     }
 }

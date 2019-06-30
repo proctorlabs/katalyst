@@ -27,7 +27,7 @@ impl HostDispatcher {
     pub fn send(guard: RequestContext) -> ModuleResult {
         let dsr = ensure!(:guard.take_request());
         let client = ensure!(:guard.katalyst()).get_client();
-        let res = client.request(dsr);
+        let res = client.hyper_client().request(dsr);
         Box::new(res.then(move |response| match response {
             Ok(r) => {
                 guard.set_response(r).unwrap_or_default();

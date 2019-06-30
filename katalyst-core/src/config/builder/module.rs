@@ -1,7 +1,7 @@
 use super::*;
-use crate::app::KatalystCore;
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::{marker::PhantomData, string::String, sync::Arc};
+use std::{marker::PhantomData, string::String};
 
 /// Builder for any implementation of ModuleProvider
 #[derive(Debug, Serialize, Deserialize)]
@@ -29,7 +29,7 @@ impl<T> Builder<Module> for ModuleBuilder<T>
 where
     T: ModuleData,
 {
-    fn build(&self, engine: Arc<KatalystCore>) -> Result<Module> {
+    fn build(&self, engine: Katalyst) -> Result<Module> {
         let module = engine.get_module(&self.module)?;
         Ok(module.build(T::MODULE_TYPE, engine.clone(), &self.config)?)
     }

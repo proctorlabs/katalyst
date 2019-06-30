@@ -1,4 +1,4 @@
-use crate::{app::KatalystCore, expression::*, modules::*};
+use crate::{expression::*, modules::*, Katalyst};
 use futures::future::*;
 use http::header::HeaderValue;
 use hyper::{Body, Response};
@@ -24,7 +24,7 @@ impl ModuleProvider for FileServerModule {
     fn build(
         &self,
         _: ModuleType,
-        engine: Arc<KatalystCore>,
+        engine: Katalyst,
         config: &unstructured::Document,
     ) -> Result<Module> {
         let c: FileServerConfig = config.clone().try_into().map_err(|e| {

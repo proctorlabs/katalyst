@@ -1,8 +1,8 @@
 use crate::{
-    app::KatalystCore,
     config::Builder,
     modules::*,
     util::{ClientRequestBuilder, CompiledClientRequest},
+    Katalyst,
 };
 use futures::Future;
 
@@ -17,7 +17,7 @@ impl ModuleProvider for HttpAuthenticatorBuilder {
     fn build(
         &self,
         _: ModuleType,
-        kat: Arc<KatalystCore>,
+        kat: Katalyst,
         config: &unstructured::Document,
     ) -> Result<Module> {
         let request: ClientRequestBuilder = config.clone().try_into().map_err(|e| {

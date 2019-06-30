@@ -1,4 +1,4 @@
-use crate::{app::KatalystCore, modules::*, prelude::*};
+use crate::{modules::*, prelude::*};
 
 #[derive(Default, Debug)]
 pub struct AlwaysAuthenticator;
@@ -8,12 +8,7 @@ impl ModuleProvider for AlwaysAuthenticator {
         "always"
     }
 
-    fn build(
-        &self,
-        _: ModuleType,
-        _: Arc<KatalystCore>,
-        _: &unstructured::Document,
-    ) -> Result<Module> {
+    fn build(&self, _: ModuleType, _: Katalyst, _: &unstructured::Document) -> Result<Module> {
         Ok(AlwaysAuthenticator.into_module())
     }
 }

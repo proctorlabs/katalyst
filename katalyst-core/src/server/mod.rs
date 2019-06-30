@@ -18,7 +18,7 @@ pub(crate) enum Server {
 }
 
 pub(crate) trait Service {
-    fn spawn(&self, _: Arc<KatalystCore>) -> Result<()>;
+    fn spawn(&self, _: Katalyst) -> Result<()>;
 }
 
 impl Server {
@@ -35,7 +35,7 @@ impl Server {
 }
 
 impl Service for Server {
-    fn spawn(&self, katalyst: Arc<KatalystCore>) -> Result<()> {
+    fn spawn(&self, katalyst: Katalyst) -> Result<()> {
         match self {
             Server::Http(s) => s.spawn(katalyst),
             Server::Https(s) => s.spawn(katalyst),
@@ -48,7 +48,7 @@ pub(crate) struct HttpServer {
 }
 
 impl Service for HttpServer {
-    fn spawn(&self, instance: Arc<KatalystCore>) -> Result<()> {
+    fn spawn(&self, instance: Katalyst) -> Result<()> {
         let engine = instance.clone();
         let server = hyper::Server::bind(&self.addr)
             .serve(make_service_fn(move |conn: &AddrStream| {
@@ -73,7 +73,7 @@ pub(crate) struct HttpsServer {
 }
 
 impl Service for HttpsServer {
-    fn spawn(&self, instance: Arc<KatalystCore>) -> Result<()> {
+    fn spawn(&self, instance: Katalyst) -> Result<()> {
         let engine = instance.clone();
         let tls_cfg = {
             let certs = self.load_certs(&self.cert)?;

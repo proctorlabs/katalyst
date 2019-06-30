@@ -5,24 +5,15 @@ use crate::{
     prelude::*,
     server::*,
 };
-use hyper::{
-    client::{connect::dns::TokioThreadpoolGaiResolver, HttpConnector},
-    Body, Client,
-};
-use hyper_rustls::HttpsConnector;
 use parking_lot::RwLock;
-use rustls::ClientConfig;
 use signal_hook::{iterator::Signals, SIGINT, SIGQUIT, SIGTERM};
 use std::{fmt, sync::Arc};
 use tokio::runtime::Runtime;
 
-pub type HttpsClient = Client<HttpsConnector<HttpConnector<TokioThreadpoolGaiResolver>>, Body>;
-
-/// This is the core structure for the API Gateway.
-pub struct KatalystCore {
+struct KatalystCore {
     instance: RwLock<Arc<Instance>>,
     servers: RwLock<Vec<Server>>,
-    client: Arc<HttpsClient>,
+    client: ProxyClient,
     compiler: Arc<Compiler>,
     modules: ModuleRegistry,
     rt: RwLock<Runtime>,
@@ -35,26 +26,20 @@ impl std::fmt::Debug for KatalystCore {
 }
 
 /// This is the core structure for the API Gateway.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Katalyst {
-    pub(crate) core: Arc<KatalystCore>,
+    core: Arc<KatalystCore>,
 }
 
 impl Katalyst {
     /// Create a new Katalyst instance
     pub fn new() -> Result<Katalyst> {
-        let builder = Client::builder();
-        let mut http_connector = HttpConnector::new_with_tokio_threadpool_resolver();
-        http_connector.enforce_http(false);
-        let mut tls = ClientConfig::new();
-        tls.root_store.add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
-
         Ok(Katalyst {
             core: Arc::new(KatalystCore {
-                instance: RwLock::default(),
-                servers: RwLock::default(),
-                client: Arc::new(builder.build(HttpsConnector::from((http_connector, tls)))),
-                compiler: Arc::new(Compiler::default()),
+                instance: Default::default(),
+                servers: Default::default(),
+                client: Default::default(),
+                compiler: Arc::new(Default::default()),
                 modules: ModuleRegistry::default(),
                 rt: RwLock::new(Runtime::new().unwrap()),
             }),
@@ -64,21 +49,21 @@ impl Katalyst {
     /// Update the KatalystCore instance with the configuration from the specified file.
     pub fn load(&self, config_file: &str) -> Result<()> {
         let config = parsers::parse_file(config_file)?;
-        self.core.update_instance(config.build(self.core.clone())?)?;
+        self.update_instance(config.build(self.clone())?)?;
         Ok(())
     }
 
     /// Update the KatalystCore instance with the configuration from the provided YAML
     pub fn load_yaml(&self, raw: &str) -> Result<()> {
         let config = parsers::parse_yaml(raw)?;
-        self.core.update_instance(config.build(self.core.clone())?)?;
+        self.update_instance(config.build(self.clone())?)?;
         Ok(())
     }
 
     /// Update the KatalystCore instance with the configuration from the provided JSON
     pub fn load_json(&self, raw: &str) -> Result<()> {
         let config = parsers::parse_json(raw)?;
-        self.core.update_instance(config.build(self.core.clone())?)?;
+        self.update_instance(config.build(self.clone())?)?;
         Ok(())
     }
 
@@ -92,10 +77,10 @@ impl Katalyst {
 
     /// Start the KatalystCore services
     pub fn run_service(&self) -> Result<()> {
-        let instance = self.core.get_instance()?.clone();
+        let instance = self.get_instance()?.clone();
         for interface in instance.service.interfaces.iter() {
             let server = Server::new(interface)?;
-            server.spawn(self.core.clone())?;
+            server.spawn(self.clone())?;
             let mut servers = self.core.servers.write();
             servers.push(server);
         }
@@ -125,41 +110,39 @@ impl Katalyst {
         app.run()?;
         Ok(app)
     }
-}
 
-impl KatalystCore {
     /// Update the running configuration of the API Gateway.
     pub fn update_instance(&self, new_instance: Instance) -> Result<()> {
-        let mut instance = self.instance.write();
+        let mut instance = self.core.instance.write();
         *instance = Arc::new(new_instance);
         Ok(())
     }
 
     /// Get a copy of the currently running API Gateway configuration.
     pub fn get_instance(&self) -> Result<Arc<Instance>> {
-        let instance = self.instance.read();
+        let instance = self.core.instance.read();
         Ok(instance.clone())
     }
 
     /// Spawn a future on the runtime backing KatalystCore
     pub fn spawn<F: Future<Item = (), Error = ()> + Send + 'static>(&self, fut: F) -> Result<()> {
-        let mut rt = self.rt.write();
+        let mut rt = self.core.rt.write();
         rt.spawn(fut);
         Ok(())
     }
 
     #[inline]
-    pub(crate) fn get_client(&self) -> Arc<HttpsClient> {
-        self.client.clone()
+    pub(crate) fn get_client(&self) -> ProxyClient {
+        self.core.client.clone()
     }
 
     #[inline]
     pub(crate) fn get_compiler(&self) -> Arc<Compiler> {
-        self.compiler.clone()
+        self.core.compiler.clone()
     }
 
     #[inline]
     pub(crate) fn get_module(&self, name: &str) -> Result<Arc<ModuleProvider>> {
-        self.modules.get(name)
+        self.core.modules.get(name)
     }
 }

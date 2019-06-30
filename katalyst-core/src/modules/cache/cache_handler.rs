@@ -1,6 +1,5 @@
 use super::*;
 use futures::Future;
-use std::sync::Arc;
 
 #[derive(Debug)]
 pub struct DefaultCacheHandler;
@@ -10,12 +9,7 @@ impl ModuleProvider for DefaultCacheHandler {
         "cache_response"
     }
 
-    fn build(
-        &self,
-        _: ModuleType,
-        _: Arc<KatalystCore>,
-        _: &unstructured::Document,
-    ) -> Result<Module> {
+    fn build(&self, _: ModuleType, _: Katalyst, _: &unstructured::Document) -> Result<Module> {
         Ok(DefaultCacheHandler.into_module())
     }
 }

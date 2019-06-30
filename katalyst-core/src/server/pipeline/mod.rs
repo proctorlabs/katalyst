@@ -5,10 +5,10 @@ mod logger;
 mod mapper;
 mod matcher;
 
-use crate::{app::KatalystCore, prelude::*};
+use crate::prelude::*;
 use futures::Future;
 use hyper::{Body, Request};
-use std::{collections::HashMap, net::SocketAddr, sync::Arc};
+use std::{collections::HashMap, net::SocketAddr};
 
 pub(crate) use mapper::HyperResult;
 
@@ -29,7 +29,7 @@ macro_rules! pipe {
 pub(crate) fn run(
     remote_addr: SocketAddr,
     request: Request<Body>,
-    engine: Arc<KatalystCore>,
+    engine: Katalyst,
 ) -> HyperResult {
     Box::new(
         ok(RequestContext::new(request, engine, remote_addr))

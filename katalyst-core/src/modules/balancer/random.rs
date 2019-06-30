@@ -9,12 +9,7 @@ impl ModuleProvider for RandomBalancerBuilder {
         "random"
     }
 
-    fn build(
-        &self,
-        _: ModuleType,
-        _: Arc<KatalystCore>,
-        doc: &unstructured::Document,
-    ) -> Result<Module> {
+    fn build(&self, _: ModuleType, _: Katalyst, doc: &unstructured::Document) -> Result<Module> {
         let hosts: Vec<String> = doc["servers"].clone().try_into().unwrap_or_default();
         let mut arc_hosts = vec![];
         for new_host in hosts.iter() {

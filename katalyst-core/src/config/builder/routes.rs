@@ -1,5 +1,5 @@
 use super::*;
-use crate::{app::KatalystCore, instance::Route};
+use crate::instance::Route;
 use http::Method;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -25,7 +25,7 @@ pub struct RouteBuilder {
 }
 
 impl Builder<Route> for RouteBuilder {
-    fn build(&self, engine: Arc<KatalystCore>) -> Result<Route> {
+    fn build(&self, engine: Katalyst) -> Result<Route> {
         let routebuilders: &Option<Vec<RouteBuilder>> = &self.children;
         let routes = match routebuilders {
             Some(b) => {

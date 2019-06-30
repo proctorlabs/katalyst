@@ -1,7 +1,6 @@
 use super::Builder;
-use crate::{app::KatalystCore, prelude::*};
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 
 /// A PathBuilder for building path strings from configuration
 #[derive(Debug, Serialize, Deserialize)]
@@ -35,7 +34,7 @@ impl Default for PathBuilder {
 }
 
 impl Builder<String> for PathBuilder {
-    fn build(&self, e: Arc<KatalystCore>) -> Result<String> {
+    fn build(&self, e: Katalyst) -> Result<String> {
         match self {
             PathBuilder::Regex { pattern } => Ok(pattern.to_string()),
             PathBuilder::Template { template } => Ok({

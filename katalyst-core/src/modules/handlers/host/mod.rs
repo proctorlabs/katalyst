@@ -2,7 +2,7 @@ mod dispatcher;
 mod transformers;
 mod util;
 
-use crate::{app::KatalystCore, expression::*, modules::*};
+use crate::{expression::*, modules::*, Katalyst};
 use futures::{future::*, Future};
 use http::Method;
 use std::collections::HashMap;
@@ -47,7 +47,7 @@ impl ModuleProvider for HostModule {
     fn build(
         &self,
         _: ModuleType,
-        engine: Arc<KatalystCore>,
+        engine: Katalyst,
         config: &unstructured::Document,
     ) -> Result<Module> {
         let c: HostConfig = config.clone().try_into().map_err(|e| {

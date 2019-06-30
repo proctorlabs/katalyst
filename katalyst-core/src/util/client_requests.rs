@@ -1,4 +1,4 @@
-use crate::{app::HttpsClient, config::Builder, expression::*, prelude::*};
+use crate::{config::Builder, expression::*, prelude::*};
 use futures::{future::*, Future};
 use http::{
     header::{HeaderMap, HeaderName, HeaderValue},
@@ -7,7 +7,7 @@ use http::{
 };
 use hyper::Body;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, str::FromStr, sync::Arc};
+use std::{collections::HashMap, str::FromStr};
 use unstructured::Document;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
@@ -22,7 +22,7 @@ pub struct ClientRequestBuilder {
 }
 
 impl Builder<CompiledClientRequest> for ClientRequestBuilder {
-    fn build(&self, katalyst: Arc<KatalystCore>) -> Result<CompiledClientRequest> {
+    fn build(&self, katalyst: Katalyst) -> Result<CompiledClientRequest> {
         let compiler = katalyst.get_compiler();
 
         let method = match &self.method {
@@ -162,14 +162,14 @@ impl From<Response<Body>> for HttpData {
 }
 
 impl HttpData {
-    pub fn send(self, client: &HttpsClient) -> AsyncResult<HttpData> {
+    pub fn send(self, client: &ProxyClient) -> AsyncResult<HttpData> {
         if let HttpAction::Request(uri, method) = self.request_type {
             let mut request = RequestBuilder::new();
             request.method(method);
             request.uri(&uri);
             *request.headers_mut().unwrap() = self.headers;
             let req = request.body(self.body.into_body()).unwrap();
-            let res = client.request(req);
+            let res = client.hyper_client().request(req);
             Box::new(res.then(move |response| match response {
                 Ok(r) => ok::<HttpData, GatewayError>(HttpData::from(r)),
                 Err(e) => {
@@ -181,7 +181,7 @@ impl HttpData {
         }
     }
 
-    pub fn send_parse(self, client: &HttpsClient) -> AsyncResult<HttpData> {
+    pub fn send_parse(self, client: &ProxyClient) -> AsyncResult<HttpData> {
         Box::new(self.send(client).and_then(|mut resp| {
             let content_type = resp.headers.get("Content-Type").map(|m| m.to_str().unwrap());
             let format = Format::content_type(content_type);
