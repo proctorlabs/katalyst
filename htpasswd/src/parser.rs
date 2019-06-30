@@ -8,6 +8,8 @@ use std::collections::HashMap;
 #[allow(dead_code)]
 struct HtpasswdParser;
 
+/// Parse the provided string as the contents of an HTPASSWD file.
+/// This returns a hashmap of usernames mapped to their password hashes.
 pub fn parse(input: &str) -> Result<HashMap<String, HashedPassword>, HtpasswdError> {
     let mut result = HashMap::new();
     let tokens = HtpasswdParser::parse(Rule::entries, input)?;
