@@ -1,4 +1,4 @@
-use crate::{modules::*, Katalyst};
+use crate::modules::*;
 use futures::future::*;
 use serde::{Deserialize, Serialize};
 
@@ -16,7 +16,7 @@ impl ModuleProvider for WhitelistBuilder {
         "whitelist"
     }
 
-    fn build(&self, _: ModuleType, _: Katalyst, config: &unstructured::Document) -> Result<Module> {
+    fn build(&self, _: ModuleType, config: &unstructured::Document) -> Result<Module> {
         let c: WhitelistConfig = config.clone().try_into().map_err(|e| {
             err!(
                 ConfigurationFailure,

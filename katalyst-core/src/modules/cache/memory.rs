@@ -11,7 +11,7 @@ impl ModuleProvider for MemoryCacheBuilder {
         "memory_cache"
     }
 
-    fn build(&self, _: ModuleType, _: Katalyst, _: &unstructured::Document) -> Result<Module> {
+    fn build(&self, _: ModuleType, _: &unstructured::Document) -> Result<Module> {
         Ok(MemoryCache::default().into_module())
     }
 }

@@ -34,14 +34,13 @@ impl Default for PathBuilder {
 }
 
 impl Builder<String> for PathBuilder {
-    fn build(&self, e: Katalyst) -> Result<String> {
+    fn build(&self) -> Result<String> {
         match self {
             PathBuilder::Regex { pattern } => Ok(pattern.to_string()),
             PathBuilder::Template { template } => Ok({
-                let compiler = e.get_compiler();
                 let mut result = String::new();
                 result.push_str("^");
-                let cmp = compiler.compile_template(Some(template))?;
+                let cmp = Compiler::compile_template(Some(template))?;
                 let ctx = RequestContext::default();
                 let rnd = cmp.render(&ctx).map_err(|e| {
                     err!(

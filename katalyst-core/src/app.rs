@@ -1,7 +1,6 @@
 use crate::{
     config::{parsers, Builder},
     instance::Instance,
-    modules::ModuleRegistry,
     prelude::*,
     server::*,
 };
@@ -14,8 +13,6 @@ struct KatalystCore {
     instance: RwLock<Arc<Instance>>,
     servers: RwLock<Vec<Server>>,
     client: ProxyClient,
-    compiler: Arc<Compiler>,
-    modules: ModuleRegistry,
     rt: RwLock<Runtime>,
 }
 
@@ -39,8 +36,6 @@ impl Katalyst {
                 instance: Default::default(),
                 servers: Default::default(),
                 client: Default::default(),
-                compiler: Arc::new(Default::default()),
-                modules: ModuleRegistry::default(),
                 rt: RwLock::new(Runtime::new().unwrap()),
             }),
         })
@@ -49,21 +44,21 @@ impl Katalyst {
     /// Update the KatalystCore instance with the configuration from the specified file.
     pub fn load(&self, config_file: &str) -> Result<()> {
         let config = parsers::parse_file(config_file)?;
-        self.update_instance(config.build(self.clone())?)?;
+        self.update_instance(config.build()?)?;
         Ok(())
     }
 
     /// Update the KatalystCore instance with the configuration from the provided YAML
     pub fn load_yaml(&self, raw: &str) -> Result<()> {
         let config = parsers::parse_yaml(raw)?;
-        self.update_instance(config.build(self.clone())?)?;
+        self.update_instance(config.build()?)?;
         Ok(())
     }
 
     /// Update the KatalystCore instance with the configuration from the provided JSON
     pub fn load_json(&self, raw: &str) -> Result<()> {
         let config = parsers::parse_json(raw)?;
-        self.update_instance(config.build(self.clone())?)?;
+        self.update_instance(config.build()?)?;
         Ok(())
     }
 
@@ -134,15 +129,5 @@ impl Katalyst {
     #[inline]
     pub(crate) fn get_client(&self) -> ProxyClient {
         self.core.client.clone()
-    }
-
-    #[inline]
-    pub(crate) fn get_compiler(&self) -> Arc<Compiler> {
-        self.core.compiler.clone()
-    }
-
-    #[inline]
-    pub(crate) fn get_module(&self, name: &str) -> Result<Arc<ModuleProvider>> {
-        self.core.modules.get(name)
     }
 }

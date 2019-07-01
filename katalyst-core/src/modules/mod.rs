@@ -17,5 +17,5 @@ pub(crate) mod balancer;
 pub(crate) mod cache;
 pub use cache::CachedObject;
 pub use def::*;
-pub use registry::ModuleRegistry;
+pub(crate) use registry::initialize;
 pub(crate) use result::*;

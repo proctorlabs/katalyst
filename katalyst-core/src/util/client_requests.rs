@@ -22,9 +22,7 @@ pub struct ClientRequestBuilder {
 }
 
 impl Builder<CompiledClientRequest> for ClientRequestBuilder {
-    fn build(&self, katalyst: Katalyst) -> Result<CompiledClientRequest> {
-        let compiler = katalyst.get_compiler();
-
+    fn build(&self) -> Result<CompiledClientRequest> {
         let method = match &self.method {
             Some(m) => Some(Method::from_bytes(m.to_uppercase().as_bytes())?),
             None => None,
@@ -41,11 +39,11 @@ impl Builder<CompiledClientRequest> for ClientRequestBuilder {
 
         Ok(CompiledClientRequest {
             host: self.host.to_owned(),
-            path: compiler.compile_template(Some(self.path.as_str()))?,
+            path: Compiler::compile_template(Some(self.path.as_str()))?,
             method,
-            query: compiler.compile_template_map(&self.query)?,
-            headers: compiler.compile_template_map(&self.headers)?,
-            body: compiler.compile_template_option(body)?,
+            query: Compiler::compile_template_map(&self.query)?,
+            headers: Compiler::compile_template_map(&self.headers)?,
+            body: Compiler::compile_template_option(body)?,
         })
     }
 }

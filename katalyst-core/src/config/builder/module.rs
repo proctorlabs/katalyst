@@ -29,8 +29,8 @@ impl<T> Builder<Module> for ModuleBuilder<T>
 where
     T: ModuleData,
 {
-    fn build(&self, engine: Katalyst) -> Result<Module> {
-        let module = engine.get_module(&self.module)?;
-        Ok(module.build(T::MODULE_TYPE, engine.clone(), &self.config)?)
+    fn build(&self) -> Result<Module> {
+        let module = crate::extensions::get_module(&self.module)?;
+        Ok(module.build(T::MODULE_TYPE, &self.config)?)
     }
 }

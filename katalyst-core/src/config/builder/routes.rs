@@ -25,19 +25,19 @@ pub struct RouteBuilder {
 }
 
 impl Builder<Route> for RouteBuilder {
-    fn build(&self, engine: Katalyst) -> Result<Route> {
+    fn build(&self) -> Result<Route> {
         let routebuilders: &Option<Vec<RouteBuilder>> = &self.children;
         let routes = match routebuilders {
             Some(b) => {
                 let mut result = vec![];
                 for rb in b {
-                    result.push(Arc::new(rb.build(engine.clone())?));
+                    result.push(Arc::new(rb.build()?));
                 }
                 Some(result)
             }
             None => None,
         };
-        let handler = module_unwrap!(RequestHandler, self.handler.build(engine.clone())?);
+        let handler = module_unwrap!(RequestHandler, self.handler.build()?);
 
         //Build method hashset
         let methods = match &self.methods {
@@ -56,7 +56,7 @@ impl Builder<Route> for RouteBuilder {
             Some(plugins) => {
                 let mut vec_plugins: Vec<Arc<Plugin>> = vec![];
                 for p in plugins {
-                    vec_plugins.push(module_unwrap!(Plugin, p.build(engine.clone())?));
+                    vec_plugins.push(module_unwrap!(Plugin, p.build()?));
                 }
                 Some(vec_plugins)
             }
@@ -67,7 +67,7 @@ impl Builder<Route> for RouteBuilder {
             Some(auths) => {
                 let mut vec_auths: Vec<Arc<Authorizer>> = vec![];
                 for a in auths {
-                    vec_auths.push(module_unwrap!(Authorizer, a.build(engine.clone())?));
+                    vec_auths.push(module_unwrap!(Authorizer, a.build()?));
                 }
                 Some(vec_auths)
             }
@@ -78,7 +78,7 @@ impl Builder<Route> for RouteBuilder {
             Some(auths) => {
                 let mut vec_auths: Vec<Arc<Authenticator>> = vec![];
                 for a in auths {
-                    vec_auths.push(module_unwrap!(Authenticator, a.build(engine.clone())?));
+                    vec_auths.push(module_unwrap!(Authenticator, a.build()?));
                 }
                 Some(vec_auths)
             }
@@ -86,12 +86,12 @@ impl Builder<Route> for RouteBuilder {
         };
 
         let cache: Option<Arc<CacheHandler>> = match &self.cache {
-            Some(c) => Some(module_unwrap!(CacheHandler, c.build(engine.clone())?)),
+            Some(c) => Some(module_unwrap!(CacheHandler, c.build()?)),
             None => None,
         };
 
         Ok(Route {
-            pattern: Regex::new(&self.path.build(engine)?)?,
+            pattern: Regex::new(&self.path.build()?)?,
             children: routes,
             handler,
             plugins,

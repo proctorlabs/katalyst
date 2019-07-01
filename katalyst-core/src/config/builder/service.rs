@@ -53,14 +53,14 @@ pub struct ServiceBuilder {
 }
 
 impl Builder<Service> for ServiceBuilder {
-    fn build(&self, instance: Katalyst) -> Result<Service> {
+    fn build(&self) -> Result<Service> {
         Ok(Service {
             interfaces: self
                 .interfaces
                 .iter()
                 .map(|i| i.make_interface())
                 .collect::<Result<Vec<Interface>>>()?,
-            cache: module_unwrap!(CacheProvider, self.cache.build(instance.clone())?),
+            cache: module_unwrap!(CacheProvider, self.cache.build()?),
         })
     }
 }

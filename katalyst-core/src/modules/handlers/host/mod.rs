@@ -2,7 +2,7 @@ mod dispatcher;
 mod transformers;
 mod util;
 
-use crate::{expression::*, modules::*, Katalyst};
+use crate::{expression::*, modules::*};
 use futures::{future::*, Future};
 use http::Method;
 use std::collections::HashMap;
@@ -36,7 +36,7 @@ pub struct HostDispatcher {
     pub body: Option<Expression>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct HostModule;
 
 impl ModuleProvider for HostModule {
@@ -44,16 +44,10 @@ impl ModuleProvider for HostModule {
         "host"
     }
 
-    fn build(
-        &self,
-        _: ModuleType,
-        engine: Katalyst,
-        config: &unstructured::Document,
-    ) -> Result<Module> {
+    fn build(&self, _: ModuleType, config: &unstructured::Document) -> Result<Module> {
         let c: HostConfig = config.clone().try_into().map_err(|e| {
             err!(ConfigurationFailure, "Failed to parse host proxy module configuration", e)
         })?;
-        let providers = engine.get_compiler();
         let method = match c.method {
             Some(m) => Some(Method::from_bytes(m.to_uppercase().as_bytes())?),
             None => None,
@@ -68,11 +62,11 @@ impl ModuleProvider for HostModule {
         };
         Ok(HostDispatcher {
             host: c.host.to_owned(),
-            path: providers.compile_template(Some(c.path.as_str()))?,
+            path: Compiler::compile_template(Some(c.path.as_str()))?,
             method,
-            query: providers.compile_template_map(&c.query)?,
-            headers: providers.compile_template_map(&c.headers)?,
-            body: providers.compile_template_option(body)?,
+            query: Compiler::compile_template_map(&c.query)?,
+            headers: Compiler::compile_template_map(&c.headers)?,
+            body: Compiler::compile_template_option(body)?,
         }
         .into_module())
     }

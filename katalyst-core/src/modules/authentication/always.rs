@@ -8,7 +8,7 @@ impl ModuleProvider for AlwaysAuthenticator {
         "always"
     }
 
-    fn build(&self, _: ModuleType, _: Katalyst, _: &unstructured::Document) -> Result<Module> {
+    fn build(&self, _: ModuleType, _: &unstructured::Document) -> Result<Module> {
         Ok(AlwaysAuthenticator.into_module())
     }
 }

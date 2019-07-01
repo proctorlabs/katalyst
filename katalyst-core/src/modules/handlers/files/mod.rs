@@ -1,4 +1,4 @@
-use crate::{expression::*, modules::*, Katalyst};
+use crate::{expression::*, modules::*};
 use futures::future::*;
 use http::header::HeaderValue;
 use hyper::{Body, Response};
@@ -13,7 +13,7 @@ struct FileServerConfig {
     selector: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct FileServerModule;
 
 impl ModuleProvider for FileServerModule {
@@ -21,18 +21,13 @@ impl ModuleProvider for FileServerModule {
         "file_server"
     }
 
-    fn build(
-        &self,
-        _: ModuleType,
-        engine: Katalyst,
-        config: &unstructured::Document,
-    ) -> Result<Module> {
+    fn build(&self, _: ModuleType, config: &unstructured::Document) -> Result<Module> {
         let c: FileServerConfig = config.clone().try_into().map_err(|e| {
             err!(ConfigurationFailure, "Failed to parse File Server module configuration", e)
         })?;
         Ok(FileServerDispatcher {
             root_path: c.root_path,
-            selector: engine.get_compiler().compile_template(Some(&c.selector))?,
+            selector: Compiler::compile_template(Some(&c.selector))?,
         }
         .into_module())
     }

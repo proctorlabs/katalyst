@@ -17,6 +17,9 @@ extern crate derive_more;
 #[macro_use]
 pub mod prelude;
 
+#[macro_use]
+pub mod extensions;
+
 mod app;
 mod client;
 mod instance;
@@ -29,7 +32,6 @@ pub mod config;
 pub mod context;
 pub mod error;
 pub mod expression;
-pub mod extensions;
 pub mod modules;
 pub use app::Katalyst;
 pub use client::ProxyClient;

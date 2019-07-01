@@ -20,31 +20,21 @@ pub enum ExpressionMetadata {
 }
 
 impl ExpressionMetadata {
-    pub fn compile(
-        self,
-        directory: &BuilderDirectory,
-    ) -> std::result::Result<Arc<CompiledExpression>, GatewayError> {
+    pub fn compile(self) -> std::result::Result<Arc<CompiledExpression>, GatewayError> {
         match self {
             ExpressionMetadata::Expression { module, method, args } => {
-                let builder = directory.get(&module.as_str());
-                match builder {
-                    Some(b) => {
-                        let mut c_args: Vec<Arc<CompiledExpression>> = vec![];
-                        for arg in args.into_iter() {
-                            c_args.push(arg.compile(directory)?);
-                        }
-                        Ok(Arc::new(CompiledExpressionNode {
-                            name: module.to_owned(),
-                            render_fn: b.make_fn(&method, &c_args)?,
-                            args: c_args,
-                            result: ExpressionResultType::Text,
-                        }))
-                    }
-                    None => Err(err!(
-                        ConfigurationFailure,
-                        format!("Could not find expression module named {}", module)
-                    )),
+                let builder = crate::extensions::get_expression(&module.as_str())?;
+
+                let mut c_args: Vec<Arc<CompiledExpression>> = vec![];
+                for arg in args.into_iter() {
+                    c_args.push(arg.compile()?);
                 }
+                Ok(Arc::new(CompiledExpressionNode {
+                    name: module.to_owned(),
+                    render_fn: builder.make_fn(&method, &c_args)?,
+                    args: c_args,
+                    result: ExpressionResultType::Text,
+                }))
             }
             ExpressionMetadata::Raw(text) | ExpressionMetadata::Text(text) => Ok(Arc::new(text)),
             ExpressionMetadata::Number(number) => Ok(Arc::new(number)),
@@ -53,15 +43,12 @@ impl ExpressionMetadata {
     }
 }
 
-pub fn parse_template(
-    input: &str,
-    directory: &BuilderDirectory,
-) -> Result<Vec<Arc<CompiledExpression>>> {
+pub fn parse_template(input: &str) -> Result<Vec<Arc<CompiledExpression>>> {
     let tokens = TemplateParser::parse(Rule::template, input)?;
     let metadata = parse_tokens(tokens)?;
     let mut result = vec![];
     for item in metadata.into_iter() {
-        result.push(item.compile(directory)?);
+        result.push(item.compile()?);
     }
     Ok(result)
 }

@@ -41,6 +41,10 @@ impl CompiledExpression for Expression {
     }
 }
 
+pub(crate) fn initialize() {
+    bind_katalyst!(Sys, Http, Auth, Url, Content, Encode, Decode);
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

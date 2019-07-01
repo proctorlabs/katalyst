@@ -16,7 +16,7 @@ use std::{collections::HashMap, sync::Arc};
 /// A configuration builder for an instance of KatalystCore
 pub trait Builder<T> {
     /// Build an instance configuration using the supplied base KatalystCore instance
-    fn build(&self, engine: Katalyst) -> Result<T>;
+    fn build(&self) -> Result<T>;
 }
 
 /// The base builder for building a new KatalystCore Instance
@@ -29,23 +29,21 @@ pub struct KatalystCoreBuilder {
 }
 
 impl Builder<Instance> for KatalystCoreBuilder {
-    fn build(&self, engine: Katalyst) -> Result<Instance> {
+    fn build(&self) -> Result<Instance> {
         //build routes...
         let mut all_routes = vec![];
         for route in self.routes.iter() {
-            all_routes.push(Arc::new(route.build(engine.clone())?));
+            all_routes.push(Arc::new(route.build()?));
         }
 
         //build hosts...
         let mut hosts: HashMap<String, Hosts> = HashMap::new();
         for (k, v) in self.hosts.iter() {
-            hosts.insert(
-                k.to_string(),
-                Hosts { servers: module_unwrap!(LoadBalancer, v.build(engine.clone())?) },
-            );
+            hosts
+                .insert(k.to_string(), Hosts { servers: module_unwrap!(LoadBalancer, v.build()?) });
         }
 
         //final result
-        Ok(Instance { hosts, routes: all_routes, service: self.service.build(engine.clone())? })
+        Ok(Instance { hosts, routes: all_routes, service: self.service.build()? })
     }
 }

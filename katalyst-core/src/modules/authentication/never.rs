@@ -1,4 +1,4 @@
-use crate::{modules::*, Katalyst};
+use crate::modules::*;
 use futures::future::err;
 
 #[derive(Default, Debug)]
@@ -9,7 +9,7 @@ impl ModuleProvider for NeverAuthenticator {
         "never"
     }
 
-    fn build(&self, _: ModuleType, _: Katalyst, _: &unstructured::Document) -> Result<Module> {
+    fn build(&self, _: ModuleType, _: &unstructured::Document) -> Result<Module> {
         Ok(NeverAuthenticator.into_module())
     }
 }
