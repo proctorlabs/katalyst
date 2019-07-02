@@ -14,6 +14,8 @@ use std::sync::Arc;
 pub use traits::*;
 use unstructured::Document;
 
+bind_katalyst!(Sys, Http, Auth, Url, Content, Encode, Decode);
+
 /// Arguments passed to an expression
 pub type ExpressionArgs = Vec<Arc<CompiledExpression>>;
 /// The base expression
@@ -39,10 +41,6 @@ impl CompiledExpression for Expression {
     fn result_type(&self) -> Document {
         Document::Seq(vec![])
     }
-}
-
-pub(crate) fn initialize() {
-    bind_katalyst!(Sys, Http, Auth, Url, Content, Encode, Decode);
 }
 
 #[cfg(test)]

@@ -7,7 +7,6 @@ mod authorization;
 mod def;
 mod handlers;
 mod plugins;
-mod registry;
 mod result;
 
 use crate::prelude::*;
@@ -17,5 +16,19 @@ pub(crate) mod balancer;
 pub(crate) mod cache;
 pub use cache::CachedObject;
 pub use def::*;
-pub(crate) use registry::initialize;
 pub(crate) use result::*;
+
+bind_katalyst!(
+    @ handlers::FileServerModule,
+    handlers::HostModule,
+    authentication::AlwaysAuthenticator,
+    authentication::NeverAuthenticator,
+    authentication::HttpAuthenticatorBuilder,
+    authentication::WhitelistBuilder,
+    plugins::ContentPlugin,
+    cache::DefaultCacheHandler,
+    cache::MemoryCacheBuilder,
+    balancer::LeastConnectionBalancerBuilder,
+    balancer::RandomBalancerBuilder,
+    balancer::RoundRobinBalancerBuilder
+);

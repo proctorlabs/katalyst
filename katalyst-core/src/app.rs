@@ -41,7 +41,7 @@ impl Katalyst {
         })
     }
 
-    /// Update the KatalystCore instance with the configuration from the specified file.
+    /// Update the Katalyst instance with the configuration from the specified file.
     pub fn load(&self, config_file: &str) -> Result<()> {
         let config = parsers::parse_file(config_file)?;
         self.update_instance(config.build()?)?;

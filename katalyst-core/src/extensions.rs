@@ -15,28 +15,41 @@ lazy_static! {
         let res = HashMap::new();
         Mutex::new(res)
     };
-    static ref INITIALIZED: bool = {
-        crate::modules::initialize();
-        crate::expression::initialize();
-        true
+}
+
+macro_rules! link_init {
+    ($contents:expr) => {
+        #[used]
+        #[cfg_attr(target_os = "linux", link_section = ".ctors")]
+        #[cfg_attr(target_os = "macos", link_section = "__DATA,__mod_init_func")]
+        #[cfg_attr(target_os = "windows", link_section = ".CRT$XCU")]
+        static __KATALYST_INIT: extern "C" fn() = {
+            extern "C" fn init() {
+                $contents
+            };
+            init
+        };
     };
 }
+
+link_init! {initialize()}
 
 /// Bind a module or expression to Katalyst
 #[macro_export]
 macro_rules! bind_katalyst {
-    (@ $( $module:expr ),* ) => {{
-        $( $crate::extensions::bind_module(std::sync::Arc::new($module)); )*
-    }};
+    (@ $( $module:expr ),* ) => {
+        pub(crate) fn initialize() {
+            $( $crate::extensions::bind_module(std::sync::Arc::new($module)); )*
+        }
+    };
     ( $( $expression:expr ),* ) => {
-        $( $crate::extensions::bind_expression(std::sync::Arc::new($expression)); )*
+        pub(crate) fn initialize() {
+            $( $crate::extensions::bind_expression(std::sync::Arc::new($expression)); )*
+        }
     };
 }
 
 pub(crate) fn get_module(name: &str) -> Result<Arc<dyn ModuleProvider>> {
-    if !*INITIALIZED {
-        unreachable!();
-    }
     let reader = MODULES.lock();
     match reader.get(name) {
         Some(m) => Ok(m.clone()),
@@ -45,9 +58,6 @@ pub(crate) fn get_module(name: &str) -> Result<Arc<dyn ModuleProvider>> {
 }
 
 pub(crate) fn get_expression(name: &str) -> Result<Arc<dyn ExpressionBinding>> {
-    if !*INITIALIZED {
-        unreachable!();
-    }
     let reader = EXPRESSIONS.lock();
     match reader.get(name) {
         Some(m) => Ok(m.clone()),
@@ -58,16 +68,19 @@ pub(crate) fn get_expression(name: &str) -> Result<Arc<dyn ExpressionBinding>> {
     }
 }
 
-/// Manually bind a module to Katalyst. If the module implements Default, then
-/// the bind_katalyst! macro should be preferred.
+fn initialize() {
+    crate::modules::initialize();
+    crate::expression::initialize();
+}
+
+/// Manually bind a module to Katalyst. Generally the bind_katalyst! should be used instead.
 pub fn bind_module(module: Arc<dyn ModuleProvider>) {
     let n = module.name();
     let mut writer = MODULES.lock();
     writer.insert(n.into(), module);
 }
 
-/// Manually bind an expression binding to Katalyst. If the expression implements Default,
-/// then the bind_katalyst! macro should be preferred.
+/// Manually bind an expression binding to Katalyst. Generally the bind_katalyst! should be used instead.
 pub fn bind_expression(expr: Arc<dyn ExpressionBinding>) {
     let n = expr.identifier();
     let mut writer = EXPRESSIONS.lock();
