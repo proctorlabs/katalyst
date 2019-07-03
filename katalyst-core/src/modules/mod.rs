@@ -3,7 +3,6 @@ Module traits and built in modules
 */
 
 mod def;
-mod result;
 
 pub(crate) mod authentication;
 pub(crate) mod authorization;
@@ -17,4 +16,16 @@ use std::{collections::HashMap, sync::Arc};
 
 pub use cache::CachedObject;
 pub use def::*;
-pub(crate) use result::*;
+
+/// Module result type
+pub type ModuleResultSync = Result<()>;
+/// Async module result type
+pub type ModuleResult = AsyncResult<()>;
+
+/// Error type for modules
+pub struct ModuleError {
+    /// Error
+    pub error: GatewayError,
+    /// Context
+    pub context: RequestContext,
+}

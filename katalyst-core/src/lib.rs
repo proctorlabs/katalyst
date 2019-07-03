@@ -37,6 +37,7 @@ pub use app::Katalyst;
 pub use client::ProxyClient;
 pub use extensions::{get_expression, get_module};
 pub use katalyst_macros::ExpressionBinding;
+pub use unstructured::Document;
 
 katalyst_link! {
     modules: {
