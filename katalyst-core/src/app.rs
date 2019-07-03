@@ -31,6 +31,8 @@ pub struct Katalyst {
 impl Katalyst {
     /// Create a new Katalyst instance
     pub fn new() -> Result<Katalyst> {
+        katalyst_load!(modules: { crate });
+        katalyst_load!(expressions: { crate });
         Ok(Katalyst {
             core: Arc::new(KatalystCore {
                 instance: Default::default(),

@@ -8,13 +8,11 @@ pub(crate) mod compiler;
 mod traits;
 
 use crate::prelude::*;
-use bindings::*;
+pub(crate) use bindings::*;
 pub use compiler::Compiler;
 use std::sync::Arc;
 pub use traits::*;
 use unstructured::Document;
-
-bind_katalyst!(Sys, Http, Auth, Url, Content, Encode, Decode);
 
 /// Arguments passed to an expression
 pub type ExpressionArgs = Vec<Arc<CompiledExpression>>;

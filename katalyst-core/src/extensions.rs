@@ -17,39 +17,36 @@ lazy_static! {
     };
 }
 
-macro_rules! link_init {
-    ($contents:expr) => {
-        #[used]
-        #[cfg_attr(target_os = "linux", link_section = ".ctors")]
-        #[cfg_attr(target_os = "macos", link_section = "__DATA,__mod_init_func")]
-        #[cfg_attr(target_os = "windows", link_section = ".CRT$XCU")]
-        static __KATALYST_INIT: extern "C" fn() = {
-            extern "C" fn init() {
-                $contents
-            };
-            init
-        };
-    };
-}
-
-link_init! {initialize()}
-
-/// Bind a module or expression to Katalyst
+/// This macro adds the loader entrypoint for this crate.
 #[macro_export]
-macro_rules! bind_katalyst {
-    (@ $( $module:expr ),* ) => {
-        pub(crate) fn initialize() {
+macro_rules! katalyst_link {
+    (modules: { $( $module:expr ),* } ) => {
+        #[doc(hidden)]
+        pub fn __katalyst_init_modules() {
             $( $crate::extensions::bind_module(std::sync::Arc::new($module)); )*
         }
     };
-    ( $( $expression:expr ),* ) => {
-        pub(crate) fn initialize() {
+    (expressions: { $( $expression:expr ),* } ) => {
+        #[doc(hidden)]
+        pub fn __katalyst_init_expressions() {
             $( $crate::extensions::bind_expression(std::sync::Arc::new($expression)); )*
         }
     };
 }
 
-pub(crate) fn get_module(name: &str) -> Result<Arc<dyn ModuleProvider>> {
+/// Load modules or extensions from these crates
+#[macro_export]
+macro_rules! katalyst_load {
+    (modules : { $( $krate:ident ),* } ) => {
+        $( $krate ::__katalyst_init_modules(); )*
+    };
+    (expressions : { $( $krate:ident ),* } ) => {
+        $( $krate ::__katalyst_init_expressions(); )*
+    };
+}
+
+/// Retrieve a loaded module provider
+pub fn get_module(name: &str) -> Result<Arc<dyn ModuleProvider>> {
     let reader = MODULES.lock();
     match reader.get(name) {
         Some(m) => Ok(m.clone()),
@@ -57,7 +54,8 @@ pub(crate) fn get_module(name: &str) -> Result<Arc<dyn ModuleProvider>> {
     }
 }
 
-pub(crate) fn get_expression(name: &str) -> Result<Arc<dyn ExpressionBinding>> {
+/// Retrieve a loaded expression binding
+pub fn get_expression(name: &str) -> Result<Arc<dyn ExpressionBinding>> {
     let reader = EXPRESSIONS.lock();
     match reader.get(name) {
         Some(m) => Ok(m.clone()),
@@ -66,11 +64,6 @@ pub(crate) fn get_expression(name: &str) -> Result<Arc<dyn ExpressionBinding>> {
             format!("Expression provider \"{}\" is not loaded.", name)
         )),
     }
-}
-
-fn initialize() {
-    crate::modules::initialize();
-    crate::expression::initialize();
 }
 
 /// Manually bind a module to Katalyst. Generally the bind_katalyst! should be used instead.

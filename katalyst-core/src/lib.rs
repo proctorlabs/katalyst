@@ -35,4 +35,34 @@ pub mod expression;
 pub mod modules;
 pub use app::Katalyst;
 pub use client::ProxyClient;
+pub use extensions::{get_expression, get_module};
 pub use katalyst_macros::ExpressionBinding;
+
+katalyst_link! {
+    modules: {
+        modules::handlers::FileServerModule,
+        modules::handlers::HostModule,
+        modules::authentication::AlwaysAuthenticator,
+        modules::authentication::NeverAuthenticator,
+        modules::authentication::HttpAuthenticatorBuilder,
+        modules::authentication::WhitelistBuilder,
+        modules::plugins::ContentPlugin,
+        modules::cache::DefaultCacheHandler,
+        modules::cache::MemoryCacheBuilder,
+        modules::balancer::LeastConnectionBalancerBuilder,
+        modules::balancer::RandomBalancerBuilder,
+        modules::balancer::RoundRobinBalancerBuilder
+    }
+}
+
+katalyst_link! {
+    expressions: {
+        expression::Sys,
+        expression::Http,
+        expression::Auth,
+        expression::Url,
+        expression::Content,
+        expression::Encode,
+        expression::Decode
+    }
+}
